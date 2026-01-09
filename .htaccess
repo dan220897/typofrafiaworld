@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Простое перенаправление API
+RewriteRule ^api/auth/(.*)$ /api/auth.php [L,QSA]
+RewriteRule ^api/chat/(.*)$ /api/chat.php [L,QSA]  
+RewriteRule ^api/orders/(.*)$ /api/orders.php [L,QSA]
