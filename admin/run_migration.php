@@ -71,9 +71,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
             <h1>🚀 Миграция: Добавление каталога услуг</h1>
             <pre><?php
 
+    // Включаем отображение всех ошибок
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+
+    // Увеличиваем лимиты для длительных операций
+    set_time_limit(300); // 5 минут
+    ini_set('max_execution_time', 300);
+    ini_set('memory_limit', '256M');
+
+    // Отключаем буферизацию для немедленного вывода
+    if (ob_get_level()) {
+        ob_end_flush();
+    }
+
     try {
+        echo "🔄 Подключение к базе данных...\n";
+        flush();
+
         $db = Database::getInstance()->getConnection();
-        echo "✅ Подключение к БД установлено\n\n";
+        echo "✅ Подключение к БД установлено\n";
+        echo "📊 База данных: " . DB_NAME . "\n\n";
+        flush();
 
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -92,9 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
             }
 
             echo "<span class='info'>📝 Выполнение: $migration</span>\n";
+            echo "📄 Размер файла: " . filesize($migrationFile) . " байт\n";
             echo str_repeat('-', 60) . "\n";
+            flush();
 
             $sql = file_get_contents($migrationFile);
+            echo "📖 SQL загружен, длина: " . strlen($sql) . " символов\n";
+            flush();
 
             // Разбиваем на запросы
             $statements = array_filter(
@@ -109,33 +132,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 
             $successCount = 0;
             $errorCount = 0;
+            $warningCount = 0;
+            $totalStatements = count($statements);
 
-            foreach ($statements as $statement) {
+            echo "🔄 Обработка $totalStatements запросов...\n";
+            flush();
+
+            foreach ($statements as $index => $statement) {
                 $statement = trim($statement);
                 if (empty($statement)) continue;
 
                 try {
+                    // Показываем прогресс каждые 10 запросов
+                    if ($index % 10 == 0) {
+                        echo "\n  [" . ($index + 1) . "/$totalStatements] ";
+                        flush();
+                    }
+
                     $db->exec($statement);
                     $successCount++;
                     echo ".";
                     flush();
+
                 } catch (PDOException $e) {
-                    if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                    $errorMsg = $e->getMessage();
+
+                    if (strpos($errorMsg, 'Duplicate entry') !== false) {
                         echo "<span class='warning'>⚠</span>";
-                    } elseif (strpos($e->getMessage(), 'Duplicate column') !== false) {
+                        $warningCount++;
+                    } elseif (strpos($errorMsg, 'Duplicate column') !== false) {
                         echo "<span class='warning'>⚠</span>";
+                        $warningCount++;
+                    } elseif (strpos($errorMsg, "Table") !== false && strpos($errorMsg, "already exists") !== false) {
+                        echo "<span class='warning'>⚠</span>";
+                        $warningCount++;
                     } else {
                         $errorCount++;
-                        echo "\n<span class='error'>❌ " . $e->getMessage() . "</span>\n";
+                        echo "\n<span class='error'>❌ ОШИБКА:</span>\n";
+                        echo "<span class='error'>   " . $errorMsg . "</span>\n";
+                        echo "<span class='warning'>   SQL: " . substr($statement, 0, 200) . "...</span>\n";
+                        flush();
                     }
                 }
             }
 
             echo "\n\n<span class='success'>✅ Завершено: $successCount запросов</span>\n";
+            if ($warningCount > 0) {
+                echo "<span class='warning'>⚠️  Предупреждений: $warningCount (дубликаты пропущены)</span>\n";
+            }
             if ($errorCount > 0) {
-                echo "<span class='error'>Ошибок: $errorCount</span>\n";
+                echo "<span class='error'>❌ Ошибок: $errorCount</span>\n";
             }
             echo "\n";
+            flush();
         }
 
         echo str_repeat('=', 60) . "\n";
