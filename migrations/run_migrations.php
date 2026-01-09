@@ -19,6 +19,7 @@ try {
 
     // Список файлов миграций
     $migrations = [
+        '000_create_tables_structure.sql',
         '001_add_services_catalog.sql',
         '002_add_services_catalog_part2.sql'
     ];

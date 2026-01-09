@@ -98,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 
         // Список миграций
         $migrations = [
+            '../migrations/000_create_tables_structure.sql',
             '../migrations/001_add_services_catalog.sql',
             '../migrations/002_add_services_catalog_part2.sql'
         ];
