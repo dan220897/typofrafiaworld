@@ -81,7 +81,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS add_column_if_not_exists$$
 CREATE PROCEDURE add_column_if_not_exists()
 BEGIN
-  -- Добавляем category
+  -- Обновление таблицы services
   IF NOT EXISTS(
     SELECT * FROM information_schema.COLUMNS
     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='category'
@@ -89,7 +89,6 @@ BEGIN
     ALTER TABLE `services` ADD COLUMN `category` VARCHAR(100) NULL AFTER `label`;
   END IF;
 
-  -- Добавляем description
   IF NOT EXISTS(
     SELECT * FROM information_schema.COLUMNS
     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='description'
@@ -97,7 +96,6 @@ BEGIN
     ALTER TABLE `services` ADD COLUMN `description` TEXT NULL AFTER `category`;
   END IF;
 
-  -- Добавляем is_active
   IF NOT EXISTS(
     SELECT * FROM information_schema.COLUMNS
     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='is_active'
@@ -105,12 +103,42 @@ BEGIN
     ALTER TABLE `services` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `description`;
   END IF;
 
-  -- Добавляем sort_order
   IF NOT EXISTS(
     SELECT * FROM information_schema.COLUMNS
     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='sort_order'
   ) THEN
     ALTER TABLE `services` ADD COLUMN `sort_order` INT NOT NULL DEFAULT 0 AFTER `is_active`;
+  END IF;
+
+  -- Обновление таблицы service_sides (добавляем multiplier)
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='service_sides' AND COLUMN_NAME='multiplier'
+  ) THEN
+    ALTER TABLE `service_sides` ADD COLUMN `multiplier` DECIMAL(5,2) DEFAULT 1.00 AFTER `label`;
+  END IF;
+
+  -- Обновление таблицы service_quantities (добавляем quantity, price)
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='service_quantities' AND COLUMN_NAME='quantity'
+  ) THEN
+    ALTER TABLE `service_quantities` ADD COLUMN `quantity` INT DEFAULT 1 AFTER `label`;
+  END IF;
+
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='service_quantities' AND COLUMN_NAME='price'
+  ) THEN
+    ALTER TABLE `service_quantities` ADD COLUMN `price` DECIMAL(10,2) DEFAULT 0.00 AFTER `multiplier`;
+  END IF;
+
+  -- Обновление таблицы service_sizes (добавляем sort_order если нет)
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='service_sizes' AND COLUMN_NAME='sort_order'
+  ) THEN
+    ALTER TABLE `service_sizes` ADD COLUMN `sort_order` INT DEFAULT 0 AFTER `is_active`;
   END IF;
 END$$
 
