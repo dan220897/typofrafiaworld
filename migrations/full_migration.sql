@@ -74,11 +74,50 @@ CREATE TABLE IF NOT EXISTS `service_lamination` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Обновляем таблицу services (добавляем поля, если их нет)
-ALTER TABLE `services`
-ADD COLUMN IF NOT EXISTS `category` VARCHAR(100) NULL AFTER `label`,
-ADD COLUMN IF NOT EXISTS `description` TEXT NULL AFTER `category`,
-ADD COLUMN IF NOT EXISTS `is_active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `description`,
-ADD COLUMN IF NOT EXISTS `sort_order` INT NOT NULL DEFAULT 0 AFTER `is_active`;
+-- Для MySQL 5.x используем процедуры для безопасного добавления колонок
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS add_column_if_not_exists$$
+CREATE PROCEDURE add_column_if_not_exists()
+BEGIN
+  -- Добавляем category
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='category'
+  ) THEN
+    ALTER TABLE `services` ADD COLUMN `category` VARCHAR(100) NULL AFTER `label`;
+  END IF;
+
+  -- Добавляем description
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='description'
+  ) THEN
+    ALTER TABLE `services` ADD COLUMN `description` TEXT NULL AFTER `category`;
+  END IF;
+
+  -- Добавляем is_active
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='is_active'
+  ) THEN
+    ALTER TABLE `services` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `description`;
+  END IF;
+
+  -- Добавляем sort_order
+  IF NOT EXISTS(
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='services' AND COLUMN_NAME='sort_order'
+  ) THEN
+    ALTER TABLE `services` ADD COLUMN `sort_order` INT NOT NULL DEFAULT 0 AFTER `is_active`;
+  END IF;
+END$$
+
+DELIMITER ;
+
+CALL add_column_if_not_exists();
+DROP PROCEDURE IF EXISTS add_column_if_not_exists;
 
 -- ============================================
 -- ШАГ 2: КАТЕГОРИЯ - Печать документов
