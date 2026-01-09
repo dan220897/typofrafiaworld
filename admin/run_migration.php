@@ -125,8 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
                 function($stmt) {
                     $stmt = trim($stmt);
                     return !empty($stmt) &&
-                           !str_starts_with($stmt, '--') &&
-                           !str_starts_with($stmt, '/*');
+                           substr($stmt, 0, 2) !== '--' &&
+                           substr($stmt, 0, 2) !== '/*';
                 }
             );
 
