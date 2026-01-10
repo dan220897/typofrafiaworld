@@ -17,20 +17,39 @@ try {
 
 // Иконки для категорий (можно настроить через админ панель позже)
 $categoryIcons = [
+    'Печать документов' => 'fa-print',
+    'Копировальные услуги' => 'fa-copy',
+    'Сканирование' => 'fa-scanner',
+    'Визитные карточки' => 'fa-id-card',
     'Визитки' => 'fa-id-card',
-    'Баннеры' => 'fa-flag',
+    'Листовки и флаеры' => 'fa-file-alt',
     'Флаеры' => 'fa-file-image',
     'Листовки' => 'fa-file-alt',
-    'Буклеты' => 'fa-book-open',
-    'Календари' => 'fa-calendar-alt',
-    'Наклейки' => 'fa-sticky-note',
+    'Брошюры и буклеты' => 'fa-book',
     'Брошюры' => 'fa-book',
-    'Каталоги' => 'fa-folder-open',
-    'Пакеты' => 'fa-shopping-bag',
-    'Папки' => 'fa-folder',
+    'Буклеты' => 'fa-book-open',
+    'Плакаты и постеры' => 'fa-image',
     'Плакаты' => 'fa-image',
+    'Наклейки и стикеры' => 'fa-sticky-note',
+    'Наклейки' => 'fa-sticky-note',
+    'Широкоформатная печать' => 'fa-flag',
+    'Баннеры' => 'fa-flag',
+    'Чертежи и схемы' => 'fa-drafting-compass',
+    'Фотоуслуги' => 'fa-camera',
+    'Календари' => 'fa-calendar-alt',
+    'Дипломы и сертификаты' => 'fa-certificate',
+    'Открытки и приглашения' => 'fa-envelope',
+    'Упаковка' => 'fa-shopping-bag',
+    'Пакеты' => 'fa-shopping-bag',
+    'Сувенирная продукция' => 'fa-gift',
     'Сувениры' => 'fa-gift',
-    'Дизайн' => 'fa-palette'
+    'Интерьерная печать' => 'fa-palette',
+    'Постпечатная обработка' => 'fa-stapler',
+    'Дизайн-услуги' => 'fa-palette',
+    'Дизайн' => 'fa-palette',
+    'Дополнительные услуги' => 'fa-plus-circle',
+    'Каталоги' => 'fa-folder-open',
+    'Папки' => 'fa-folder'
 ];
 ?>
 <!DOCTYPE html>

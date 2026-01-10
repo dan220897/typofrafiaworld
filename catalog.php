@@ -18,16 +18,79 @@ if (empty($category)) {
 try {
     $db = Database::getInstance()->getConnection();
     $stmt = $db->prepare("
-        SELECT id, label as name, icon, chat_image,
-               (SELECT base_price FROM service_base_prices WHERE service_id = services.id LIMIT 1) as base_price
+        SELECT id, name, description, base_price, min_quantity, production_time_days
         FROM services
-        WHERE category = ?
-        ORDER BY label
+        WHERE category = ? AND is_active = 1
+        ORDER BY sort_order ASC, name ASC
     ");
     $stmt->execute([$category]);
     $services = $stmt->fetchAll();
 } catch (Exception $e) {
     $services = [];
+}
+
+// Иконки для услуг по умолчанию
+$serviceIcons = [
+    'печать' => 'fa-print',
+    'визит' => 'fa-id-card',
+    'листовк' => 'fa-file-alt',
+    'флаер' => 'fa-file-image',
+    'брошюр' => 'fa-book',
+    'буклет' => 'fa-book-open',
+    'плакат' => 'fa-image',
+    'постер' => 'fa-image',
+    'наклейк' => 'fa-sticky-note',
+    'стикер' => 'fa-sticky-note',
+    'баннер' => 'fa-flag',
+    'roll-up' => 'fa-sign',
+    'фотообои' => 'fa-panorama',
+    'чертеж' => 'fa-drafting-compass',
+    'схем' => 'fa-project-diagram',
+    'фото' => 'fa-camera',
+    'календар' => 'fa-calendar-alt',
+    'диплом' => 'fa-certificate',
+    'сертификат' => 'fa-award',
+    'открытк' => 'fa-envelope',
+    'приглашен' => 'fa-envelope-open-text',
+    'пакет' => 'fa-shopping-bag',
+    'коробк' => 'fa-box',
+    'футболк' => 'fa-tshirt',
+    'кружк' => 'fa-mug-hot',
+    'значк' => 'fa-circle',
+    'магнит' => 'fa-magnet',
+    'сумк' => 'fa-shopping-bag',
+    'картин' => 'fa-palette',
+    'холст' => 'fa-paint-brush',
+    'модульн' => 'fa-th',
+    'брошюров' => 'fa-stapler',
+    'пружин' => 'fa-paperclip',
+    'термопереплет' => 'fa-book-medical',
+    'ламинир' => 'fa-layer-group',
+    'резк' => 'fa-cut',
+    'перфорац' => 'fa-grip-lines-vertical',
+    'дизайн' => 'fa-palette',
+    'логотип' => 'fa-pen-nib',
+    'фирменн' => 'fa-trademark',
+    'верстк' => 'fa-file-code',
+    'доставк' => 'fa-truck',
+    'набор' => 'fa-keyboard',
+    'распознав' => 'fa-scanner',
+    'сканир' => 'fa-scanner',
+    'ксерокоп' => 'fa-copy',
+    'копир' => 'fa-copy',
+    'паспорт' => 'fa-passport',
+    'срочн' => 'fa-rocket',
+    'экспресс' => 'fa-bolt'
+];
+
+function getServiceIcon($serviceName, $iconMap) {
+    $name = mb_strtolower($serviceName);
+    foreach ($iconMap as $key => $icon) {
+        if (mb_strpos($name, $key) !== false) {
+            return $icon;
+        }
+    }
+    return 'fa-box'; // иконка по умолчанию
 }
 ?>
 <!DOCTYPE html>
@@ -429,13 +492,13 @@ try {
                 <?php foreach ($services as $service): ?>
                     <a href="service.php?id=<?= urlencode($service['id']) ?>" class="service-card" data-name="<?= strtolower($service['name']) ?>">
                         <div class="service-icon">
-                            <i class="fas <?= $service['icon'] ?? 'fa-box' ?>"></i>
+                            <i class="fas <?= getServiceIcon($service['name'], $serviceIcons) ?>"></i>
                         </div>
                         <div class="service-name"><?= htmlspecialchars($service['name']) ?></div>
                         <div class="service-description">
                             <?= htmlspecialchars($service['description'] ?? 'Оформить заказ онлайн с расчетом стоимости') ?>
                         </div>
-                        <?php if (!empty($service['base_price'])): ?>
+                        <?php if (!empty($service['base_price']) && $service['base_price'] > 0): ?>
                             <div class="service-price">
                                 От <?= number_format($service['base_price'], 0, ',', ' ') ?> ₽
                             </div>
