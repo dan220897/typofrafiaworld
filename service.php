@@ -418,7 +418,7 @@ try {
                 <select id="quantity" onchange="calculatePrice()">
                     <option value="">Выберите тираж</option>
                     <?php foreach ($params['quantities'] as $qty): ?>
-                        <option value="<?= $qty['id'] ?>" data-quantity="<?= $qty['quantity'] ?>" data-price="<?= $qty['price'] ?>">
+                        <option value="<?= $qty['id'] ?>" data-quantity="<?= $qty['quantity'] ?>" data-multiplier="<?= $qty['multiplier'] ?? 1 ?>" data-price="<?= $qty['price'] ?>">
                             <?= htmlspecialchars($qty['label']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -477,9 +477,12 @@ try {
             const quantitySelect = document.getElementById('quantity');
             if (quantitySelect && quantitySelect.value) {
                 const quantityOption = quantitySelect.options[quantitySelect.selectedIndex];
-                const qtyPrice = parseFloat(quantityOption.dataset.price || 0);
                 const qtyCount = parseFloat(quantityOption.dataset.quantity || 1);
-                total = (total + qtyPrice) * qtyCount;
+                const qtyMultiplier = parseFloat(quantityOption.dataset.multiplier || 1);
+                const qtyPrice = parseFloat(quantityOption.dataset.price || 0);
+
+                // Формула: (базовая_цена + доп_цена) × количество × множитель_скидки
+                total = (total + qtyPrice) * qtyCount * qtyMultiplier;
             }
 
             // Отображаем цену
