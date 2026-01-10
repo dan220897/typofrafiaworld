@@ -6,59 +6,100 @@ $userService = new UserService();
 $isAuthenticated = $userService->isAuthenticated();
 $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
 
-// Получаем категории услуг
-try {
-    $db = Database::getInstance()->getConnection();
-    $stmt = $db->query("SELECT DISTINCT category FROM services WHERE category IS NOT NULL ORDER BY category");
-    $categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (Exception $e) {
-    $categories = [];
+// Получаем категорию из URL
+$category = $_GET['category'] ?? '';
+
+if (empty($category)) {
+    header('Location: /');
+    exit;
 }
 
-// Иконки для категорий (можно настроить через админ панель позже)
-$categoryIcons = [
-    'Печать документов' => 'fa-print',
-    'Копировальные услуги' => 'fa-copy',
-    'Сканирование' => 'fa-scanner',
-    'Визитные карточки' => 'fa-id-card',
-    'Визитки' => 'fa-id-card',
-    'Листовки и флаеры' => 'fa-file-alt',
-    'Флаеры' => 'fa-file-image',
-    'Листовки' => 'fa-file-alt',
-    'Брошюры и буклеты' => 'fa-book',
-    'Брошюры' => 'fa-book',
-    'Буклеты' => 'fa-book-open',
-    'Плакаты и постеры' => 'fa-image',
-    'Плакаты' => 'fa-image',
-    'Наклейки и стикеры' => 'fa-sticky-note',
-    'Наклейки' => 'fa-sticky-note',
-    'Широкоформатная печать' => 'fa-flag',
-    'Баннеры' => 'fa-flag',
-    'Чертежи и схемы' => 'fa-drafting-compass',
-    'Фотоуслуги' => 'fa-camera',
-    'Календари' => 'fa-calendar-alt',
-    'Дипломы и сертификаты' => 'fa-certificate',
-    'Открытки и приглашения' => 'fa-envelope',
-    'Упаковка' => 'fa-shopping-bag',
-    'Пакеты' => 'fa-shopping-bag',
-    'Сувенирная продукция' => 'fa-gift',
-    'Сувениры' => 'fa-gift',
-    'Интерьерная печать' => 'fa-palette',
-    'Постпечатная обработка' => 'fa-stapler',
-    'Дизайн-услуги' => 'fa-palette',
-    'Дизайн' => 'fa-palette',
-    'Дополнительные услуги' => 'fa-plus-circle',
-    'Каталоги' => 'fa-folder-open',
-    'Папки' => 'fa-folder'
+// Получаем услуги этой категории
+try {
+    $db = Database::getInstance()->getConnection();
+    $stmt = $db->prepare("
+        SELECT id, name, description, base_price, min_quantity, production_time_days
+        FROM services
+        WHERE category = ? AND is_active = 1
+        ORDER BY sort_order ASC, name ASC
+    ");
+    $stmt->execute([$category]);
+    $services = $stmt->fetchAll();
+} catch (Exception $e) {
+    $services = [];
+}
+
+// Иконки для услуг по умолчанию
+$serviceIcons = [
+    'печать' => 'fa-print',
+    'визит' => 'fa-id-card',
+    'листовк' => 'fa-file-alt',
+    'флаер' => 'fa-file-image',
+    'брошюр' => 'fa-book',
+    'буклет' => 'fa-book-open',
+    'плакат' => 'fa-image',
+    'постер' => 'fa-image',
+    'наклейк' => 'fa-sticky-note',
+    'стикер' => 'fa-sticky-note',
+    'баннер' => 'fa-flag',
+    'roll-up' => 'fa-sign',
+    'фотообои' => 'fa-panorama',
+    'чертеж' => 'fa-drafting-compass',
+    'схем' => 'fa-project-diagram',
+    'фото' => 'fa-camera',
+    'календар' => 'fa-calendar-alt',
+    'диплом' => 'fa-certificate',
+    'сертификат' => 'fa-award',
+    'открытк' => 'fa-envelope',
+    'приглашен' => 'fa-envelope-open-text',
+    'пакет' => 'fa-shopping-bag',
+    'коробк' => 'fa-box',
+    'футболк' => 'fa-tshirt',
+    'кружк' => 'fa-mug-hot',
+    'значк' => 'fa-circle',
+    'магнит' => 'fa-magnet',
+    'сумк' => 'fa-shopping-bag',
+    'картин' => 'fa-palette',
+    'холст' => 'fa-paint-brush',
+    'модульн' => 'fa-th',
+    'брошюров' => 'fa-stapler',
+    'пружин' => 'fa-paperclip',
+    'термопереплет' => 'fa-book-medical',
+    'ламинир' => 'fa-layer-group',
+    'резк' => 'fa-cut',
+    'перфорац' => 'fa-grip-lines-vertical',
+    'дизайн' => 'fa-palette',
+    'логотип' => 'fa-pen-nib',
+    'фирменн' => 'fa-trademark',
+    'верстк' => 'fa-file-code',
+    'доставк' => 'fa-truck',
+    'набор' => 'fa-keyboard',
+    'распознав' => 'fa-scanner',
+    'сканир' => 'fa-scanner',
+    'ксерокоп' => 'fa-copy',
+    'копир' => 'fa-copy',
+    'паспорт' => 'fa-passport',
+    'срочн' => 'fa-rocket',
+    'экспресс' => 'fa-bolt'
 ];
+
+function getServiceIcon($serviceName, $iconMap) {
+    $name = mb_strtolower($serviceName);
+    foreach ($iconMap as $key => $icon) {
+        if (mb_strpos($name, $key) !== false) {
+            return $icon;
+        }
+    }
+    return 'fa-box'; // иконка по умолчанию
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= SITE_NAME ?> - Профессиональная типография онлайн</title>
-    <meta name="description" content="Качественная полиграфия с доставкой. Визитки, баннеры, флаеры, дизайн. Быстрое изготовление, низкие цены.">
+    <title><?= htmlspecialchars($category) ?> - <?= SITE_NAME ?></title>
+    <meta name="description" content="<?= htmlspecialchars($category) ?> - качественная печать с доставкой">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -149,42 +190,70 @@ $categoryIcons = [
             background: var(--primary-hover);
         }
 
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
-            padding: 4rem 2rem;
-            text-align: center;
+        /* Breadcrumbs */
+        .breadcrumbs {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding: 0 2rem;
+            font-size: 0.9rem;
         }
 
-        .hero h1 {
+        .breadcrumbs a {
+            color: var(--gray);
+            text-decoration: none;
+        }
+
+        .breadcrumbs a:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumbs span {
+            margin: 0 0.5rem;
+            color: var(--gray);
+        }
+
+        /* Page Header */
+        .page-header {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-title {
             font-size: 2.5rem;
             margin-bottom: 1rem;
+            color: var(--dark);
         }
 
-        .hero p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
+        .page-description {
+            color: var(--gray);
+            font-size: 1.1rem;
         }
 
         /* Search */
         .search-container {
-            max-width: 600px;
-            margin: 2rem auto 0;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
         .search-box {
             position: relative;
+            max-width: 500px;
         }
 
         .search-input {
             width: 100%;
-            padding: 1rem 3rem 1rem 1.5rem;
-            border: none;
+            padding: 0.75rem 3rem 0.75rem 1rem;
+            border: 2px solid var(--light-gray);
             border-radius: 50px;
             font-size: 1rem;
-            box-shadow: var(--shadow-lg);
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         .search-btn {
@@ -196,8 +265,8 @@ $categoryIcons = [
             color: var(--white);
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
             transition: background 0.2s;
         }
@@ -206,58 +275,72 @@ $categoryIcons = [
             background: var(--primary-hover);
         }
 
-        /* Main Content */
-        .container {
+        /* Services Grid */
+        .services-container {
             max-width: 1200px;
             margin: 3rem auto;
             padding: 0 2rem;
         }
 
-        .section-title {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        /* Categories Grid */
-        .categories-grid {
+        .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 2rem;
         }
 
-        .category-card {
+        .service-card {
             background: var(--white);
             border-radius: 12px;
             padding: 2rem;
-            text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: var(--shadow);
             text-decoration: none;
             color: var(--dark);
+            display: flex;
+            flex-direction: column;
         }
 
-        .category-card:hover {
+        .service-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
         }
 
-        .category-icon {
-            font-size: 3rem;
+        .service-icon {
+            font-size: 2.5rem;
             color: var(--primary);
             margin-bottom: 1rem;
         }
 
-        .category-name {
-            font-size: 1.25rem;
+        .service-name {
+            font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .category-description {
+        .service-price {
+            color: var(--success);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: auto;
+        }
+
+        .service-description {
             color: var(--gray);
-            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
         }
 
         /* Chat Widget */
@@ -331,21 +414,13 @@ $categoryIcons = [
                 gap: 1rem;
             }
 
-            .hero h1 {
+            .page-title {
                 font-size: 2rem;
             }
 
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .categories-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            .services-grid {
+                grid-template-columns: 1fr;
                 gap: 1rem;
-            }
-
-            .container {
-                padding: 0 1rem;
             }
         }
     </style>
@@ -371,93 +446,67 @@ $categoryIcons = [
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>Профессиональная типография онлайн</h1>
-        <p>Качественная полиграфия с доставкой по всей России</p>
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <a href="/">Главная</a>
+        <span>/</span>
+        <span><?= htmlspecialchars($category) ?></span>
+    </div>
 
-        <div class="search-container">
-            <div class="search-box">
-                <input
-                    type="text"
-                    class="search-input"
-                    placeholder="Поиск услуг..."
-                    id="searchInput"
-                    onkeyup="handleSearch()"
-                >
-                <button class="search-btn" onclick="handleSearch()">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title"><?= htmlspecialchars($category) ?></h1>
+        <p class="page-description">
+            Выберите услугу для расчета стоимости и оформления заказа
+        </p>
+    </div>
+
+    <!-- Search -->
+    <div class="search-container">
+        <div class="search-box">
+            <input
+                type="text"
+                class="search-input"
+                placeholder="Поиск услуг в категории..."
+                id="searchInput"
+                onkeyup="handleSearch()"
+            >
+            <button class="search-btn" onclick="handleSearch()">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
-    </section>
+    </div>
 
-    <!-- Categories -->
-    <main class="container">
-        <h2 class="section-title">Наши услуги</h2>
-
-        <div class="categories-grid" id="categoriesGrid">
-            <?php if (empty($categories)): ?>
-                <!-- Если категорий нет в БД, показываем примеры -->
-                <a href="catalog.php?category=Визитки" class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-id-card"></i>
-                    </div>
-                    <div class="category-name">Визитки</div>
-                    <div class="category-description">От 500 руб за тираж</div>
-                </a>
-
-                <a href="catalog.php?category=Баннеры" class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-flag"></i>
-                    </div>
-                    <div class="category-name">Баннеры</div>
-                    <div class="category-description">Любые размеры</div>
-                </a>
-
-                <a href="catalog.php?category=Флаеры" class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-file-image"></i>
-                    </div>
-                    <div class="category-name">Флаеры</div>
-                    <div class="category-description">Быстрая печать</div>
-                </a>
-
-                <a href="catalog.php?category=Листовки" class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="category-name">Листовки</div>
-                    <div class="category-description">От 1000 шт</div>
-                </a>
-
-                <a href="catalog.php?category=Буклеты" class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <div class="category-name">Буклеты</div>
-                    <div class="category-description">Различные форматы</div>
-                </a>
-
-                <a href="catalog.php?category=Каталоги" class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-folder-open"></i>
-                    </div>
-                    <div class="category-name">Каталоги</div>
-                    <div class="category-description">Премиум качество</div>
-                </a>
-            <?php else: ?>
-                <?php foreach ($categories as $category): ?>
-                    <a href="catalog.php?category=<?= urlencode($category) ?>" class="category-card" data-category="<?= strtolower($category) ?>">
-                        <div class="category-icon">
-                            <i class="fas <?= $categoryIcons[$category] ?? 'fa-box' ?>"></i>
+    <!-- Services -->
+    <main class="services-container">
+        <?php if (empty($services)): ?>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h2>Услуги не найдены</h2>
+                <p>В категории "<?= htmlspecialchars($category) ?>" пока нет услуг</p>
+                <br>
+                <a href="/" class="btn btn-primary">Вернуться на главную</a>
+            </div>
+        <?php else: ?>
+            <div class="services-grid" id="servicesGrid">
+                <?php foreach ($services as $service): ?>
+                    <a href="service.php?id=<?= urlencode($service['id']) ?>" class="service-card" data-name="<?= strtolower($service['name']) ?>">
+                        <div class="service-icon">
+                            <i class="fas <?= getServiceIcon($service['name'], $serviceIcons) ?>"></i>
                         </div>
-                        <div class="category-name"><?= htmlspecialchars($category) ?></div>
-                        <div class="category-description">Смотреть услуги</div>
+                        <div class="service-name"><?= htmlspecialchars($service['name']) ?></div>
+                        <div class="service-description">
+                            <?= htmlspecialchars($service['description'] ?? 'Оформить заказ онлайн с расчетом стоимости') ?>
+                        </div>
+                        <?php if (!empty($service['base_price']) && $service['base_price'] > 0): ?>
+                            <div class="service-price">
+                                От <?= number_format($service['base_price'], 0, ',', ' ') ?> ₽
+                            </div>
+                        <?php endif; ?>
                     </a>
                 <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
     </main>
 
     <!-- Chat Widget -->
@@ -478,7 +527,7 @@ $categoryIcons = [
             </div>
             <div class="footer-section">
                 <h3>Услуги</h3>
-                <a href="catalog.php">Каталог услуг</a>
+                <a href="/">Каталог услуг</a>
                 <a href="#prices">Цены</a>
                 <a href="#delivery">Доставка</a>
             </div>
@@ -495,15 +544,15 @@ $categoryIcons = [
     </footer>
 
     <script>
-        // Поиск по категориям
+        // Поиск по услугам
         function handleSearch() {
             const searchText = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.category-card');
+            const cards = document.querySelectorAll('.service-card');
 
             cards.forEach(card => {
-                const categoryName = card.querySelector('.category-name').textContent.toLowerCase();
-                if (categoryName.includes(searchText)) {
-                    card.style.display = 'block';
+                const serviceName = card.getAttribute('data-name');
+                if (serviceName.includes(searchText)) {
+                    card.style.display = 'flex';
                 } else {
                     card.style.display = 'none';
                 }
@@ -515,9 +564,8 @@ $categoryIcons = [
             window.location.href = 'chat.php';
         }
 
-        // Показать модальное окно авторизации (если нужно)
+        // Показать модальное окно авторизации
         function showAuthModal() {
-            // TODO: Реализовать модальное окно
             alert('Модальное окно авторизации в разработке');
         }
     </script>
