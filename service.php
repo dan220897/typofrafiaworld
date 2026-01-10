@@ -446,6 +446,14 @@ try {
     <script>
         const basePrice = <?= $basePrice ?>;
 
+        // Определяем базовый тираж (первый в списке quantities)
+        let baseQuantity = 1;
+        const quantitySelect = document.getElementById('quantity');
+        if (quantitySelect && quantitySelect.options.length > 1) {
+            // Первый option - это "Выберите тираж", берем второй
+            baseQuantity = parseFloat(quantitySelect.options[1].dataset.quantity || 1);
+        }
+
         function calculatePrice() {
             let total = basePrice;
 
@@ -474,15 +482,16 @@ try {
             total *= sidesMultiplier;
 
             // Количество
-            const quantitySelect = document.getElementById('quantity');
             if (quantitySelect && quantitySelect.value) {
                 const quantityOption = quantitySelect.options[quantitySelect.selectedIndex];
                 const qtyCount = parseFloat(quantityOption.dataset.quantity || 1);
                 const qtyMultiplier = parseFloat(quantityOption.dataset.multiplier || 1);
                 const qtyPrice = parseFloat(quantityOption.dataset.price || 0);
 
-                // Формула: (базовая_цена + доп_цена) × количество × множитель_скидки
-                total = (total + qtyPrice) * qtyCount * qtyMultiplier;
+                // Формула: (базовая_цена + доп_цена) × (количество / базовый_тираж) × множитель_скидки
+                // Пример для визиток: (500₽ + 0₽) × (500 / 100) × 0.80 = 500 × 5 × 0.80 = 2000₽
+                // Пример для печати: (3₽ + 0₽) × (10 / 1) × 1.00 = 3 × 10 × 1.00 = 30₽
+                total = (total + qtyPrice) * (qtyCount / baseQuantity) * qtyMultiplier;
             }
 
             // Отображаем цену
