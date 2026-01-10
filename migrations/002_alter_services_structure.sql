@@ -14,6 +14,16 @@ BEGIN
     DECLARE label_exists INT DEFAULT 0;
     DECLARE icon_exists INT DEFAULT 0;
     DECLARE id_type VARCHAR(50);
+    DECLARE fk_name VARCHAR(128);
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cur CURSOR FOR
+        SELECT CONSTRAINT_NAME
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'order_items'
+            AND REFERENCED_TABLE_NAME = 'services'
+            AND REFERENCED_COLUMN_NAME = 'id';
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
     -- Проверяем существование колонки label
     SELECT COUNT(*) INTO label_exists
@@ -38,26 +48,43 @@ BEGIN
 
     -- Если id имеет тип int, меняем структуру
     IF id_type = 'int' THEN
-        -- 1. Очищаем таблицу services (старые данные)
+        -- 1. Удаляем все внешние ключи на services.id
+        OPEN cur;
+        read_loop: LOOP
+            FETCH cur INTO fk_name;
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+            SET @drop_fk = CONCAT('ALTER TABLE `order_items` DROP FOREIGN KEY `', fk_name, '`');
+            PREPARE stmt FROM @drop_fk;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+        END LOOP;
+        CLOSE cur;
+
+        -- 2. Очищаем связанные данные (заказы со старыми услугами)
+        DELETE FROM order_items WHERE service_id IN (SELECT id FROM services);
+
+        -- 3. Очищаем таблицу services (старые данные)
         DELETE FROM services;
 
-        -- 2. Удаляем AUTO_INCREMENT
+        -- 4. Удаляем AUTO_INCREMENT
         ALTER TABLE `services` MODIFY `id` INT NOT NULL;
 
-        -- 3. Меняем тип id на VARCHAR
+        -- 5. Меняем тип id на VARCHAR
         ALTER TABLE `services` MODIFY `id` VARCHAR(50) NOT NULL;
 
-        -- 4. Добавляем поле label (копируем из name)
+        -- 6. Добавляем поле label
         IF label_exists = 0 THEN
             ALTER TABLE `services` ADD COLUMN `label` VARCHAR(255) NOT NULL AFTER `id`;
         END IF;
 
-        -- 5. Добавляем поле icon
+        -- 7. Добавляем поле icon
         IF icon_exists = 0 THEN
             ALTER TABLE `services` ADD COLUMN `icon` VARCHAR(50) DEFAULT NULL AFTER `label`;
         END IF;
 
-        -- 6. Убеждаемся что есть category, description, is_active, sort_order
+        -- 8. Убеждаемся что есть category, description, is_active, sort_order
         SET @alter_query = 'ALTER TABLE `services` ';
 
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
@@ -90,6 +117,15 @@ BEGIN
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
         END IF;
+
+        -- 9. Меняем тип service_id в order_items на VARCHAR(50)
+        ALTER TABLE `order_items` MODIFY `service_id` VARCHAR(50) DEFAULT NULL;
+
+        -- 10. Восстанавливаем внешний ключ (но теперь VARCHAR)
+        ALTER TABLE `order_items`
+        ADD CONSTRAINT `order_items_ibfk_service`
+        FOREIGN KEY (`service_id`) REFERENCES `services` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE;
 
     ELSE
         -- id уже VARCHAR, просто добавляем недостающие поля

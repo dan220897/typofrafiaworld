@@ -8,9 +8,13 @@
 
 ### 002_alter_services_structure.sql
 **ВАЖНО!** Изменяет структуру таблицы services:
+- Удаляет внешние ключи на services.id
+- Очищает старые заказы из order_items
 - Меняет тип `id` с INT на VARCHAR(50)
 - Добавляет поле `label` (название услуги)
 - Добавляет поле `icon` (иконка)
+- Меняет тип service_id в order_items на VARCHAR(50)
+- Восстанавливает внешний ключ с новым типом
 - Очищает старые данные из таблицы services
 
 ### 003_add_cost_prices.sql
