@@ -1084,6 +1084,9 @@ try {
                     .format(total);
         }
 
+        // Вызываем calculatePrice при загрузке страницы для отображения базовой цены
+        calculatePrice();
+
         async function addToCartFromService() {
             // Получаем данные из калькулятора
             const sizeSelect = document.getElementById('size');
@@ -1093,28 +1096,37 @@ try {
 
             // Собираем параметры
             const parameters = {};
-            if (sizeSelect) parameters.size = sizeSelect.options[sizeSelect.selectedIndex].text;
-            if (densitySelect) parameters.density = densitySelect.options[densitySelect.selectedIndex].text;
-            if (sidesSelect) parameters.sides = sidesSelect.options[sidesSelect.selectedIndex].text;
-            if (quantitySelect) {
-                parameters.quantity = quantitySelect.options[quantitySelect.selectedIndex].text;
-                parameters.quantityValue = parseInt(quantitySelect.getAttribute('data-quantity') || 1);
+            let quantityValue = 1; // По умолчанию 1
+
+            if (sizeSelect && sizeSelect.value) {
+                parameters.size = sizeSelect.options[sizeSelect.selectedIndex].text;
+            }
+            if (densitySelect && densitySelect.value) {
+                parameters.density = densitySelect.options[densitySelect.selectedIndex].text;
+            }
+            if (sidesSelect && sidesSelect.value) {
+                parameters.sides = sidesSelect.options[sidesSelect.selectedIndex].text;
+            }
+            if (quantitySelect && quantitySelect.value) {
+                const selectedOption = quantitySelect.options[quantitySelect.selectedIndex];
+                parameters.quantity = selectedOption.text;
+                quantityValue = parseInt(selectedOption.dataset.quantity || 1);
             }
 
             // Получаем итоговую цену
             const totalPriceText = document.getElementById('totalPrice').textContent;
             const totalPrice = parseFloat(totalPriceText.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
 
-            if (totalPrice === 0) {
-                alert('Пожалуйста, выберите параметры услуги');
+            if (totalPrice === 0 || isNaN(totalPrice)) {
+                alert('Пожалуйста, подождите расчета стоимости');
                 return;
             }
 
             // Добавляем в корзину
             const success = await addToCart(
                 '<?= $serviceId ?>',
-                parameters.quantityValue || 1,
-                totalPrice / (parameters.quantityValue || 1),
+                quantityValue,
+                totalPrice / quantityValue,
                 parameters
             );
 
