@@ -602,7 +602,7 @@ try {
             }
 
             .header-nav {
-                width: 100%;
+                
                 justify-content: space-around;
                 margin-top: 0.5rem;
                 gap: 0.5rem;
@@ -868,6 +868,40 @@ try {
             .btn {
                 font-size: 0.9rem;
             }
+        }
+        
+        @media (max-width: 968px) {
+            .header-nav { gap: 1rem; }
+            .nav-link { font-size: 0.9rem; }
+            .page-title { font-size: 2.25rem; }
+            .page-header { padding: 2rem 1.5rem; }
+        }
+
+        @media (max-width: 768px) {
+            .header-container { padding: 1rem; }
+            .header-nav { gap: 0.75rem; font-size: 0.85rem; }
+            .logo { font-size: 1.25rem; }
+            .breadcrumbs { padding: 0 1rem; }
+            .page-header { margin: 1.5rem auto; padding: 2rem 1rem; }
+            .page-title { font-size: 1.75rem; }
+            .page-description { font-size: 1rem; }
+            .container { padding: 0 1rem; margin: 2rem auto; }
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .service-card { padding: 2rem 1.5rem; }
+            .telegram-widget { bottom: 1.5rem; right: 1.5rem; }
+            .telegram-btn { width: 56px; height: 56px; font-size: 1.5rem; }
+            .telegram-widget:hover .telegram-info { display: none; }
+        }
+
+        @media (max-width: 480px) {
+            .header-nav a:not(.btn) { display: none; }
+            .page-title { font-size: 1.5rem; }
+            .btn { padding: 0.5rem 1.25rem; font-size: 0.85rem; }
+            .service-icon { font-size: 2.75rem; }
+            .service-name { font-size: 1.15rem; }
         }
     </style>
 </head>
