@@ -83,42 +83,44 @@ try {
         <?php
         // Определяем цвета для каждой категории
         $categoryColors = [
-            'Визитки' => '#FF6B6B',
-            'Баннеры' => '#4ECDC4',
-            'Флаеры' => '#FFD93D',
-            'Листовки' => '#95E1D3',
-            'Буклеты' => '#A8E6CF',
-            'Брошюры' => '#FF8B94',
-            'Календари' => '#6C5CE7',
-            'Блокноты' => '#74B9FF',
-            'Наклейки' => '#FD79A8',
-            'Сувенирная продукция' => '#FDCB6E',
-            'Вывески' => '#00B894',
-            'Каталоги' => '#A29BFE',
-            'Копирование документов' => '#55EFC4',
-            'Дизайн и дополнительные услуги' => '#FF7675'
+            'Визитки' => '#6366f1',
+            'Баннеры' => '#ec4899',
+            'Флаеры' => '#f59e0b',
+            'Листовки' => '#10b981',
+            'Буклеты' => '#8b5cf6',
+            'Брошюры' => '#ef4444',
+            'Календари' => '#3b82f6',
+            'Блокноты' => '#14b8a6',
+            'Наклейки' => '#f97316',
+            'Сувенирная продукция' => '#06b6d4',
+            'Вывески' => '#84cc16',
+            'Каталоги' => '#a855f7',
+            'Копирование документов' => '#6366f1',
+            'Дизайн и дополнительные услуги' => '#ec4899'
         ];
 
-        $currentColor = $categoryColors[$service['category']] ?? '#FF6B6B';
+        $currentColor = $categoryColors[$service['category']] ?? '#6366f1';
         ?>
 
         :root {
-            --accent: <?= $currentColor ?>;
-            --bg-dark: #0F172A;
-            --bg-card: #1E293B;
-            --bg-light: #F8FAFC;
-            --text-dark: #0F172A;
-            --text-light: #64748B;
-            --text-white: #F8FAFC;
-            --border: #E2E8F0;
-            --success: #10B981;
-            --white: #FFFFFF;
+            --category-color: <?= $currentColor ?>;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        @keyframes slideUp {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(60px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -126,337 +128,324 @@ try {
             }
         }
 
-        @keyframes scaleIn {
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInRight {
             from {
                 opacity: 0;
-                transform: scale(0.9);
+                transform: translateX(30px);
             }
             to {
                 opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
                 transform: scale(1);
             }
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -1000px 0;
-            }
-            100% {
-                background-position: 1000px 0;
-            }
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
             50% {
-                transform: translateY(-10px);
+                transform: scale(1.05);
             }
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: var(--text-dark);
-            background: var(--bg-light);
-            line-height: 1.7;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            line-height: 1.6;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Header */
         .header {
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease-out;
         }
 
         .header-container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 1.25rem 2.5rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--text-dark);
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-decoration: none;
-            letter-spacing: -0.5px;
-            transition: color 0.2s;
-        }
-
-        .logo i {
-            color: var(--accent);
-            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
         }
 
         .logo:hover {
-            color: var(--accent);
+            transform: scale(1.05);
         }
 
         .header-nav {
             display: flex;
-            gap: 2.5rem;
+            gap: 2rem;
             align-items: center;
         }
 
         .nav-link {
-            color: var(--text-light);
+            color: var(--gray);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.2s;
+            transition: all 0.3s ease;
             position: relative;
         }
 
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--category-color);
+            transition: width 0.3s ease;
+        }
+
         .nav-link:hover {
-            color: var(--accent);
+            color: var(--category-color);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
         }
 
         .breadcrumbs {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem 2.5rem;
-            font-size: 0.875rem;
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding: 0 2rem;
+            font-size: 0.9rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .breadcrumbs a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumbs a:hover {
+            color: var(--category-color);
+        }
+
+        .breadcrumbs span {
+            margin: 0 0.5rem;
+            color: var(--gray);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 3rem;
+        }
+
+        .service-info {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .service-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--category-color), var(--dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .service-info > p {
+            color: var(--gray);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-xl);
+            position: sticky;
+            top: 120px;
+            animation: slideInRight 0.8s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .calculator h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-size: 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .breadcrumbs a {
-            color: var(--text-light);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .breadcrumbs a:hover {
-            color: var(--accent);
-        }
-
-        .breadcrumbs span {
-            color: var(--border);
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 3rem 2.5rem 5rem;
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 4rem;
-            align-items: start;
-        }
-
-        .service-info {
-            animation: slideUp 0.6s ease-out;
-        }
-
-        .service-info h1 {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--text-dark);
-            margin-bottom: 1.5rem;
-            line-height: 1.1;
-            letter-spacing: -1px;
-        }
-
-        .service-info h1::before {
+        .calculator h3::before {
             content: '';
-            display: block;
-            width: 60px;
-            height: 6px;
-            background: var(--accent);
-            margin-bottom: 2rem;
-            border-radius: 3px;
-        }
-
-        .service-info > p {
-            color: var(--text-light);
-            font-size: 1.25rem;
-            margin-bottom: 3rem;
-            line-height: 1.8;
-        }
-
-        /* Calculator Card */
-        .calculator {
-            background: var(--white);
-            border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border: 1px solid var(--border);
-            position: sticky;
-            top: 120px;
-            animation: scaleIn 0.6s ease-out 0.2s backwards;
-        }
-
-        .calculator h3 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 2rem;
-            letter-spacing: -0.5px;
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            border-radius: 2px;
         }
 
         .form-group {
-            margin-bottom: 1.75rem;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out backwards;
         }
+
+        .form-group:nth-child(2) { animation-delay: 0.1s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.3s; }
+        .form-group:nth-child(5) { animation-delay: 0.4s; }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             font-weight: 600;
-            color: var(--text-dark);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: var(--dark);
+            font-size: 0.95rem;
         }
 
         .form-group select,
         .form-group input {
             width: 100%;
-            padding: 1rem 1.25rem;
-            border: 2px solid var(--border);
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--light-gray);
             border-radius: 12px;
             font-size: 1rem;
-            color: var(--text-dark);
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             background: var(--white);
-            font-family: inherit;
         }
 
         .form-group select:hover,
         .form-group input:hover {
-            border-color: var(--accent);
+            border-color: var(--category-color);
         }
 
         .form-group select:focus,
         .form-group input:focus {
             outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+            border-color: var(--category-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        /* Price Display */
         .price-display {
-            background: var(--bg-dark);
-            padding: 2.5rem;
-            border-radius: 20px;
-            margin: 2rem 0;
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 1.5rem 0;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .price-display::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--accent);
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 1.2s ease-out backwards;
+            animation-delay: 0.5s;
         }
 
         .price-label {
-            color: var(--text-white);
-            font-size: 0.875rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
         .price-value {
-            font-size: 3rem;
-            font-weight: 900;
+            font-size: 2.5rem;
+            font-weight: 700;
             color: var(--white);
-            letter-spacing: -1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* Buttons */
         .btn {
             width: 100%;
-            padding: 1.25rem;
+            padding: 1.125rem;
             border: none;
             border-radius: 12px;
             font-size: 1.05rem;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            font-family: inherit;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1.4s ease-out backwards;
+            animation-delay: 0.6s;
         }
 
         .btn-primary {
-            background: var(--accent);
+            background: var(--category-color);
             color: var(--white);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(255, 107, 107, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
+            box-shadow: var(--shadow-lg);
         }
 
         .btn-success {
-            background: var(--success);
+            background: linear-gradient(135deg, var(--success), #059669);
             color: var(--white);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         .btn-success:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+            box-shadow: var(--shadow-xl);
         }
 
         .btn-success:active {
             transform: translateY(0);
         }
 
-        /* Features Section */
         .features {
-            margin-top: 5rem;
+            margin-top: 3rem;
         }
 
         .features h2 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 3rem;
-            letter-spacing: -0.5px;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: var(--dark);
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
         }
 
         .feature-card {
-            background: var(--white);
-            padding: 2.5rem;
-            border-radius: 20px;
-            border: 2px solid var(--border);
-            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
             opacity: 0;
         }
 
         .feature-card.visible {
-            animation: slideUp 0.6s ease-out forwards;
+            animation: fadeInUp 0.6s ease-out forwards;
         }
 
         .feature-card:nth-child(1).visible { animation-delay: 0.1s; }
@@ -465,33 +454,31 @@ try {
 
         .feature-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-            border-color: var(--accent);
+            box-shadow: var(--shadow-xl);
         }
 
         .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--accent);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            color: var(--white);
-            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
         }
 
         .feature-card h3 {
             font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
         }
 
         .feature-card p {
-            color: var(--text-light);
-            font-size: 1rem;
+            color: var(--gray);
             line-height: 1.6;
         }
 
@@ -501,123 +488,100 @@ try {
             bottom: 2rem;
             right: 2rem;
             z-index: 99;
-            animation: float 3s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: fadeIn 1s ease-out;
         }
 
         .telegram-info {
-            display: none;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .telegram-widget:hover .telegram-info {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .telegram-info-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .telegram-info-status {
+            font-size: 0.85rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .telegram-info-status::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
         }
 
         .telegram-btn {
-            width: 64px;
-            height: 64px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background: var(--accent);
+            background: linear-gradient(135deg, #0088cc, #006699);
             color: var(--white);
             border: none;
-            font-size: 1.875rem;
+            font-size: 1.75rem;
             cursor: pointer;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s;
+            box-shadow: var(--shadow-xl);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .telegram-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 30px rgba(0, 136, 204, 0.4);
         }
 
         .telegram-btn:active {
             transform: scale(0.95);
         }
 
-        /* Responsive - Tablets & Large Phones */
-        @media (max-width: 1024px) {
+        @media (max-width: 968px) {
             .container {
                 grid-template-columns: 1fr;
-                gap: 3rem;
-                padding: 2rem 1.5rem 4rem;
+                gap: 2rem;
+                padding-bottom: 2rem;
             }
 
             .calculator {
                 position: relative;
                 top: 0;
+                box-shadow: var(--shadow);
+            }
+
+            .service-info h1 {
+                font-size: 2rem;
             }
 
             .features-grid {
                 grid-template-columns: 1fr;
-            }
-        }
-
-        /* Responsive - Mobile */
-        @media (max-width: 768px) {
-            .header-container {
-                padding: 1rem 1.25rem;
-                flex-wrap: wrap;
-            }
-
-            .logo {
-                font-size: 1.5rem;
-            }
-
-            .header-nav {
-                width: 100%;
-                justify-content: space-between;
-                margin-top: 1rem;
-                gap: 1rem;
-            }
-
-            .nav-link {
-                font-size: 0.875rem;
-            }
-
-            .breadcrumbs {
-                padding: 1rem 1.25rem;
-                font-size: 0.8125rem;
-            }
-
-            .container {
-                padding: 2rem 1.25rem 3rem;
-            }
-
-            .service-info h1 {
-                font-size: 2.5rem;
-            }
-
-            .service-info h1::before {
-                width: 50px;
-                height: 5px;
-                margin-bottom: 1.5rem;
-            }
-
-            .service-info > p {
-                font-size: 1.125rem;
-            }
-
-            .calculator {
-                padding: 2rem;
-            }
-
-            .calculator h3 {
-                font-size: 1.5rem;
-            }
-
-            .price-value {
-                font-size: 2.5rem;
-            }
-
-            .features {
-                margin-top: 3rem;
-            }
-
-            .features h2 {
-                font-size: 2rem;
-            }
-
-            .feature-card {
-                padding: 2rem;
             }
 
             .telegram-widget {
@@ -625,17 +589,25 @@ try {
                 right: 1.5rem;
             }
 
+            .telegram-info {
+                display: none;
+            }
+
             .telegram-btn {
                 width: 56px;
                 height: 56px;
                 font-size: 1.5rem;
             }
+
+            .header-nav {
+                gap: 1rem;
+            }
         }
 
-        /* Responsive - Small Mobile */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             .header-container {
                 padding: 1rem;
+                flex-wrap: wrap;
             }
 
             .logo {
@@ -643,136 +615,271 @@ try {
             }
 
             .header-nav {
-                gap: 0.75rem;
+                width: 100%;
+                justify-content: space-around;
+                margin-top: 0.5rem;
+                gap: 0.5rem;
+                font-size: 0.85rem;
             }
 
             .nav-link {
-                font-size: 0.8125rem;
+                font-size: 0.85rem;
+                padding: 0.25rem;
             }
 
-            .breadcrumbs {
-                padding: 0.875rem 1rem;
-                font-size: 0.75rem;
+            .nav-link::after {
+                display: none;
             }
 
             .container {
-                padding: 1.5rem 1rem 2.5rem;
-                gap: 2.5rem;
+                padding: 0 1rem 2rem;
+                margin: 1.5rem auto;
+            }
+
+            .breadcrumbs {
+                padding: 0 1rem;
+                font-size: 0.8rem;
+                margin: 1rem auto 0;
             }
 
             .service-info h1 {
-                font-size: 2rem;
-            }
-
-            .service-info h1::before {
-                width: 40px;
-                height: 4px;
-                margin-bottom: 1.25rem;
+                font-size: 1.75rem;
+                line-height: 1.3;
             }
 
             .service-info > p {
                 font-size: 1rem;
-                margin-bottom: 2rem;
+                margin-bottom: 1.5rem;
             }
 
             .calculator {
-                padding: 1.5rem;
-                border-radius: 20px;
-            }
-
-            .calculator h3 {
-                font-size: 1.375rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-
-            .form-group label {
-                font-size: 0.8125rem;
-                margin-bottom: 0.625rem;
-            }
-
-            .form-group select,
-            .form-group input {
-                padding: 0.875rem 1rem;
-                font-size: 0.9375rem;
-            }
-
-            .price-display {
-                padding: 2rem;
-            }
-
-            .price-label {
-                font-size: 0.8125rem;
-            }
-
-            .price-value {
-                font-size: 2.25rem;
-            }
-
-            .btn {
-                padding: 1.125rem;
-                font-size: 1rem;
-            }
-
-            .features {
-                margin-top: 2.5rem;
-            }
-
-            .features h2 {
-                font-size: 1.75rem;
-                margin-bottom: 2rem;
-            }
-
-            .feature-card {
-                padding: 1.75rem;
-            }
-
-            .feature-icon {
-                width: 52px;
-                height: 52px;
-                font-size: 1.5rem;
-                margin-bottom: 1.25rem;
-            }
-
-            .feature-card h3 {
-                font-size: 1.125rem;
-            }
-
-            .feature-card p {
-                font-size: 0.9375rem;
-            }
-
-            .telegram-widget {
-                bottom: 1.25rem;
-                right: 1.25rem;
-            }
-
-            .telegram-btn {
-                width: 52px;
-                height: 52px;
-                font-size: 1.375rem;
-            }
-        }
-
-        /* Responsive - Very Small Mobile */
-        @media (max-width: 360px) {
-            .service-info h1 {
-                font-size: 1.75rem;
+                padding: 1.25rem;
+                border-radius: 16px;
             }
 
             .calculator h3 {
                 font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .form-group select,
+            .form-group input {
+                padding: 0.75rem 0.875rem;
+                font-size: 0.95rem;
+                border-radius: 10px;
+            }
+
+            .price-display {
+                padding: 1.25rem;
+                border-radius: 12px;
+                margin: 1.25rem 0;
+            }
+
+            .price-label {
+                font-size: 0.9rem;
             }
 
             .price-value {
                 font-size: 2rem;
             }
 
+            .btn {
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+
+            .features {
+                margin-top: 2rem;
+            }
+
             .features h2 {
                 font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+                border-radius: 12px;
+            }
+
+            .feature-icon {
+                font-size: 2rem;
+            }
+
+            .feature-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .feature-card p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .header-container {
+                padding: 0.875rem;
+            }
+
+            .header-nav {
+                gap: 0.25rem;
+                font-size: 0.8rem;
+            }
+
+            .nav-link {
+                font-size: 0.8rem;
+                padding: 0.2rem;
+            }
+
+            .breadcrumbs {
+                font-size: 0.75rem;
+                margin: 0.875rem auto 0;
+            }
+
+            .container {
+                padding: 0 0.875rem 1.5rem;
+                margin: 1rem auto;
+                gap: 1.5rem;
+            }
+
+            .service-info h1 {
+                font-size: 1.5rem;
+                line-height: 1.3;
+            }
+
+            .service-info > p {
+                font-size: 0.95rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .calculator {
+                padding: 1rem;
+                border-radius: 14px;
+            }
+
+            .calculator h3 {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .calculator h3::before {
+                height: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+                margin-bottom: 0.35rem;
+            }
+
+            .form-group select,
+            .form-group input {
+                padding: 0.675rem 0.75rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+
+            .price-display {
+                padding: 1rem;
+                border-radius: 10px;
+                margin: 1rem 0;
+            }
+
+            .price-label {
+                font-size: 0.85rem;
+            }
+
+            .price-value {
+                font-size: 1.75rem;
+            }
+
+            .btn {
+                padding: 0.875rem;
+                font-size: 0.95rem;
+                border-radius: 8px;
+            }
+
+            .features {
+                margin-top: 1.5rem;
+            }
+
+            .features h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .feature-card {
+                padding: 1.25rem;
+                border-radius: 10px;
+            }
+
+            .feature-icon {
+                font-size: 1.75rem;
+            }
+
+            .feature-card h3 {
+                font-size: 1rem;
+            }
+
+            .feature-card p {
+                font-size: 0.9rem;
+            }
+
+            .telegram-widget {
+                bottom: 0.875rem;
+                right: 0.875rem;
+            }
+
+            .telegram-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.15rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header-nav {
+                font-size: 0.75rem;
+            }
+
+            .nav-link {
+                font-size: 0.75rem;
+            }
+
+            .service-info h1 {
+                font-size: 1.35rem;
+            }
+
+            .calculator h3 {
+                font-size: 1rem;
+            }
+
+            .price-value {
+                font-size: 1.5rem;
+            }
+
+            .btn {
+                font-size: 0.9rem;
             }
         }
     </style>
