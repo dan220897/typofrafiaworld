@@ -51,21 +51,23 @@ $megaMenu_categoryIcons = [
     }
 
     .mega-menu-overlay {
-        display: none;
         position: fixed;
-        top: 72px;
+        top: 60px;
         left: 0;
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
         z-index: 999;
         opacity: 0;
-        transition: opacity 0.3s ease;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+        pointer-events: none;
     }
 
     .mega-menu-wrapper:hover .mega-menu-overlay {
-        display: block;
         opacity: 1;
+        visibility: visible;
+        transition: opacity 0.2s ease, visibility 0s linear 0s;
     }
 
     .mega-menu-trigger {
@@ -101,7 +103,7 @@ $megaMenu_categoryIcons = [
 
     .mega-menu {
         position: fixed;
-        top: 72px;
+        top: 60px;
         left: 0;
         right: 0;
         width: 100%;
@@ -109,15 +111,31 @@ $megaMenu_categoryIcons = [
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         border-radius: 0;
         padding: 2rem 0;
-        display: none;
+        padding-top: 3rem;
         z-index: 1000;
-        max-height: calc(100vh - 72px);
+        max-height: calc(100vh - 60px);
         overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: opacity 0.2s ease, visibility 0s linear 0.2s, transform 0.2s ease;
+    }
+
+    .mega-menu::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        left: 0;
+        right: 0;
+        height: 20px;
+        background: transparent;
     }
 
     .mega-menu-wrapper:hover .mega-menu {
-        display: block;
-        animation: fadeInDown 0.3s ease;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        transition: opacity 0.2s ease, visibility 0s linear 0s, transform 0.2s ease;
     }
 
     @keyframes fadeInDown {
