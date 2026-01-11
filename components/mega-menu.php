@@ -5,11 +5,11 @@ try {
 
     // Получаем все категории
     $stmt = $db->query("SELECT DISTINCT category FROM services WHERE category IS NOT NULL AND is_active = 1 ORDER BY category");
-    $menuCategories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $megaMenu_categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     // Получаем все услуги, сгруппированные по категориям
-    $menuServices = [];
-    foreach ($menuCategories as $cat) {
+    $megaMenu_services = [];
+    foreach ($megaMenu_categories as $megaMenu_cat) {
         $stmt = $db->prepare("
             SELECT id, label, icon
             FROM services
@@ -17,16 +17,16 @@ try {
             ORDER BY sort_order, label
             LIMIT 8
         ");
-        $stmt->execute([$cat]);
-        $menuServices[$cat] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([$megaMenu_cat]);
+        $megaMenu_services[$megaMenu_cat] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 } catch (Exception $e) {
-    $menuCategories = [];
-    $menuServices = [];
+    $megaMenu_categories = [];
+    $megaMenu_services = [];
 }
 
 // Иконки для категорий
-$categoryIcons = [
+$megaMenu_categoryIcons = [
     'Визитки' => 'fa-address-card',
     'Баннеры' => 'fa-panorama',
     'Флаеры' => 'fa-layer-group',
@@ -287,31 +287,31 @@ $categoryIcons = [
     <div class="mega-menu">
         <div class="mega-menu-container">
             <div class="mega-menu-grid">
-                <?php foreach ($menuCategories as $category): ?>
+                <?php foreach ($megaMenu_categories as $megaMenu_category): ?>
                 <div class="mega-menu-category">
-                    <a href="/catalog.php?category=<?= urlencode($category) ?>" class="mega-menu-category-header">
+                    <a href="/catalog.php?category=<?= urlencode($megaMenu_category) ?>" class="mega-menu-category-header">
                         <div class="mega-menu-category-icon">
-                            <i class="fas <?= $categoryIcons[$category] ?? 'fa-folder' ?>"></i>
+                            <i class="fas <?= $megaMenu_categoryIcons[$megaMenu_category] ?? 'fa-folder' ?>"></i>
                         </div>
-                        <h3 class="mega-menu-category-name"><?= htmlspecialchars($category) ?></h3>
+                        <h3 class="mega-menu-category-name"><?= htmlspecialchars($megaMenu_category) ?></h3>
                     </a>
 
                     <div class="mega-menu-services">
                         <?php
-                        $services = $menuServices[$category] ?? [];
-                        $displayedServices = array_slice($services, 0, 6);
-                        foreach ($displayedServices as $service):
+                        $megaMenu_servicesList = $megaMenu_services[$megaMenu_category] ?? [];
+                        $megaMenu_displayedServices = array_slice($megaMenu_servicesList, 0, 6);
+                        foreach ($megaMenu_displayedServices as $megaMenu_service):
                         ?>
-                            <a href="/service.php?id=<?= $service['id'] ?>" class="mega-menu-service">
+                            <a href="/service.php?id=<?= $megaMenu_service['id'] ?>" class="mega-menu-service">
                                 <i class="fas fa-angle-right"></i>
-                                <?= htmlspecialchars($service['label']) ?>
+                                <?= htmlspecialchars($megaMenu_service['label']) ?>
                             </a>
                         <?php endforeach; ?>
 
-                        <?php if (count($services) > 6): ?>
+                        <?php if (count($megaMenu_servicesList) > 6): ?>
                             <div class="mega-menu-view-all">
-                                <a href="/catalog.php?category=<?= urlencode($category) ?>">
-                                    Смотреть все (<?= count($services) ?>)
+                                <a href="/catalog.php?category=<?= urlencode($megaMenu_category) ?>">
+                                    Смотреть все (<?= count($megaMenu_servicesList) ?>)
                                     <i class="fas fa-arrow-right"></i>
                                 </a>
                             </div>
