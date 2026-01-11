@@ -168,11 +168,11 @@ try {
             position: sticky;
             top: 0;
             z-index: 100;
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.3s ease;
         }
 
         .header-container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 1rem 2rem;
             display: flex;
@@ -183,10 +183,7 @@ try {
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--category-color), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
             text-decoration: none;
             transition: transform 0.3s ease;
         }
@@ -216,12 +213,12 @@ try {
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--category-color);
+            background: var(--primary);
             transition: width 0.3s ease;
         }
 
         .nav-link:hover {
-            color: var(--category-color);
+            color: var(--primary);
         }
 
         .nav-link:hover::after {
@@ -231,7 +228,6 @@ try {
         .breadcrumbs {
             max-width: 1200px;
             margin: 2rem auto 0;
-            padding: 0 2rem;
             font-size: 0.9rem;
             animation: fadeInUp 0.6s ease-out;
         }
@@ -254,7 +250,7 @@ try {
         .container {
             max-width: 1200px;
             margin: 3rem auto;
-            padding: 0 2rem 4rem;
+            
             display: grid;
             grid-template-columns: 1fr 420px;
             gap: 3rem;
@@ -377,16 +373,15 @@ try {
         }
 
         .btn {
-            width: 100%;
-            padding: 1.125rem;
-            border: none;
+            padding: 0.625rem 1.5rem;
             border-radius: 12px;
-            font-size: 1.05rem;
-            font-weight: 600;
+            border: none;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            animation: fadeInUp 1.4s ease-out backwards;
-            animation-delay: 0.6s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95rem;
         }
 
         .btn-primary {
@@ -399,20 +394,7 @@ try {
             box-shadow: var(--shadow-lg);
         }
 
-        .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-        }
-
+        
         .btn-success:active {
             transform: translateY(0);
         }
@@ -637,7 +619,7 @@ try {
             }
 
             .breadcrumbs {
-                padding: 0 1rem;
+                
                 font-size: 0.8rem;
                 margin: 1rem auto 0;
             }
@@ -1136,6 +1118,372 @@ try {
                 openCartPopup();
             }
         }
+    </script>
+    
+    <!-- Login Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h3>Вход в личный кабинет</h3>
+                <button class="auth-modal-close" onclick="closeAuthModal()">&times;</button>
+            </div>
+            <div class="auth-modal-body">
+                <p class="auth-description">Введите email для получения кода подтверждения</p>
+                <form id="authForm" onsubmit="handleAuth(event)">
+                    <div class="form-group">
+                        <label for="authEmail">Email</label>
+                        <input
+                            type="email"
+                            id="authEmail"
+                            name="email"
+                            class="form-input"
+                            placeholder="example@mail.com"
+                            required
+                        >
+                    </div>
+                    <div class="form-group" id="codeGroup" style="display: none;">
+                        <label for="authCode">Код подтверждения</label>
+                        <input
+                            type="text"
+                            id="authCode"
+                            name="code"
+                            class="form-input"
+                            placeholder="Введите код из письма"
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="authSubmitBtn">
+                        Получить код
+                    </button>
+                </form>
+                <div id="authMessage" class="auth-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Auth Modal */
+        .auth-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-modal.active {
+            display: flex;
+        }
+
+        .auth-modal-content {
+            background: var(--white);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .auth-modal-header {
+            padding: 2rem 2rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .auth-modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .auth-modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .auth-modal-close:hover {
+            color: var(--dark);
+            transform: rotate(90deg);
+        }
+
+        .auth-modal-body {
+            padding: 2rem;
+        }
+
+        .auth-description {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .auth-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .auth-message.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .auth-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .auth-modal-content {
+                width: 95%;
+                max-width: none;
+                margin: 1rem;
+            }
+
+            .auth-modal-header {
+                padding: 1.5rem;
+            }
+
+            .auth-modal-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Все услуги для поиска
+        const allServices = <?= json_encode($allServices, JSON_UNESCAPED_UNICODE) ?>;
+
+        // Поиск по категориям и услугам (подкатегориям)
+        function handleSearch() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.category-card');
+
+            if (!searchText) {
+                // Если поиск пустой, показываем все категории
+                cards.forEach(card => {
+                    card.style.display = 'block';
+                });
+                return;
+            }
+
+            // Создаем множество категорий, которые должны быть видны
+            const visibleCategories = new Set();
+
+            // 1. Ищем совпадения в названиях категорий
+            cards.forEach(card => {
+                const categoryName = card.querySelector('.category-name').textContent.toLowerCase();
+                if (categoryName.includes(searchText)) {
+                    visibleCategories.add(categoryName);
+                }
+            });
+
+            // 2. Ищем совпадения в названиях услуг (подкатегорий)
+            allServices.forEach(service => {
+                const serviceLabel = service.label.toLowerCase();
+                if (serviceLabel.includes(searchText)) {
+                    // Если нашли совпадение в услуге, добавляем её категорию к видимым
+                    visibleCategories.add(service.category.toLowerCase());
+                }
+            });
+
+            // 3. Показываем/скрываем категории
+            cards.forEach(card => {
+                const categoryName = card.querySelector('.category-name').textContent.toLowerCase();
+                if (visibleCategories.has(categoryName)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Открыть Telegram
+        function openTelegram() {
+            // TODO: Заменить на реальную ссылку на Telegram бота или группу
+            window.open('https://t.me/your_bot', '_blank');
+        }
+
+        // Показать модальное окно авторизации
+        function showAuthModal() {
+            document.getElementById('authModal').classList.add('active');
+            document.getElementById('authEmail').focus();
+        }
+
+        // Закрыть модальное окно
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('active');
+            document.getElementById('authForm').reset();
+            document.getElementById('codeGroup').style.display = 'none';
+            document.getElementById('authSubmitBtn').textContent = 'Получить код';
+            document.getElementById('authMessage').className = 'auth-message';
+            document.getElementById('authMessage').textContent = '';
+        }
+
+        // Закрыть модалку по клику вне её
+        window.onclick = function(event) {
+            const modal = document.getElementById('authModal');
+            if (event.target === modal) {
+                closeAuthModal();
+            }
+        }
+
+        // Обработка авторизации
+        let authStep = 'email'; // email или code
+
+        async function handleAuth(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('authEmail').value;
+            const code = document.getElementById('authCode').value;
+            const messageEl = document.getElementById('authMessage');
+            const submitBtn = document.getElementById('authSubmitBtn');
+
+            if (authStep === 'email') {
+                // Отправка email для получения кода
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Отправка...';
+
+                try {
+                    const response = await fetch('/api/auth.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'send_code', email: email })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        messageEl.className = 'auth-message success';
+                        messageEl.textContent = 'Код отправлен на ' + email;
+                        document.getElementById('codeGroup').style.display = 'block';
+                        submitBtn.textContent = 'Войти';
+                        authStep = 'code';
+                    } else {
+                        messageEl.className = 'auth-message error';
+                        messageEl.textContent = data.message || 'Ошибка отправки кода';
+                        submitBtn.textContent = 'Получить код';
+                    }
+                } catch (error) {
+                    messageEl.className = 'auth-message error';
+                    messageEl.textContent = 'Ошибка соединения';
+                    submitBtn.textContent = 'Получить код';
+                }
+
+                submitBtn.disabled = false;
+            } else {
+                // Проверка кода
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Проверка...';
+
+                try {
+                    const response = await fetch('/api/auth.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'verify_code', email: email, code: code })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        messageEl.className = 'auth-message success';
+                        messageEl.textContent = 'Вход выполнен успешно!';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        messageEl.className = 'auth-message error';
+                        messageEl.textContent = data.message || 'Неверный код';
+                        submitBtn.textContent = 'Войти';
+                    }
+                } catch (error) {
+                    messageEl.className = 'auth-message error';
+                    messageEl.textContent = 'Ошибка соединения';
+                    submitBtn.textContent = 'Войти';
+                }
+
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Анимация элементов при прокрутке
+        function animateOnScroll() {
+            const cards = document.querySelectorAll('.category-card');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.animation = `fadeInUp 0.6s ease forwards`;
+                            entry.target.style.opacity = '1';
+                        }, index * 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                observer.observe(card);
+            });
+        }
+
+        // Запускаем анимацию при загрузке страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            animateOnScroll();
+        });
     </script>
 </body>
 </html>
