@@ -360,9 +360,6 @@ function checkout($db, $sessionId, $userId) {
 
                 if ($user) {
                     $userId = $user['id'];
-                    // Обновляем имя и телефон если пользователь найден
-                    $stmt = $db->prepare("UPDATE users SET name = ?, phone = ? WHERE id = ?");
-                    $stmt->execute([$name, $phone, $userId]);
                 }
             }
 
@@ -374,13 +371,8 @@ function checkout($db, $sessionId, $userId) {
 
                 if ($user) {
                     $userId = $user['id'];
-                    // Обновляем имя и email если пользователь найден
-                    if ($email) {
-                        $stmt = $db->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
-                        $stmt->execute([$name, $email, $userId]);
-                    }
                 } else {
-                    // Создаем нового пользователя
+                    // Создаем нового пользователя только если не нашли ни по email, ни по телефону
                     $stmt = $db->prepare("
                         INSERT INTO users (name, phone, email, created_at)
                         VALUES (?, ?, ?, NOW())
