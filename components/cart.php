@@ -61,26 +61,22 @@
     .cart-popup {
         position: fixed;
         top: 0;
-        right: 0;
+        right: -500px;
         width: 500px;
         max-width: 100vw;
         height: 100vh;
         background: var(--white);
         z-index: 99999;
         box-shadow: -4px 0 30px rgba(0, 0, 0, 0.2);
-        display: flex;
+        display: none;
         flex-direction: column;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s, opacity 0.3s;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
-        visibility: hidden;
-        opacity: 0;
-        transform: translateX(100%);
     }
 
     .cart-popup.active {
-        visibility: visible;
-        opacity: 1;
-        transform: translateX(0);
+        right: 0;
+        display: flex;
     }
 
     .cart-header {
@@ -121,6 +117,7 @@
         flex: 1;
         overflow-y: auto;
         padding: 1.5rem;
+        -webkit-overflow-scrolling: touch;
     }
 
     .cart-empty {
@@ -417,6 +414,7 @@
     @media (max-width: 768px) {
         .cart-popup {
             width: 100vw;
+            right: -100vw;
         }
     }
 </style>
