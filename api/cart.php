@@ -351,21 +351,43 @@ function checkout($db, $sessionId, $userId) {
     try {
         // Создаем или находим пользователя
         if (!$userId) {
-            // Для неавторизованных создаем/находим пользователя по телефону
-            $stmt = $db->prepare("SELECT id FROM users WHERE phone = ?");
-            $stmt->execute([$phone]);
-            $user = $stmt->fetch();
+            // Для неавторизованных создаем/находим пользователя
+            // Сначала ищем по email (если предоставлен)
+            if ($email) {
+                $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+                $stmt->execute([$email]);
+                $user = $stmt->fetch();
 
-            if ($user) {
-                $userId = $user['id'];
-            } else {
-                // Создаем нового пользователя
-                $stmt = $db->prepare("
-                    INSERT INTO users (name, phone, email, created_at)
-                    VALUES (?, ?, ?, NOW())
-                ");
-                $stmt->execute([$name, $phone, $email]);
-                $userId = $db->lastInsertId();
+                if ($user) {
+                    $userId = $user['id'];
+                    // Обновляем имя и телефон если пользователь найден
+                    $stmt = $db->prepare("UPDATE users SET name = ?, phone = ?, updated_at = NOW() WHERE id = ?");
+                    $stmt->execute([$name, $phone, $userId]);
+                }
+            }
+
+            // Если не нашли по email, ищем по телефону
+            if (!$userId) {
+                $stmt = $db->prepare("SELECT id FROM users WHERE phone = ?");
+                $stmt->execute([$phone]);
+                $user = $stmt->fetch();
+
+                if ($user) {
+                    $userId = $user['id'];
+                    // Обновляем имя и email если пользователь найден
+                    if ($email) {
+                        $stmt = $db->prepare("UPDATE users SET name = ?, email = ?, updated_at = NOW() WHERE id = ?");
+                        $stmt->execute([$name, $email, $userId]);
+                    }
+                } else {
+                    // Создаем нового пользователя
+                    $stmt = $db->prepare("
+                        INSERT INTO users (name, phone, email, created_at)
+                        VALUES (?, ?, ?, NOW())
+                    ");
+                    $stmt->execute([$name, $phone, $email]);
+                    $userId = $db->lastInsertId();
+                }
             }
         }
 
