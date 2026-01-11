@@ -6,10 +6,6 @@
         cursor: pointer;
     }
 
-    .cart-icon-container.hidden {
-        display: none;
-    }
-
     .cart-icon {
         font-size: 1.5rem;
         color: var(--gray);

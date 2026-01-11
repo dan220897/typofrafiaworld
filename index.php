@@ -98,6 +98,11 @@ $categoryColors = [
             overflow-x: hidden;
         }
 
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
         /* Animations */
         @keyframes fadeInUp {
             from {
