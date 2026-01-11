@@ -491,7 +491,8 @@
 </div>
 
 <!-- Скрипт для работы с корзиной -->
-<script src="https://api-maps.yandex.ru/2.1/?apikey=YOUR_API_KEY&lang=ru_RU"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=8dfcf1c7-a203-4c41-96f2-b99ce403dba2
+&lang=ru_RU"></script>
 <script>
     // Глобальное состояние корзины
     let cartState = {
@@ -907,3 +908,4 @@
         console.log(`[${type}] ${message}`);
     }
 </script>
+
