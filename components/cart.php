@@ -61,7 +61,7 @@
     .cart-popup {
         position: fixed;
         top: 0;
-        right: -100%;
+        right: 0;
         width: 500px;
         max-width: 100vw;
         height: 100vh;
@@ -70,16 +70,17 @@
         box-shadow: -4px 0 30px rgba(0, 0, 0, 0.2);
         display: flex;
         flex-direction: column;
-        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s, opacity 0.3s;
         overflow: hidden;
         visibility: hidden;
         opacity: 0;
+        transform: translateX(100%);
     }
 
     .cart-popup.active {
-        right: 0;
         visibility: visible;
         opacity: 1;
+        transform: translateX(0);
     }
 
     .cart-header {
