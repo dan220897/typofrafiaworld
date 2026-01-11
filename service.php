@@ -328,6 +328,13 @@ try {
                 <a href="/" class="nav-link">Каталог</a>
                 <a href="#" class="nav-link">О нас</a>
                 <a href="#" class="nav-link">Контакты</a>
+                <?php if ($isAuthenticated): ?>
+                    <a href="/orders.php" class="nav-link">Мои заказы</a>
+                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
+                <?php else: ?>
+                    <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
+                <?php endif; ?>
+                <?php include 'components/cart.php'; ?>
             </nav>
         </div>
     </header>
@@ -431,8 +438,8 @@ try {
                 <div class="price-value" id="totalPrice">-</div>
             </div>
 
-            <button class="btn btn-success" onclick="placeOrder()">
-                <i class="fas fa-shopping-cart"></i> Оформить заказ
+            <button class="btn btn-success" onclick="addToCartFromService()">
+                <i class="fas fa-shopping-cart"></i> Добавить в корзину
             </button>
         </div>
     </div>
@@ -500,40 +507,44 @@ try {
                     .format(total);
         }
 
-        function placeOrder() {
-            <?php if ($isAuthenticated): ?>
-                // Собираем данные заказа
-                const orderData = {
-                    service_id: '<?= $serviceId ?>',
-                    size: document.getElementById('size')?.value,
-                    density: document.getElementById('density')?.value,
-                    sides: document.getElementById('sides')?.value,
-                    quantity: document.getElementById('quantity')?.value,
-                    total: document.getElementById('totalPrice').textContent
-                };
+        async function addToCartFromService() {
+            // Получаем данные из калькулятора
+            const sizeSelect = document.getElementById('size');
+            const densitySelect = document.getElementById('density');
+            const sidesSelect = document.getElementById('sides');
+            const quantitySelect = document.getElementById('quantity');
 
-                // Отправка заказа через API
-                fetch('/api/orders.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Заказ успешно создан!');
-                        window.location.href = '/orders.php';
-                    } else {
-                        alert('Ошибка: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    alert('Ошибка при создании заказа');
-                });
-            <?php else: ?>
-                alert('Войдите в систему для оформления заказа');
-                // TODO: Открыть модальное окно авторизации
-            <?php endif; ?>
+            // Собираем параметры
+            const parameters = {};
+            if (sizeSelect) parameters.size = sizeSelect.options[sizeSelect.selectedIndex].text;
+            if (densitySelect) parameters.density = densitySelect.options[densitySelect.selectedIndex].text;
+            if (sidesSelect) parameters.sides = sidesSelect.options[sidesSelect.selectedIndex].text;
+            if (quantitySelect) {
+                parameters.quantity = quantitySelect.options[quantitySelect.selectedIndex].text;
+                parameters.quantityValue = parseInt(quantitySelect.getAttribute('data-quantity') || 1);
+            }
+
+            // Получаем итоговую цену
+            const totalPriceText = document.getElementById('totalPrice').textContent;
+            const totalPrice = parseFloat(totalPriceText.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+
+            if (totalPrice === 0) {
+                alert('Пожалуйста, выберите параметры услуги');
+                return;
+            }
+
+            // Добавляем в корзину
+            const success = await addToCart(
+                '<?= $serviceId ?>',
+                parameters.quantityValue || 1,
+                totalPrice / (parameters.quantityValue || 1),
+                parameters
+            );
+
+            if (success) {
+                // Открываем попап корзины
+                openCartPopup();
+            }
         }
     </script>
 </body>

@@ -379,6 +379,7 @@ try {
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
+                <?php include 'components/cart.php'; ?>
             </nav>
         </div>
     </header>

@@ -15,6 +15,15 @@ try {
     $categories = [];
 }
 
+// Получаем все услуги для поиска
+try {
+    $db = Database::getInstance()->getConnection();
+    $stmt = $db->query("SELECT id, label, category FROM services WHERE is_active = 1 ORDER BY category, label");
+    $allServices = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $allServices = [];
+}
+
 // Иконки для категорий (можно настроить через админ панель позже)
 $categoryIcons = [
     'Визитки' => 'fa-id-card',
@@ -348,6 +357,7 @@ $categoryIcons = [
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
+                <?php include 'components/cart.php'; ?>
             </nav>
         </div>
     </header>
@@ -476,14 +486,46 @@ $categoryIcons = [
     </footer>
 
     <script>
-        // Поиск по категориям
+        // Все услуги для поиска
+        const allServices = <?= json_encode($allServices, JSON_UNESCAPED_UNICODE) ?>;
+
+        // Поиск по категориям и услугам (подкатегориям)
         function handleSearch() {
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
             const cards = document.querySelectorAll('.category-card');
 
+            if (!searchText) {
+                // Если поиск пустой, показываем все категории
+                cards.forEach(card => {
+                    card.style.display = 'block';
+                });
+                return;
+            }
+
+            // Создаем множество категорий, которые должны быть видны
+            const visibleCategories = new Set();
+
+            // 1. Ищем совпадения в названиях категорий
             cards.forEach(card => {
                 const categoryName = card.querySelector('.category-name').textContent.toLowerCase();
                 if (categoryName.includes(searchText)) {
+                    visibleCategories.add(categoryName);
+                }
+            });
+
+            // 2. Ищем совпадения в названиях услуг (подкатегорий)
+            allServices.forEach(service => {
+                const serviceLabel = service.label.toLowerCase();
+                if (serviceLabel.includes(searchText)) {
+                    // Если нашли совпадение в услуге, добавляем её категорию к видимым
+                    visibleCategories.add(service.category.toLowerCase());
+                }
+            });
+
+            // 3. Показываем/скрываем категории
+            cards.forEach(card => {
+                const categoryName = card.querySelector('.category-name').textContent.toLowerCase();
+                if (visibleCategories.has(categoryName)) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
