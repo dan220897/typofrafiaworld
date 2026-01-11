@@ -573,6 +573,7 @@ try {
             .calculator {
                 position: relative;
                 top: 0;
+                box-shadow: var(--shadow);
             }
 
             .service-info h1 {
@@ -609,58 +610,276 @@ try {
                 flex-wrap: wrap;
             }
 
+            .logo {
+                font-size: 1.25rem;
+            }
+
             .header-nav {
                 width: 100%;
                 justify-content: space-around;
                 margin-top: 0.5rem;
                 gap: 0.5rem;
+                font-size: 0.85rem;
             }
 
             .nav-link {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                padding: 0.25rem;
+            }
+
+            .nav-link::after {
+                display: none;
             }
 
             .container {
                 padding: 0 1rem 2rem;
-                margin: 2rem auto;
+                margin: 1.5rem auto;
             }
 
             .breadcrumbs {
                 padding: 0 1rem;
-                font-size: 0.85rem;
+                font-size: 0.8rem;
+                margin: 1rem auto 0;
+            }
+
+            .service-info h1 {
+                font-size: 1.75rem;
+                line-height: 1.3;
+            }
+
+            .service-info > p {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
             }
 
             .calculator {
-                padding: 1.5rem;
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+
+            .calculator h3 {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .form-group select,
+            .form-group input {
+                padding: 0.75rem 0.875rem;
+                font-size: 0.95rem;
+                border-radius: 10px;
             }
 
             .price-display {
-                padding: 1.5rem;
+                padding: 1.25rem;
+                border-radius: 12px;
+                margin: 1.25rem 0;
+            }
+
+            .price-label {
+                font-size: 0.9rem;
             }
 
             .price-value {
                 font-size: 2rem;
             }
-        }
 
-        @media (max-width: 480px) {
-            .service-info h1 {
-                font-size: 1.75rem;
+            .btn {
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+
+            .features {
+                margin-top: 2rem;
             }
 
             .features h2 {
                 font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+                border-radius: 12px;
+            }
+
+            .feature-icon {
+                font-size: 2rem;
+            }
+
+            .feature-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .feature-card p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .header-container {
+                padding: 0.875rem;
+            }
+
+            .header-nav {
+                gap: 0.25rem;
+                font-size: 0.8rem;
+            }
+
+            .nav-link {
+                font-size: 0.8rem;
+                padding: 0.2rem;
+            }
+
+            .breadcrumbs {
+                font-size: 0.75rem;
+                margin: 0.875rem auto 0;
+            }
+
+            .container {
+                padding: 0 0.875rem 1.5rem;
+                margin: 1rem auto;
+                gap: 1.5rem;
+            }
+
+            .service-info h1 {
+                font-size: 1.5rem;
+                line-height: 1.3;
+            }
+
+            .service-info > p {
+                font-size: 0.95rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .calculator {
+                padding: 1rem;
+                border-radius: 14px;
+            }
+
+            .calculator h3 {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .calculator h3::before {
+                height: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+                margin-bottom: 0.35rem;
+            }
+
+            .form-group select,
+            .form-group input {
+                padding: 0.675rem 0.75rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+
+            .price-display {
+                padding: 1rem;
+                border-radius: 10px;
+                margin: 1rem 0;
+            }
+
+            .price-label {
+                font-size: 0.85rem;
+            }
+
+            .price-value {
+                font-size: 1.75rem;
+            }
+
+            .btn {
+                padding: 0.875rem;
+                font-size: 0.95rem;
+                border-radius: 8px;
+            }
+
+            .features {
+                margin-top: 1.5rem;
+            }
+
+            .features h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .feature-card {
+                padding: 1.25rem;
+                border-radius: 10px;
+            }
+
+            .feature-icon {
+                font-size: 1.75rem;
+            }
+
+            .feature-card h3 {
+                font-size: 1rem;
+            }
+
+            .feature-card p {
+                font-size: 0.9rem;
             }
 
             .telegram-widget {
-                bottom: 1rem;
-                right: 1rem;
+                bottom: 0.875rem;
+                right: 0.875rem;
             }
 
             .telegram-btn {
-                width: 52px;
-                height: 52px;
-                font-size: 1.25rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.15rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header-nav {
+                font-size: 0.75rem;
+            }
+
+            .nav-link {
+                font-size: 0.75rem;
+            }
+
+            .service-info h1 {
+                font-size: 1.35rem;
+            }
+
+            .calculator h3 {
+                font-size: 1rem;
+            }
+
+            .price-value {
+                font-size: 1.5rem;
+            }
+
+            .btn {
+                font-size: 0.9rem;
             }
         }
     </style>

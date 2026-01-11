@@ -43,11 +43,12 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 10998;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 99998;
         display: none;
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: opacity 0.3s ease;
+        backdrop-filter: blur(3px);
     }
 
     .cart-overlay.active {
@@ -64,11 +65,12 @@
         max-width: 100vw;
         height: 100vh;
         background: var(--white);
-        z-index: 10999;
-        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+        z-index: 99999;
+        box-shadow: -4px 0 30px rgba(0, 0, 0, 0.2);
         display: flex;
         flex-direction: column;
-        transition: right 0.3s ease;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
     }
 
     .cart-popup.active {
@@ -455,8 +457,9 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="checkoutEmail">Email (необязательно)</label>
-                <input type="email" id="checkoutEmail" class="form-input">
+                <label class="form-label required" for="checkoutEmail">Email</label>
+                <input type="email" id="checkoutEmail" class="form-input" required>
+                <div class="form-error" id="errorEmail">Введите корректный email</div>
             </div>
 
             <div class="form-group">
@@ -843,6 +846,13 @@
             document.getElementById('errorPhone').classList.remove('active');
         }
 
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('errorEmail').classList.add('active');
+            hasError = true;
+        } else {
+            document.getElementById('errorEmail').classList.remove('active');
+        }
+
         if (!cartState.selectedPickupPoint) {
             document.getElementById('errorPickupPoint').classList.add('active');
             hasError = true;
@@ -866,7 +876,7 @@
                 body: JSON.stringify({
                     name: name,
                     phone: phone,
-                    email: email || null,
+                    email: email,
                     pickup_point_id: cartState.selectedPickupPoint,
                     notes: notes
                 })
