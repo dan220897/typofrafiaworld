@@ -178,8 +178,8 @@ function addToCart($db, $sessionId, $userId) {
     } else {
         // Добавляем новый товар
         $stmt = $db->prepare("
-            INSERT INTO cart (session_id, user_id, service_id, quantity, parameters, unit_price, total_price)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO cart (session_id, user_id, service_id, quantity, parameters, unit_price, total_price, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->execute([
             $userId ? null : $sessionId,
