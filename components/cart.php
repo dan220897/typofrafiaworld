@@ -218,6 +218,7 @@
     .cart-footer {
         border-top: 2px solid var(--light-gray);
         padding: 1.5rem;
+        margin-bottom:25px;
     }
 
     .cart-total {
