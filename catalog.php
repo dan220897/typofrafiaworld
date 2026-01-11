@@ -205,7 +205,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             max-width: 1280px;
             margin: 2rem auto;
             padding: 3rem 2rem;
-            background: linear-gradient(135deg, <?= $currentColor ?>15 0%, <?= $currentColor ?>05 100%);
+            background: var(--light-gray);
             border-radius: 20px;
             animation: fadeInUp 0.6s ease;
         }
@@ -214,11 +214,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             font-size: 2.75rem;
             font-weight: 800;
             margin-bottom: 1rem;
-            color: var(--dark);
-            background: linear-gradient(135deg, <?= $currentColor ?> 0%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
         }
 
         .page-description {
@@ -261,7 +257,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, <?= $currentColor ?>08 0%, rgba(236, 72, 153, 0.05) 100%);
+            background: rgba(99, 102, 241, 0.05);
             opacity: 0;
             transition: opacity 0.4s ease;
         }
@@ -392,7 +388,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0088cc 0%, #0066cc 100%);
+            background: #0088cc;
             color: var(--white);
             border: none;
             font-size: 1.75rem;
@@ -410,7 +406,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
         }
 
         .footer {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background: var(--dark);
             color: var(--white);
             padding: 4rem 2rem 1.5rem;
             margin-top: 6rem;
@@ -495,7 +491,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
                 <i class="fas fa-print"></i> <?= SITE_NAME ?>
             </a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Каталог</a>
+                <?php include 'components/mega-menu.php'; ?>
                 <a href="/about.php" class="nav-link">О нас</a>
                 <a href="/portfolio.php" class="nav-link">Портфолио</a>
                 <a href="/contacts.php" class="nav-link">Контакты</a>

@@ -149,7 +149,7 @@ $portfolioItems = [
         }
 
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             color: var(--white);
             padding: 5rem 2rem 3rem;
             text-align: center;
@@ -304,7 +304,7 @@ $portfolioItems = [
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0088cc 0%, #0066cc 100%);
+            background: #0088cc;
             color: var(--white);
             border: none;
             font-size: 1.75rem;
@@ -322,7 +322,7 @@ $portfolioItems = [
         }
 
         .footer {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background: var(--dark);
             color: var(--white);
             padding: 4rem 2rem 1.5rem;
             margin-top: 6rem;
@@ -398,7 +398,7 @@ $portfolioItems = [
                 <i class="fas fa-print"></i> <?= SITE_NAME ?>
             </a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Каталог</a>
+                <?php include 'components/mega-menu.php'; ?>
                 <a href="/about.php" class="nav-link">О нас</a>
                 <a href="/portfolio.php" class="nav-link active">Портфолио</a>
                 <a href="/contacts.php" class="nav-link">Контакты</a>
@@ -424,7 +424,7 @@ $portfolioItems = [
             <div class="portfolio-grid">
                 <?php foreach ($portfolioItems as $item): ?>
                     <div class="portfolio-item">
-                        <div class="portfolio-image" style="background: linear-gradient(135deg, <?= $item['color'] ?> 0%, <?= $item['color'] ?>cc 100%);">
+                        <div class="portfolio-image" style="background: <?= $item['color'] ?>;">
                             <i class="fas <?= $item['icon'] ?>"></i>
                         </div>
                         <div class="portfolio-info">

@@ -159,7 +159,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
 
         /* Hero */
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             color: var(--white);
             padding: 5rem 2rem 3rem;
             text-align: center;
@@ -233,7 +233,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: var(--shadow-xl);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--primary);
             height: 400px;
             display: flex;
             align-items: center;
@@ -365,7 +365,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             height: 120px;
             border-radius: 50%;
             margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -390,7 +390,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
 
         /* Footer */
         .footer {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background: var(--dark);
             color: var(--white);
             padding: 4rem 2rem 1.5rem;
             margin-top: 6rem;
@@ -492,7 +492,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0088cc 0%, #0066cc 100%);
+            background: #0088cc;
             color: var(--white);
             border: none;
             font-size: 1.75rem;
@@ -639,7 +639,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
                 <i class="fas fa-print"></i> <?= SITE_NAME ?>
             </a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Каталог</a>
+                <?php include 'components/mega-menu.php'; ?>
                 <a href="/about.php" class="nav-link active">О нас</a>
                 <a href="/portfolio.php" class="nav-link">Портфолио</a>
                 <a href="/contacts.php" class="nav-link">Контакты</a>

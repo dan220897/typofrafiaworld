@@ -138,7 +138,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
         }
 
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             color: var(--white);
             padding: 5rem 2rem 3rem;
             text-align: center;
@@ -219,7 +219,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             width: 50px;
             height: 50px;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -377,7 +377,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0088cc 0%, #0066cc 100%);
+            background: #0088cc;
             color: var(--white);
             border: none;
             font-size: 1.75rem;
@@ -395,7 +395,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
         }
 
         .footer {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background: var(--dark);
             color: var(--white);
             padding: 4rem 2rem 1.5rem;
             margin-top: 6rem;
@@ -476,7 +476,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
                 <i class="fas fa-print"></i> <?= SITE_NAME ?>
             </a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Каталог</a>
+                <?php include 'components/mega-menu.php'; ?>
                 <a href="/about.php" class="nav-link">О нас</a>
                 <a href="/portfolio.php" class="nav-link">Портфолио</a>
                 <a href="/contacts.php" class="nav-link active">Контакты</a>

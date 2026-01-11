@@ -232,7 +232,7 @@ $categoryColors = [
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             color: var(--white);
             padding: 6rem 2rem;
             text-align: center;
@@ -364,7 +364,7 @@ $categoryColors = [
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+            background: rgba(99, 102, 241, 0.05);
             opacity: 0;
             transition: opacity 0.4s ease;
         }
@@ -470,7 +470,7 @@ $categoryColors = [
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0088cc 0%, #0066cc 100%);
+            background: #0088cc;
             color: var(--white);
             border: none;
             font-size: 1.75rem;
@@ -489,7 +489,7 @@ $categoryColors = [
 
         /* Footer */
         .footer {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background: var(--dark);
             color: var(--white);
             padding: 4rem 2rem 1.5rem;
             margin-top: 6rem;
@@ -675,7 +675,7 @@ $categoryColors = [
                 <i class="fas fa-print"></i> <?= SITE_NAME ?>
             </a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Каталог</a>
+                <?php include 'components/mega-menu.php'; ?>
                 <a href="/about.php" class="nav-link">О нас</a>
                 <a href="/portfolio.php" class="nav-link">Портфолио</a>
                 <a href="/contacts.php" class="nav-link">Контакты</a>

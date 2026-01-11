@@ -166,7 +166,7 @@ try {
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: var(--dark);
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            background: #f5f7fa;
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
@@ -274,10 +274,7 @@ try {
         .service-info h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--category-color), var(--dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
             line-height: 1.2;
         }
 
@@ -313,7 +310,7 @@ try {
             display: inline-block;
             width: 4px;
             height: 24px;
-            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            background: var(--primary);
             border-radius: 2px;
         }
 
@@ -359,7 +356,7 @@ try {
         }
 
         .price-display {
-            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            background: var(--primary);
             padding: 2rem;
             border-radius: 16px;
             margin: 1.5rem 0;
@@ -452,10 +449,7 @@ try {
 
         .feature-icon {
             font-size: 2.5rem;
-            background: linear-gradient(135deg, var(--category-color), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
             margin-bottom: 1rem;
             transition: transform 0.3s ease;
         }
@@ -535,7 +529,7 @@ try {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0088cc, #006699);
+            background: #0088cc;
             color: var(--white);
             border: none;
             font-size: 1.75rem;
@@ -884,7 +878,7 @@ try {
                 <i class="fas fa-print"></i> <?= SITE_NAME ?>
             </a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Каталог</a>
+                <?php include 'components/mega-menu.php'; ?>
                 <a href="/portfolio.php" class="nav-link">Портфолио</a>
                 <a href="/about.php" class="nav-link">О нас</a>
                 <a href="/contacts.php" class="nav-link">Контакты</a>
