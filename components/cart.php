@@ -513,7 +513,28 @@
     document.addEventListener('DOMContentLoaded', function() {
         loadCart();
         loadPickupPoints();
+        initScrollHandler();
     });
+
+    // Обработчик горизонтального скролла
+    function initScrollHandler() {
+        let lastScrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+        window.addEventListener('scroll', function() {
+            const currentScrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+            // Если произошел горизонтальный скролл
+            if (currentScrollLeft !== lastScrollLeft) {
+                // Закрываем корзину, если она открыта
+                const cartPopup = document.getElementById('cartPopup');
+                if (cartPopup && cartPopup.classList.contains('active')) {
+                    closeCartPopup();
+                }
+            }
+
+            lastScrollLeft = currentScrollLeft;
+        });
+    }
 
     // Загрузить корзину
     async function loadCart() {

@@ -80,6 +80,10 @@ try {
             box-sizing: border-box;
         }
 
+        html {
+            overflow-x: hidden;
+        }
+
         <?php
         // Определяем цвета для каждой категории
         $categoryColors = [
@@ -159,6 +163,7 @@ try {
             background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .header {
