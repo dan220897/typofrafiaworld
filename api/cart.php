@@ -389,10 +389,10 @@ function checkout($db, $sessionId, $userId) {
 
         $stmt = $db->prepare("
             INSERT INTO orders (
-                order_number, user_id, status, total_amount, final_amount,
+                order_number, user_id, total_amount, final_amount,
                 delivery_method, delivery_address, payment_status,
                 created_at
-            ) VALUES (?, ?, 'pending', ?, ?, 'pickup', ?, 'pending', NOW())
+            ) VALUES (?, ?, ?, ?, 'pickup', ?, 'pending', NOW())
         ");
         $stmt->execute([$orderNumber, $userId, $totalAmount, $totalAmount, $deliveryAddress]);
         $orderId = $db->lastInsertId();
@@ -426,8 +426,8 @@ function checkout($db, $sessionId, $userId) {
 
         // Добавляем запись в историю статусов
         $stmt = $db->prepare("
-            INSERT INTO order_status_history (order_id, status, comment, created_at)
-            VALUES (?, 'pending', 'Заказ создан', NOW())
+            INSERT INTO order_status_history (order_id, comment, created_at)
+            VALUES (?, 'Заказ создан', NOW())
         ");
         $stmt->execute([$orderId]);
 
