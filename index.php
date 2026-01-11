@@ -232,9 +232,9 @@ $categoryColors = [
 
         /* Hero Section */
         .hero {
-            background: var(--primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--white);
-            padding: 6rem 2rem;
+            padding: 8rem 2rem;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -248,7 +248,17 @@ $categoryColors = [
             right: 0;
             bottom: 0;
             background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.4;
+            opacity: 0.3;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(to top, var(--light-gray), transparent);
         }
 
         .hero-content {
@@ -258,25 +268,37 @@ $categoryColors = [
         }
 
         .hero h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
             line-height: 1.2;
             animation: slideInLeft 0.8s ease;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         .hero p {
-            font-size: 1.35rem;
-            margin-bottom: 2.5rem;
+            font-size: 1.5rem;
+            margin-bottom: 0;
             opacity: 0.95;
             animation: fadeInUp 0.8s ease 0.2s backwards;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Services Header */
+        .services-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease;
         }
 
         /* Search */
         .search-container {
-            max-width: 600px;
-            margin: 0 auto;
-            animation: fadeInUp 0.8s ease 0.4s backwards;
+            flex: 0 1 400px;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
         }
 
         .search-box {
@@ -285,39 +307,44 @@ $categoryColors = [
 
         .search-input {
             width: 100%;
-            padding: 1.125rem 3.5rem 1.125rem 1.5rem;
-            border: none;
+            padding: 1rem 3.5rem 1rem 1.25rem;
+            border: 2px solid #e5e7eb;
             border-radius: 50px;
-            font-size: 1rem;
-            box-shadow: var(--shadow-xl);
+            font-size: 0.95rem;
+            box-shadow: var(--shadow-md);
             transition: all 0.3s ease;
             background: var(--white);
         }
 
         .search-input:focus {
             outline: none;
+            border-color: var(--primary);
             transform: translateY(-2px);
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
         }
 
         .search-btn {
             position: absolute;
-            right: 0.5rem;
+            right: 0.4rem;
             top: 50%;
             transform: translateY(-50%);
             background: var(--primary);
             color: var(--white);
             border: none;
             border-radius: 50%;
-            width: 45px;
-            height: 45px;
+            width: 42px;
+            height: 42px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .search-btn:hover {
             background: var(--primary-hover);
             transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
         /* Main Content */
@@ -330,31 +357,36 @@ $categoryColors = [
         .section-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 3rem;
-            text-align: center;
+            margin-bottom: 0;
+            text-align: left;
             animation: fadeInUp 0.6s ease;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            flex: 1;
         }
 
         /* Categories Grid */
         .categories-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 2rem;
         }
 
         .category-card {
             background: var(--white);
-            border-radius: 20px;
-            padding: 2.5rem 2rem;
+            border-radius: 24px;
+            padding: 2.75rem 2.25rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             text-decoration: none;
             color: var(--dark);
             position: relative;
             overflow: hidden;
-            border: 1px solid transparent;
+            border: 2px solid transparent;
         }
 
         .category-card::before {
@@ -364,14 +396,28 @@ $categoryColors = [
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(99, 102, 241, 0.05);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(236, 72, 153, 0.08));
             opacity: 0;
             transition: opacity 0.4s ease;
+            border-radius: 24px;
+        }
+
+        .category-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
         }
 
         .category-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: var(--shadow-xl);
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
             border-color: var(--primary);
         }
 
@@ -379,36 +425,49 @@ $categoryColors = [
             opacity: 1;
         }
 
+        .category-card:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
         .category-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.25rem;
-            transition: all 0.4s ease;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             position: relative;
+            z-index: 2;
+            display: inline-block;
         }
 
         .category-card:hover .category-icon {
-            transform: scale(1.15) rotateY(180deg);
+            transform: scale(1.2) rotateY(360deg);
         }
 
         .category-name {
-            font-size: 1.35rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            transition: color 0.3s ease;
+            margin-bottom: 0.625rem;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
         }
 
         .category-card:hover .category-name {
             color: var(--primary);
+            transform: scale(1.05);
         }
 
         .category-description {
             color: var(--gray);
             font-size: 0.95rem;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
         }
 
         .category-card:hover .category-description {
             color: var(--dark);
+            font-weight: 500;
         }
 
         /* Telegram Widget */
@@ -543,19 +602,29 @@ $categoryColors = [
             }
 
             .hero {
-                padding: 4rem 1.5rem;
+                padding: 5rem 1.5rem;
             }
 
             .hero h1 {
-                font-size: 2.25rem;
+                font-size: 2.5rem;
             }
 
             .hero p {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
+            }
+
+            .services-header {
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .section-title {
                 font-size: 2rem;
+            }
+
+            .search-container {
+                width: 100%;
+                flex: 1;
             }
         }
 
@@ -574,24 +643,23 @@ $categoryColors = [
             }
 
             .hero {
-                padding: 3rem 1rem;
+                padding: 4rem 1rem;
             }
 
             .hero h1 {
-                font-size: 1.75rem;
+                font-size: 2rem;
             }
 
             .hero p {
-                font-size: 1rem;
-                margin-bottom: 2rem;
+                font-size: 1.1rem;
             }
 
-            .search-container {
-                margin-top: 0;
+            .services-header {
+                gap: 1.5rem;
             }
 
             .search-input {
-                padding: 1rem 3rem 1rem 1.25rem;
+                padding: 0.875rem 3rem 0.875rem 1.125rem;
                 font-size: 0.9rem;
             }
 
@@ -611,7 +679,6 @@ $categoryColors = [
 
             .section-title {
                 font-size: 1.75rem;
-                margin-bottom: 2rem;
             }
 
             .telegram-widget {
@@ -644,12 +711,24 @@ $categoryColors = [
                 display: none;
             }
 
+            .hero {
+                padding: 3rem 1rem;
+            }
+
             .hero h1 {
                 font-size: 1.5rem;
             }
 
             .hero p {
-                font-size: 0.9rem;
+                font-size: 0.95rem;
+            }
+
+            .services-header {
+                gap: 1.25rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
             }
 
             .btn {
@@ -695,7 +774,13 @@ $categoryColors = [
         <div class="hero-content">
             <h1>Профессиональная типография онлайн</h1>
             <p>Качественная полиграфия с доставкой по всей России. Быстро, надёжно, по лучшим ценам.</p>
+        </div>
+    </section>
 
+    <!-- Categories -->
+    <main class="container">
+        <div class="services-header">
+            <h2 class="section-title">Наши услуги</h2>
             <div class="search-container">
                 <div class="search-box">
                     <input
@@ -711,11 +796,6 @@ $categoryColors = [
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- Categories -->
-    <main class="container">
-        <h2 class="section-title">Наши услуги</h2>
 
         <div class="categories-grid" id="categoriesGrid">
             <?php if (empty($categories)): ?>
