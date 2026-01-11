@@ -335,6 +335,52 @@ $categoryColors = [
             animation: fadeInUp 0.6s ease;
         }
 
+        /* Services Header */
+        .services-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            gap: 2rem;
+        }
+
+        .services-header .section-title {
+            margin-bottom: 0;
+            text-align: left;
+            flex: 1;
+        }
+
+        .services-search-wrapper {
+            position: relative;
+            max-width: 350px;
+            flex-shrink: 0;
+        }
+
+        .services-search-input {
+            width: 100%;
+            padding: 0.875rem 3rem 0.875rem 1.25rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .services-search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.2);
+        }
+
+        .services-search-icon {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
         /* Categories Grid */
         .categories-grid {
             display: grid;
@@ -614,6 +660,20 @@ $categoryColors = [
                 margin-bottom: 2rem;
             }
 
+            .services-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1.5rem;
+            }
+
+            .services-header .section-title {
+                text-align: center;
+            }
+
+            .services-search-wrapper {
+                max-width: 100%;
+            }
+
             .telegram-widget {
                 bottom: 1.5rem;
                 right: 1.5rem;
@@ -715,7 +775,19 @@ $categoryColors = [
 
     <!-- Categories -->
     <main class="container">
-        <h2 class="section-title">Наши услуги</h2>
+        <div class="services-header">
+            <h2 class="section-title">Наши услуги</h2>
+            <div class="services-search-wrapper">
+                <input
+                    type="text"
+                    class="services-search-input"
+                    placeholder="Поиск услуг..."
+                    id="servicesSearchInput"
+                    onkeyup="handleServicesSearch()"
+                >
+                <i class="fas fa-search services-search-icon"></i>
+            </div>
+        </div>
 
         <div class="categories-grid" id="categoriesGrid">
             <?php if (empty($categories)): ?>
@@ -1007,6 +1079,50 @@ $categoryColors = [
         // Поиск по категориям и услугам (подкатегориям)
         function handleSearch() {
             const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.category-card');
+
+            if (!searchText) {
+                // Если поиск пустой, показываем все категории
+                cards.forEach(card => {
+                    card.style.display = 'block';
+                });
+                return;
+            }
+
+            // Создаем множество категорий, которые должны быть видны
+            const visibleCategories = new Set();
+
+            // 1. Ищем совпадения в названиях категорий
+            cards.forEach(card => {
+                const categoryName = card.querySelector('.category-name').textContent.toLowerCase();
+                if (categoryName.includes(searchText)) {
+                    visibleCategories.add(categoryName);
+                }
+            });
+
+            // 2. Ищем совпадения в названиях услуг (подкатегорий)
+            allServices.forEach(service => {
+                const serviceLabel = service.label.toLowerCase();
+                if (serviceLabel.includes(searchText)) {
+                    // Если нашли совпадение в услуге, добавляем её категорию к видимым
+                    visibleCategories.add(service.category.toLowerCase());
+                }
+            });
+
+            // 3. Показываем/скрываем категории
+            cards.forEach(card => {
+                const categoryName = card.querySelector('.category-name').textContent.toLowerCase();
+                if (visibleCategories.has(categoryName)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Поиск услуг в разделе "Наши услуги"
+        function handleServicesSearch() {
+            const searchText = document.getElementById('servicesSearchInput').value.toLowerCase().trim();
             const cards = document.querySelectorAll('.category-card');
 
             if (!searchText) {
