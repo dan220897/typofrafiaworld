@@ -351,35 +351,30 @@ function checkout($db, $sessionId, $userId) {
     try {
         // Создаем или находим пользователя
         if (!$userId) {
-            // Для неавторизованных создаем/находим пользователя
-            // Сначала ищем по email (если предоставлен)
+            // Для неавторизованных пользователей ищем по email или телефону
             if ($email) {
-                $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
-                $stmt->execute([$email]);
-                $user = $stmt->fetch();
-
-                if ($user) {
-                    $userId = $user['id'];
-                }
+                // Ищем по email или телефону одновременно
+                $stmt = $db->prepare("SELECT id FROM users WHERE email = ? OR phone = ? LIMIT 1");
+                $stmt->execute([$email, $phone]);
+            } else {
+                // Если email не указан, ищем только по телефону
+                $stmt = $db->prepare("SELECT id FROM users WHERE phone = ? LIMIT 1");
+                $stmt->execute([$phone]);
             }
 
-            // Если не нашли по email, ищем по телефону
-            if (!$userId) {
-                $stmt = $db->prepare("SELECT id FROM users WHERE phone = ?");
-                $stmt->execute([$phone]);
-                $user = $stmt->fetch();
+            $user = $stmt->fetch();
 
-                if ($user) {
-                    $userId = $user['id'];
-                } else {
-                    // Создаем нового пользователя только если не нашли ни по email, ни по телефону
-                    $stmt = $db->prepare("
-                        INSERT INTO users (name, phone, email, created_at)
-                        VALUES (?, ?, ?, NOW())
-                    ");
-                    $stmt->execute([$name, $phone, $email]);
-                    $userId = $db->lastInsertId();
-                }
+            if ($user) {
+                // Пользователь найден
+                $userId = $user['id'];
+            } else {
+                // Пользователь не найден - создаем нового
+                $stmt = $db->prepare("
+                    INSERT INTO users (name, phone, email, created_at)
+                    VALUES (?, ?, ?, NOW())
+                ");
+                $stmt->execute([$name, $phone, $email]);
+                $userId = $db->lastInsertId();
             }
         }
 
