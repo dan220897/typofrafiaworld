@@ -54,6 +54,7 @@
     .cart-overlay.active {
         display: block;
         opacity: 1;
+        height: 100vh;
     }
 
     /* Попап корзины */

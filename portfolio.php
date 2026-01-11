@@ -251,7 +251,7 @@ $portfolioItems = [
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            z-index: 1000;
+            z-index: 99;
             display: flex;
             align-items: center;
             gap: 1rem;
