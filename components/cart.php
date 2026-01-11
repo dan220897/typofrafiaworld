@@ -6,6 +6,10 @@
         cursor: pointer;
     }
 
+    .cart-icon-container.hidden {
+        display: none;
+    }
+
     .cart-icon {
         font-size: 1.5rem;
         color: var(--gray);
@@ -417,7 +421,7 @@
 </style>
 
 <!-- Иконка корзины -->
-<div class="cart-icon-container" onclick="openCartPopup()">
+<div class="cart-icon-container hidden" id="cartIconContainer" onclick="openCartPopup()">
     <i class="fas fa-shopping-cart cart-icon"></i>
     <span class="cart-badge hidden" id="cartBadge">0</span>
 </div>
@@ -660,12 +664,19 @@
 
     // Обновить UI корзины
     function updateCartUI() {
+        // Обновляем контейнер иконки корзины
+        const cartIconContainer = document.getElementById('cartIconContainer');
+
         // Обновляем бейдж
         const badge = document.getElementById('cartBadge');
         if (cartState.count > 0) {
+            // Показываем иконку корзины и бейдж
+            cartIconContainer.classList.remove('hidden');
             badge.textContent = cartState.count;
             badge.classList.remove('hidden');
         } else {
+            // Скрываем иконку корзины
+            cartIconContainer.classList.add('hidden');
             badge.classList.add('hidden');
         }
 
