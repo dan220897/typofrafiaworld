@@ -232,12 +232,17 @@ $categoryColors = [
 
         /* Hero Section */
         .hero {
-            background: var(--primary);
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80') center/cover no-repeat;
             color: var(--white);
-            padding: 6rem 2rem;
+            padding: 8rem 2rem;
             text-align: center;
             position: relative;
             overflow: hidden;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .hero::before {
@@ -247,8 +252,8 @@ $categoryColors = [
             left: 0;
             right: 0;
             bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.4;
+            background: rgba(99, 102, 241, 0.1);
+            opacity: 0.6;
         }
 
         .hero-content {
@@ -258,18 +263,22 @@ $categoryColors = [
         }
 
         .hero h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
             line-height: 1.2;
             animation: slideInLeft 0.8s ease;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
         }
 
         .hero p {
-            font-size: 1.35rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.95;
+            font-size: 1.5rem;
+            margin-bottom: 0;
+            opacity: 1;
             animation: fadeInUp 0.8s ease 0.2s backwards;
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         /* Search */
@@ -589,15 +598,16 @@ $categoryColors = [
             }
 
             .hero {
-                padding: 4rem 1.5rem;
+                padding: 5rem 1.5rem;
+                min-height: 400px;
             }
 
             .hero h1 {
-                font-size: 2.25rem;
+                font-size: 2.5rem;
             }
 
             .hero p {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
 
             .section-title {
@@ -620,7 +630,8 @@ $categoryColors = [
             }
 
             .hero {
-                padding: 3rem 1rem;
+                padding: 4rem 1rem;
+                min-height: 350px;
             }
 
             .hero h1 {
@@ -629,16 +640,6 @@ $categoryColors = [
 
             .hero p {
                 font-size: 1rem;
-                margin-bottom: 2rem;
-            }
-
-            .search-container {
-                margin-top: 0;
-            }
-
-            .search-input {
-                padding: 1rem 3rem 1rem 1.25rem;
-                font-size: 0.9rem;
             }
 
             .categories-grid {
@@ -755,21 +756,6 @@ $categoryColors = [
         <div class="hero-content">
             <h1>Профессиональная типография онлайн</h1>
             <p>Качественная полиграфия с доставкой по всей России. Быстро, надёжно, по лучшим ценам.</p>
-
-            <div class="search-container">
-                <div class="search-box">
-                    <input
-                        type="text"
-                        class="search-input"
-                        placeholder="Найти услугу или продукт..."
-                        id="searchInput"
-                        onkeyup="handleSearch()"
-                    >
-                    <button class="search-btn" onclick="handleSearch()">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-            </div>
         </div>
     </section>
 
