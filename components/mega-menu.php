@@ -50,6 +50,24 @@ $categoryIcons = [
         position: relative;
     }
 
+    .mega-menu-overlay {
+        display: none;
+        position: fixed;
+        top: 72px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .mega-menu-wrapper:hover .mega-menu-overlay {
+        display: block;
+        opacity: 1;
+    }
+
     .mega-menu-trigger {
         color: var(--gray);
         text-decoration: none;
@@ -82,20 +100,18 @@ $categoryIcons = [
     }
 
     .mega-menu {
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
+        position: fixed;
+        top: 72px;
+        left: 0;
+        right: 0;
+        width: 100%;
         background: var(--white);
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        border-radius: 12px;
-        padding: 2rem;
-        width: 900px;
-        max-width: 90vw;
+        border-radius: 0;
+        padding: 2rem 0;
         display: none;
-        margin-top: 1rem;
         z-index: 1000;
-        max-height: 80vh;
+        max-height: calc(100vh - 72px);
         overflow-y: auto;
     }
 
@@ -107,17 +123,23 @@ $categoryIcons = [
     @keyframes fadeInDown {
         from {
             opacity: 0;
-            transform: translateX(-50%) translateY(-10px);
+            transform: translateY(-10px);
         }
         to {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateY(0);
         }
+    }
+
+    .mega-menu-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 2rem;
     }
 
     .mega-menu-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 2rem;
     }
 
@@ -133,6 +155,17 @@ $categoryIcons = [
         margin-bottom: 1rem;
         padding-bottom: 0.75rem;
         border-bottom: 2px solid var(--light-gray);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .mega-menu-category-header:hover {
+        border-bottom-color: var(--primary);
+    }
+
+    .mega-menu-category-header:hover .mega-menu-category-icon {
+        background: var(--primary-hover);
+        transform: scale(1.05);
     }
 
     .mega-menu-category-icon {
@@ -205,42 +238,40 @@ $categoryIcons = [
 
     /* Адаптивность */
     @media (max-width: 1024px) {
-        .mega-menu {
-            width: 700px;
-        }
-
         .mega-menu-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
     }
 
     @media (max-width: 768px) {
         .mega-menu {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            width: 100%;
-            max-width: 100%;
-            transform: none;
-            border-radius: 0;
-            margin-top: 0;
-            max-height: calc(100vh - 60px);
+            top: 110px;
+            max-height: calc(100vh - 110px);
+            padding: 1.5rem 0;
         }
 
-        .mega-menu-wrapper:hover .mega-menu {
-            animation: slideDown 0.3s ease;
+        .mega-menu-container {
+            padding: 0 1rem;
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .mega-menu-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .mega-menu-category-header {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .mega-menu-category-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+        }
+
+        .mega-menu-category-name {
+            font-size: 1rem;
         }
     }
 </style>
@@ -251,16 +282,19 @@ $categoryIcons = [
         <i class="fas fa-chevron-down" style="font-size: 0.75rem;"></i>
     </a>
 
+    <div class="mega-menu-overlay"></div>
+
     <div class="mega-menu">
-        <div class="mega-menu-grid">
-            <?php foreach ($menuCategories as $category): ?>
+        <div class="mega-menu-container">
+            <div class="mega-menu-grid">
+                <?php foreach ($menuCategories as $category): ?>
                 <div class="mega-menu-category">
-                    <div class="mega-menu-category-header">
+                    <a href="/catalog.php?category=<?= urlencode($category) ?>" class="mega-menu-category-header">
                         <div class="mega-menu-category-icon">
                             <i class="fas <?= $categoryIcons[$category] ?? 'fa-folder' ?>"></i>
                         </div>
                         <h3 class="mega-menu-category-name"><?= htmlspecialchars($category) ?></h3>
-                    </div>
+                    </a>
 
                     <div class="mega-menu-services">
                         <?php
@@ -285,6 +319,7 @@ $categoryIcons = [
                     </div>
                 </div>
             <?php endforeach; ?>
+            </div>
         </div>
     </div>
 </div>
