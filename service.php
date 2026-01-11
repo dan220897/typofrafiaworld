@@ -167,7 +167,7 @@ try {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: var(--dark);
             background: #f5f7fa;
-            line-height: 1.6;
+            
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -393,8 +393,9 @@ try {
         }
 
         .btn-primary {
-            background: var(--category-color);
-            color: var(--white);
+            background: var(--primary);
+    color: var(--white);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
         }
 
         .btn-primary:hover {
@@ -625,8 +626,8 @@ try {
 
             .breadcrumbs {
                 
-                font-size: 0.8rem;
-                margin: 1rem auto 0;
+               
+                
             }
 
             .service-info h1 {
@@ -736,8 +737,7 @@ try {
             }
 
             .breadcrumbs {
-                font-size: 0.75rem;
-                margin: 0.875rem auto 0;
+                
             }
 
             .container {
