@@ -80,7 +80,30 @@ try {
             box-sizing: border-box;
         }
 
+        <?php
+        // Определяем цвета для каждой категории
+        $categoryColors = [
+            'Визитки' => '#6366f1',
+            'Баннеры' => '#ec4899',
+            'Флаеры' => '#f59e0b',
+            'Листовки' => '#10b981',
+            'Буклеты' => '#8b5cf6',
+            'Брошюры' => '#ef4444',
+            'Календари' => '#3b82f6',
+            'Блокноты' => '#14b8a6',
+            'Наклейки' => '#f97316',
+            'Сувенирная продукция' => '#06b6d4',
+            'Вывески' => '#84cc16',
+            'Каталоги' => '#a855f7',
+            'Копирование документов' => '#6366f1',
+            'Дизайн и дополнительные услуги' => '#ec4899'
+        ];
+
+        $currentColor = $categoryColors[$service['category']] ?? '#6366f1';
+        ?>
+
         :root {
+            --category-color: <?= $currentColor ?>;
             --primary: #6366f1;
             --primary-hover: #4f46e5;
             --secondary: #ec4899;
@@ -91,21 +114,61 @@ try {
             --white: #ffffff;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: var(--dark);
-            background-color: var(--light-gray);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
             line-height: 1.6;
+            min-height: 100vh;
         }
 
         .header {
-            background: var(--white);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
+            animation: fadeIn 0.5s ease-out;
         }
 
         .header-container {
@@ -120,8 +183,16 @@ try {
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary);
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
         }
 
         .header-nav {
@@ -134,10 +205,27 @@ try {
             color: var(--gray);
             text-decoration: none;
             font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--category-color);
+            transition: width 0.3s ease;
         }
 
         .nav-link:hover {
-            color: var(--primary);
+            color: var(--category-color);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
         }
 
         .breadcrumbs {
@@ -145,11 +233,17 @@ try {
             margin: 2rem auto 0;
             padding: 0 2rem;
             font-size: 0.9rem;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .breadcrumbs a {
             color: var(--gray);
             text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumbs a:hover {
+            color: var(--category-color);
         }
 
         .breadcrumbs span {
@@ -160,104 +254,167 @@ try {
         .container {
             max-width: 1200px;
             margin: 3rem auto;
-            padding: 0 2rem;
+            padding: 0 2rem 4rem;
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 420px;
             gap: 3rem;
+        }
+
+        .service-info {
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .service-info h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--category-color), var(--dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
         }
 
-        .service-info p {
+        .service-info > p {
             color: var(--gray);
             margin-bottom: 2rem;
+            font-size: 1.1rem;
         }
 
         .calculator {
-            background: var(--white);
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
             padding: 2rem;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-xl);
             position: sticky;
-            top: 100px;
+            top: 120px;
+            animation: slideInRight 0.8s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
         .calculator h3 {
             margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calculator h3::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            border-radius: 2px;
         }
 
         .form-group {
             margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out backwards;
         }
+
+        .form-group:nth-child(2) { animation-delay: 0.1s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.3s; }
+        .form-group:nth-child(5) { animation-delay: 0.4s; }
 
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
         }
 
         .form-group select,
         .form-group input {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.875rem 1rem;
             border: 2px solid var(--light-gray);
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-group select:hover,
+        .form-group input:hover {
+            border-color: var(--category-color);
         }
 
         .form-group select:focus,
         .form-group input:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--category-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .price-display {
-            background: var(--light-gray);
-            padding: 1.5rem;
-            border-radius: 8px;
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            padding: 2rem;
+            border-radius: 16px;
             margin: 1.5rem 0;
             text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 1.2s ease-out backwards;
+            animation-delay: 0.5s;
         }
 
         .price-label {
-            color: var(--gray);
-            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
             margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
         .price-value {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: var(--success);
+            color: var(--white);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .btn {
             width: 100%;
-            padding: 1rem;
+            padding: 1.125rem;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-size: 1.05rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1.4s ease-out backwards;
+            animation-delay: 0.6s;
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--category-color);
             color: var(--white);
         }
 
         .btn-primary:hover {
-            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         .btn-success {
-            background: var(--success);
+            background: linear-gradient(135deg, var(--success), #059669);
             color: var(--white);
-            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .btn-success:active {
+            transform: translateY(0);
         }
 
         .features {
@@ -265,7 +422,9 @@ try {
         }
 
         .features h2 {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: var(--dark);
         }
 
         .features-grid {
@@ -275,45 +434,233 @@ try {
         }
 
         .feature-card {
-            background: var(--white);
-            padding: 1.5rem;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
             box-shadow: var(--shadow);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            opacity: 0;
+        }
+
+        .feature-card.visible {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .feature-card:nth-child(1).visible { animation-delay: 0.1s; }
+        .feature-card:nth-child(2).visible { animation-delay: 0.2s; }
+        .feature-card:nth-child(3).visible { animation-delay: 0.3s; }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
         }
 
         .feature-icon {
-            font-size: 2rem;
-            color: var(--primary);
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--category-color), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            transition: transform 0.3s ease;
         }
 
-        .chat-widget {
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        /* Telegram Widget */
+        .telegram-widget {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: fadeIn 1s ease-out;
         }
 
-        .chat-btn {
+        .telegram-info {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .telegram-widget:hover .telegram-info {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .telegram-info-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .telegram-info-status {
+            font-size: 0.85rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .telegram-info-status::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .telegram-btn {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: var(--primary);
+            background: linear-gradient(135deg, #0088cc, #006699);
             color: var(--white);
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             cursor: pointer;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-xl);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .telegram-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 30px rgba(0, 136, 204, 0.4);
+        }
+
+        .telegram-btn:active {
+            transform: scale(0.95);
         }
 
         @media (max-width: 968px) {
             .container {
                 grid-template-columns: 1fr;
+                gap: 2rem;
+                padding-bottom: 2rem;
             }
 
             .calculator {
                 position: relative;
                 top: 0;
+            }
+
+            .service-info h1 {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .telegram-widget {
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+
+            .telegram-info {
+                display: none;
+            }
+
+            .telegram-btn {
+                width: 56px;
+                height: 56px;
+                font-size: 1.5rem;
+            }
+
+            .header-nav {
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .header-nav {
+                width: 100%;
+                justify-content: space-around;
+                margin-top: 0.5rem;
+                gap: 0.5rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+            }
+
+            .container {
+                padding: 0 1rem 2rem;
+                margin: 2rem auto;
+            }
+
+            .breadcrumbs {
+                padding: 0 1rem;
+                font-size: 0.85rem;
+            }
+
+            .calculator {
+                padding: 1.5rem;
+            }
+
+            .price-display {
+                padding: 1.5rem;
+            }
+
+            .price-value {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .service-info h1 {
+                font-size: 1.75rem;
+            }
+
+            .features h2 {
+                font-size: 1.5rem;
+            }
+
+            .telegram-widget {
+                bottom: 1rem;
+                right: 1rem;
+            }
+
+            .telegram-btn {
+                width: 52px;
+                height: 52px;
+                font-size: 1.25rem;
             }
         }
     </style>
@@ -326,8 +673,9 @@ try {
             </a>
             <nav class="header-nav">
                 <a href="/" class="nav-link">Каталог</a>
-                <a href="#" class="nav-link">О нас</a>
-                <a href="#" class="nav-link">Контакты</a>
+                <a href="/portfolio.php" class="nav-link">Портфолио</a>
+                <a href="/about.php" class="nav-link">О нас</a>
+                <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
                     <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
@@ -444,13 +792,36 @@ try {
         </div>
     </div>
 
-    <div class="chat-widget">
-        <button class="chat-btn" onclick="window.location.href='chat.php'">
-            <i class="fas fa-comments"></i>
+    <div class="telegram-widget">
+        <div class="telegram-info">
+            <div class="telegram-info-title">Свяжитесь с нами в Telegram</div>
+            <div class="telegram-info-status">Мы онлайн сейчас</div>
+        </div>
+        <button class="telegram-btn" onclick="window.open('https://t.me/yourusername', '_blank')">
+            <i class="fab fa-telegram-plane"></i>
         </button>
     </div>
 
     <script>
+        // Intersection Observer для анимации карточек преимуществ
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card').forEach(card => {
+            observer.observe(card);
+        });
+
         const basePrice = <?= $basePrice ?>;
 
         // Определяем базовый тираж (первый в списке quantities)

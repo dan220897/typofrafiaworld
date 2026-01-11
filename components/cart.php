@@ -44,7 +44,7 @@
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 9998;
+        z-index: 10998;
         display: none;
         opacity: 0;
         transition: opacity 0.3s;
@@ -64,7 +64,7 @@
         max-width: 100vw;
         height: 100vh;
         background: var(--white);
-        z-index: 9999;
+        z-index: 10999;
         box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
