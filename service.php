@@ -38,7 +38,7 @@ try {
     if ($sizes) $params['sizes'] = $sizes;
 
     // Плотность
-    $stmt = $db->prepare("SELECT * FROM service_density WHERE service_id = ? ORDER BY id");
+    $stmt = $db->prepare("SELECT * FROM service_density WHERE service_id = ? ORDER BY CAST(SUBSTRING_INDEX(label, ' ', 1) AS UNSIGNED) ASC");
     $stmt->execute([$serviceId]);
     $densities = $stmt->fetchAll();
     if ($densities) $params['densities'] = $densities;
@@ -50,7 +50,13 @@ try {
     if ($sides) $params['sides'] = $sides;
 
     // Количество
-    $stmt = $db->prepare("SELECT * FROM service_quantities WHERE service_id = ? ORDER BY id");
+    $stmt = $db->prepare("
+        SELECT id, service_id, quantity, label, multiplier, price
+        FROM service_quantities
+        WHERE service_id = ?
+        GROUP BY quantity, label
+        ORDER BY CAST(quantity AS UNSIGNED) ASC
+    ");
     $stmt->execute([$serviceId]);
     $quantities = $stmt->fetchAll();
     if ($quantities) $params['quantities'] = $quantities;
