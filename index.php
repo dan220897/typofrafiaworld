@@ -643,6 +643,31 @@ ease;
             line-height: 1.6;
         }
 
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--white);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            color: var(--white);
+        }
+
         .footer-locations-container {
             display: flex;
             flex-wrap: wrap;
@@ -1002,6 +1027,17 @@ ease;
                 <p><i class="fas fa-phone"></i> +7 (985) 315-20-05</p>
                 <p><i class="fas fa-envelope"></i> <?= ADMIN_EMAIL ?></p>
                 <p><i class="fas fa-map-marker-alt"></i> Москва, Россия</p>
+                <div class="footer-social">
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://t.me/typografia" target="_blank" rel="noopener noreferrer" title="Telegram">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="https://vk.com" target="_blank" rel="noopener noreferrer" title="VKontakte">
+                        <i class="fab fa-vk"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
