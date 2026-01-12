@@ -1,10 +1,22 @@
 <?php
 require_once dirname(__DIR__) . '/config/config.php';
-require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use PHPMailer\PHPMailer\SMTP;
+// Проверяем наличие autoload.php перед подключением
+$autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
+    define('PHPMAILER_AVAILABLE', true);
+} else {
+    define('PHPMAILER_AVAILABLE', false);
+    logMessage("PHPMailer не установлен. Используется fallback на mail()", 'WARNING');
+}
+
+// Подключаем классы PHPMailer только если они доступны
+if (PHPMAILER_AVAILABLE) {
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
+    use PHPMailer\PHPMailer\SMTP;
+}
 
 class EmailService {
     private $db;
@@ -17,10 +29,14 @@ class EmailService {
         $this->fromEmail = EMAIL_FROM_ADDRESS;
         $this->fromName = EMAIL_FROM_NAME;
 
-        // Инициализация PHPMailer
-        if (defined('USE_SMTP') && USE_SMTP) {
+        // Инициализация PHPMailer только если он доступен
+        if (defined('USE_SMTP') && USE_SMTP && PHPMAILER_AVAILABLE) {
             $this->mailer = new PHPMailer(true);
             $this->configureSMTP();
+        } else {
+            if (defined('USE_SMTP') && USE_SMTP && !PHPMAILER_AVAILABLE) {
+                logMessage("SMTP включен, но PHPMailer не установлен. Используется mail()", 'WARNING');
+            }
         }
     }
 
@@ -28,6 +44,10 @@ class EmailService {
      * Настройка SMTP
      */
     private function configureSMTP() {
+        if (!PHPMAILER_AVAILABLE) {
+            return;
+        }
+
         try {
             // Настройки сервера
             $this->mailer->isSMTP();
