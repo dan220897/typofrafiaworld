@@ -630,22 +630,32 @@ ease;
             line-height: 1.6;
         }
 
-        .footer-location {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .footer-locations-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
         }
 
-        .footer-location:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+        .footer-location {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .footer-location:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
         }
 
         .footer-location .location-name {
             color: var(--white);
             font-weight: 600;
             margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
         .footer-location .location-name i {
@@ -654,15 +664,15 @@ ease;
         }
 
         .footer-location .location-address {
-            font-size: 0.9rem;
-            padding-left: 1.75rem;
+            font-size: 0.85rem;
             margin-bottom: 0.3rem;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .footer-location .location-hours {
-            font-size: 0.85rem;
-            padding-left: 1.75rem;
+            font-size: 0.8rem;
             font-style: italic;
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .footer-location .location-hours i {
@@ -964,15 +974,17 @@ ease;
             <div class="footer-section">
                 <h3>Наши точки</h3>
                 <?php if (!empty($pickupPoints)): ?>
-                    <?php foreach ($pickupPoints as $point): ?>
-                        <div class="footer-location">
-                            <p class="location-name"><i class="fas fa-map-marker-alt"></i> <strong><?= htmlspecialchars($point['name']) ?></strong></p>
-                            <p class="location-address"><?= htmlspecialchars($point['address']) ?></p>
-                            <?php if (!empty($point['working_hours'])): ?>
-                                <p class="location-hours"><i class="far fa-clock"></i> <?= htmlspecialchars($point['working_hours']) ?></p>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
+                    <div class="footer-locations-container">
+                        <?php foreach ($pickupPoints as $point): ?>
+                            <div class="footer-location">
+                                <p class="location-name"><i class="fas fa-map-marker-alt"></i> <strong><?= htmlspecialchars($point['name']) ?></strong></p>
+                                <p class="location-address"><?= htmlspecialchars($point['address']) ?></p>
+                                <?php if (!empty($point['working_hours'])): ?>
+                                    <p class="location-hours"><i class="far fa-clock"></i> <?= htmlspecialchars($point['working_hours']) ?></p>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 <?php else: ?>
                     <p>Информация о точках скоро появится</p>
                 <?php endif; ?>
