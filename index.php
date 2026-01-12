@@ -966,12 +966,17 @@ ease;
             </div>
             <div class="footer-section">
                 <h3>Услуги</h3>
-                <a href="/">Каталог услуг</a>
+                
                 <a href="/catalog.php?category=Визитки">Визитки</a>
                 <a href="/catalog.php?category=Листовки">Листовки</a>
                 <a href="/catalog.php?category=Флаеры">Флаеры</a>
                 <a href="/catalog.php?category=Буклеты">Буклеты</a>
                 <a href="/catalog.php?category=Брошюры">Брошюры</a>
+                
+            </div>
+            
+            <div class="footer-section">
+               
                 <a href="/catalog.php?category=Баннеры">Баннеры</a>
                 <a href="/catalog.php?category=Календари">Календари</a>
                 <a href="/catalog.php?category=Наклейки">Наклейки</a>
@@ -980,7 +985,15 @@ ease;
                 <a href="/catalog.php?category=Папки">Папки</a>
                 <a href="/catalog.php?category=Дизайн">Дизайн</a>
             </div>
+            
             <div class="footer-section">
+                <h3>Контакты</h3>
+                <p><i class="fas fa-phone"></i> +7 (985) 315-20-05</p>
+                <p><i class="fas fa-envelope"></i> <?= ADMIN_EMAIL ?></p>
+                <p><i class="fas fa-map-marker-alt"></i> Москва, Россия</p>
+            </div>
+        </div>
+        <div class="footer-section">
                 <h3>Наши точки</h3>
                 <?php if (!empty($pickupPoints)): ?>
                     <div class="footer-locations-container">
@@ -998,13 +1011,6 @@ ease;
                     <p>Информация о точках скоро появится</p>
                 <?php endif; ?>
             </div>
-            <div class="footer-section">
-                <h3>Контакты</h3>
-                <p><i class="fas fa-phone"></i> +7 (985) 315-20-05</p>
-                <p><i class="fas fa-envelope"></i> <?= ADMIN_EMAIL ?></p>
-                <p><i class="fas fa-map-marker-alt"></i> Москва, Россия</p>
-            </div>
-        </div>
         <div class="footer-bottom">
             <p>&copy; 2026 <?= SITE_NAME ?>. Все права защищены.</p>
         </div>
