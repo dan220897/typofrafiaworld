@@ -604,6 +604,19 @@ ease;
             margin-bottom: 2.5rem;
         }
 
+        .footer-locations-wrapper {
+            max-width: 1280px;
+            margin: 0 auto 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-locations-wrapper h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
         .footer-section h3 {
             margin-bottom: 1.25rem;
             font-size: 1.2rem;
@@ -966,24 +979,22 @@ ease;
             </div>
             <div class="footer-section">
                 <h3>Услуги</h3>
-                
-                <a href="/catalog.php?category=Визитки">Визитки</a>
-                <a href="/catalog.php?category=Листовки">Листовки</a>
-                <a href="/catalog.php?category=Флаеры">Флаеры</a>
-                <a href="/catalog.php?category=Буклеты">Буклеты</a>
-                <a href="/catalog.php?category=Брошюры">Брошюры</a>
-                
+                <?php
+                $firstHalf = array_slice($categories, 0, ceil(count($categories) / 2));
+                foreach ($firstHalf as $category):
+                ?>
+                    <a href="/catalog.php?category=<?= urlencode($category) ?>"><?= htmlspecialchars($category) ?></a>
+                <?php endforeach; ?>
             </div>
-            
+
             <div class="footer-section">
-               
-                <a href="/catalog.php?category=Баннеры">Баннеры</a>
-                <a href="/catalog.php?category=Календари">Календари</a>
-                <a href="/catalog.php?category=Наклейки">Наклейки</a>
-                <a href="/catalog.php?category=Плакаты">Плакаты</a>
-                <a href="/catalog.php?category=Пакеты">Пакеты</a>
-                <a href="/catalog.php?category=Папки">Папки</a>
-                <a href="/catalog.php?category=Дизайн">Дизайн</a>
+                <h3>&nbsp;</h3>
+                <?php
+                $secondHalf = array_slice($categories, ceil(count($categories) / 2));
+                foreach ($secondHalf as $category):
+                ?>
+                    <a href="/catalog.php?category=<?= urlencode($category) ?>"><?= htmlspecialchars($category) ?></a>
+                <?php endforeach; ?>
             </div>
             
             <div class="footer-section">
@@ -993,24 +1004,26 @@ ease;
                 <p><i class="fas fa-map-marker-alt"></i> Москва, Россия</p>
             </div>
         </div>
-        <div class="footer-section">
-                <h3>Наши точки</h3>
-                <?php if (!empty($pickupPoints)): ?>
-                    <div class="footer-locations-container">
-                        <?php foreach ($pickupPoints as $point): ?>
-                            <div class="footer-location">
-                                <p class="location-name"><i class="fas fa-map-marker-alt"></i> <strong><?= htmlspecialchars($point['name']) ?></strong></p>
-                                <p class="location-address"><?= htmlspecialchars($point['address']) ?></p>
-                                <?php if (!empty($point['working_hours'])): ?>
-                                    <p class="location-hours"><i class="far fa-clock"></i> <?= htmlspecialchars($point['working_hours']) ?></p>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <p>Информация о точках скоро появится</p>
-                <?php endif; ?>
-            </div>
+
+        <div class="footer-locations-wrapper">
+            <h3>Наши точки</h3>
+            <?php if (!empty($pickupPoints)): ?>
+                <div class="footer-locations-container">
+                    <?php foreach ($pickupPoints as $point): ?>
+                        <div class="footer-location">
+                            <p class="location-name"><i class="fas fa-map-marker-alt"></i> <strong><?= htmlspecialchars($point['name']) ?></strong></p>
+                            <p class="location-address"><?= htmlspecialchars($point['address']) ?></p>
+                            <?php if (!empty($point['working_hours'])): ?>
+                                <p class="location-hours"><i class="far fa-clock"></i> <?= htmlspecialchars($point['working_hours']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p>Информация о точках скоро появится</p>
+            <?php endif; ?>
+        </div>
+
         <div class="footer-bottom">
             <p>&copy; 2026 <?= SITE_NAME ?>. Все права защищены.</p>
         </div>
