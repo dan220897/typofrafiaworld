@@ -10,8 +10,8 @@ uploads/
 Thumbs.db
 
 # PHP
-vendor/
-composer.lock
+# vendor/ - закоммичен в репозиторий для production сервера
+# composer.lock - закоммичен в репозиторий
 
 # IDE
 .idea/
