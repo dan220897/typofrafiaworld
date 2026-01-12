@@ -951,4 +951,3 @@
         console.log(`[${type}] ${message}`);
     }
 </script>
-
