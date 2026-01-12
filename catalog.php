@@ -30,6 +30,24 @@ try {
     $services = [];
 }
 
+// Получаем все категории услуг для футера
+try {
+    $db = Database::getInstance()->getConnection();
+    $stmt = $db->query("SELECT DISTINCT category FROM services WHERE category IS NOT NULL ORDER BY category");
+    $categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (Exception $e) {
+    $categories = [];
+}
+
+// Получаем все точки самовывоза для футера
+try {
+    $db = Database::getInstance()->getConnection();
+    $stmt = $db->query("SELECT id, name, address, phone, working_hours FROM pickup_points WHERE is_active = 1 ORDER BY sort_order, name");
+    $pickupPoints = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $pickupPoints = [];
+}
+
 // Цвета для категорий
 $categoryColors = [
     'Визитки' => '#6366f1',
@@ -569,18 +587,62 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             </div>
             <div class="footer-section">
                 <h3>Услуги</h3>
-                <a href="/">Каталог услуг</a>
-                <a href="/catalog.php?category=Визитки">Визитки</a>
-                <a href="/catalog.php?category=Баннеры">Баннеры</a>
-                <a href="/catalog.php?category=Дизайн">Дизайн</a>
+                <?php
+                $firstHalf = array_slice($categories, 0, ceil(count($categories) / 2));
+                foreach ($firstHalf as $cat):
+                ?>
+                    <a href="/catalog.php?category=<?= urlencode($cat) ?>"><?= htmlspecialchars($cat) ?></a>
+                <?php endforeach; ?>
             </div>
+
+            <div class="footer-section">
+                <h3>&nbsp;</h3>
+                <?php
+                $secondHalf = array_slice($categories, ceil(count($categories) / 2));
+                foreach ($secondHalf as $cat):
+                ?>
+                    <a href="/catalog.php?category=<?= urlencode($cat) ?>"><?= htmlspecialchars($cat) ?></a>
+                <?php endforeach; ?>
+            </div>
+
             <div class="footer-section">
                 <h3>Контакты</h3>
-                <p><i class="fas fa-phone"></i> +7 (XXX) XXX-XX-XX</p>
+                <p><i class="fas fa-phone"></i> +7 (985) 315-20-05</p>
                 <p><i class="fas fa-envelope"></i> <?= ADMIN_EMAIL ?></p>
                 <p><i class="fas fa-map-marker-alt"></i> Москва, Россия</p>
+                <div class="footer-social">
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://t.me/typografia" target="_blank" rel="noopener noreferrer" title="Telegram">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="https://vk.com" target="_blank" rel="noopener noreferrer" title="VKontakte">
+                        <i class="fab fa-vk"></i>
+                    </a>
+                </div>
             </div>
         </div>
+
+        <div class="footer-locations-wrapper">
+            <h3>Наши точки</h3>
+            <?php if (!empty($pickupPoints)): ?>
+                <div class="footer-locations-container">
+                    <?php foreach ($pickupPoints as $point): ?>
+                        <div class="footer-location">
+                            <p class="location-name"><i class="fas fa-map-marker-alt"></i> <strong><?= htmlspecialchars($point['name']) ?></strong></p>
+                            <p class="location-address"><?= htmlspecialchars($point['address']) ?></p>
+                            <?php if (!empty($point['working_hours'])): ?>
+                                <p class="location-hours"><i class="far fa-clock"></i> <?= htmlspecialchars($point['working_hours']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p>Информация о точках скоро появится</p>
+            <?php endif; ?>
+        </div>
+
         <div class="footer-bottom">
             <p>&copy; 2026 <?= SITE_NAME ?>. Все права защищены.</p>
         </div>
