@@ -52,7 +52,7 @@ $megaMenu_categoryIcons = [
 
     .mega-menu-overlay {
         position: fixed;
-        top: 60px;
+        top: 70px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -103,12 +103,12 @@ $megaMenu_categoryIcons = [
 
     .mega-menu {
         position: fixed;
-        top: 60px;
+        top: 70px;
         left: 0;
         right: 0;
         width: 100%;
-        background: var(--white);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        background: #f9fafb;
+        
         border-radius: 0;
         padding: 2rem 0;
         padding-top: 3rem;
