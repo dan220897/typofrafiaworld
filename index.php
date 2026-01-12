@@ -24,6 +24,15 @@ try {
     $allServices = [];
 }
 
+// Получаем все точки самовывоза для футера
+try {
+    $db = Database::getInstance()->getConnection();
+    $stmt = $db->query("SELECT id, name, address, phone, working_hours FROM pickup_points WHERE is_active = 1 ORDER BY sort_order, name");
+    $pickupPoints = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $pickupPoints = [];
+}
+
 // Уникальные иконки для каждой категории
 $categoryIcons = [
 
@@ -615,6 +624,51 @@ ease;
             padding-left: 5px;
         }
 
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .footer-location {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-location:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .footer-location .location-name {
+            color: var(--white);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-location .location-name i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .footer-location .location-address {
+            font-size: 0.9rem;
+            padding-left: 1.75rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .footer-location .location-hours {
+            font-size: 0.85rem;
+            padding-left: 1.75rem;
+            font-style: italic;
+        }
+
+        .footer-location .location-hours i {
+            margin-right: 0.4rem;
+        }
+
         .footer-bottom {
             text-align: center;
             padding-top: 2rem;
@@ -906,6 +960,22 @@ ease;
                 <a href="/catalog.php?category=Визитки">Визитки</a>
                 <a href="/catalog.php?category=Баннеры">Баннеры</a>
                 <a href="/catalog.php?category=Дизайн">Дизайн</a>
+            </div>
+            <div class="footer-section">
+                <h3>Наши точки</h3>
+                <?php if (!empty($pickupPoints)): ?>
+                    <?php foreach ($pickupPoints as $point): ?>
+                        <div class="footer-location">
+                            <p class="location-name"><i class="fas fa-map-marker-alt"></i> <strong><?= htmlspecialchars($point['name']) ?></strong></p>
+                            <p class="location-address"><?= htmlspecialchars($point['address']) ?></p>
+                            <?php if (!empty($point['working_hours'])): ?>
+                                <p class="location-hours"><i class="far fa-clock"></i> <?= htmlspecialchars($point['working_hours']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Информация о точках скоро появится</p>
+                <?php endif; ?>
             </div>
             <div class="footer-section">
                 <h3>Контакты</h3>
