@@ -26,20 +26,44 @@ try {
 
 // Уникальные иконки для каждой категории
 $categoryIcons = [
-    'Визитки' => 'fa-address-card',
-    'Баннеры' => 'fa-panorama',
-    'Флаеры' => 'fa-layer-group',
-    'Листовки' => 'fa-file-lines',
-    'Буклеты' => 'fa-book-open-reader',
-    'Календари' => 'fa-calendar-days',
-    'Наклейки' => 'fa-note-sticky',
-    'Брошюры' => 'fa-book-bookmark',
-    'Каталоги' => 'fa-books',
-    'Пакеты' => 'fa-bag-shopping',
-    'Папки' => 'fa-folder-tree',
-    'Плакаты' => 'fa-panorama',
-    'Сувениры' => 'fa-gifts',
-    'Дизайн' => 'fa-pen-nib'
+
+    // Полиграфия
+    'Визитки'                => 'fa-address-card',
+    'Листовки'               => 'fa-file-lines',
+    'Флаеры'                 => 'fa-layer-group',
+    'Буклеты'                => 'fa-book-open',
+    'Брошюры'                => 'fa-book-bookmark',
+    'Каталоги'               => 'fa-books',
+    'Плакаты'                => 'fa-image',
+    'Календари'              => 'fa-calendar-days',
+
+    // Печать
+    'Широкоформатная печать'  => 'fa-expand',
+    'Интерьерная печать'     => 'fa-print',
+    
+'Печать документов'  => 'fa-print',
+
+    // Упаковка и материалы
+    'Упаковка'               => 'fa-box-open',
+    'Пакеты'                 => 'fa-bag-shopping',
+    'Папки'                  => 'fa-folder-open',
+
+    // Стикеры и сувениры
+    'Наклейки'               => 'fa-note-sticky',
+    'Сувенирная продукция'   => 'fa-gift',
+    'Сувениры'               => 'fa-gifts',
+
+    // Услуги
+    'Дизайн-услуги'          => 'fa-pen-nib',
+    'Дизайн'                 => 'fa-pen-ruler',
+    'Дополнительные услуги'  => 'fa-ellipsis',
+    'Постпечатная обработка' => 'fa-scissors',
+    'Копирование'            => 'fa-copy',
+    'Сканирование'        => 'fa-file-image',
+
+
+    // Прочее
+    'Баннеры'                => 'fa-flag',
 ];
 
 // Цвета для категорий
@@ -91,7 +115,7 @@ $categoryColors = [
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: montserrat;
             color: var(--dark);
             background-color: var(--light-gray);
             line-height: 1.6;
@@ -148,9 +172,8 @@ $categoryColors = [
 
         /* Header */
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            
             backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -164,6 +187,19 @@ $categoryColors = [
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        
+        btn-primary {
+            color: var(--gray) !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s 
+ease;
+
+        }
+        
+        .btn-primary:hover {
+            color: var(--primary);
         }
 
         .logo {
@@ -221,33 +257,28 @@ $categoryColors = [
             text-decoration: none;
             display: inline-block;
             font-size: 0.95rem;
+            color:#000;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
+        
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                        url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80') center/cover no-repeat;
+            /*background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80') center/cover no-repeat;*/
             color: var(--white);
             padding: 8rem 2rem;
-            text-align: center;
+            text-align: left;
             position: relative;
             overflow: hidden;
             min-height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
+            max-width: 1210px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+    border-radius: 69px;
         }
 
         .hero::before {
@@ -257,8 +288,8 @@ $categoryColors = [
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(99, 102, 241, 0.1);
-            opacity: 0.6;
+                background: rgb(100 102 233);
+    opacity: 1;
         }
 
         .hero-content {
@@ -268,22 +299,21 @@ $categoryColors = [
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            margin-bottom: 1.5rem;
             line-height: 1.2;
             animation: slideInLeft 0.8s ease;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
         }
 
         .hero p {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             margin-bottom: 0;
             opacity: 1;
             animation: fadeInUp 0.8s ease 0.2s backwards;
             text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
             max-width: 800px;
-            margin: 0 auto;
+            
         }
 
         /* Search */
@@ -362,11 +392,12 @@ $categoryColors = [
             margin-bottom: 0;
             text-align: left;
             flex: 1;
+            display:none;
         }
 
         .services-search-wrapper {
             position: relative;
-            max-width: 350px;
+            width:100%;
             flex-shrink: 0;
         }
 
@@ -451,7 +482,7 @@ $categoryColors = [
         }
 
         .category-name {
-            font-size: 1.35rem;
+            font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
             transition: color 0.3s ease;
@@ -621,6 +652,11 @@ $categoryColors = [
         }
 
         @media (max-width: 768px) {
+            .hero {
+                margin: 0rem auto;
+                padding: 0 2rem;
+                border-radius: 0px;
+            }
             .header-container {
                 padding: 1rem;
             }
@@ -738,7 +774,7 @@ $categoryColors = [
     <header class="header">
         <div class="header-container">
             <a href="/" class="logo">
-                <i class="fas fa-print"></i> <?= SITE_NAME ?>
+                <img src="logo.png" height="22vw" />
             </a>
             <nav class="header-nav">
                 <?php include 'components/mega-menu.php'; ?>
@@ -759,8 +795,8 @@ $categoryColors = [
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Профессиональная типография онлайн</h1>
-            <p>Качественная полиграфия с доставкой по всей России. Быстро, надёжно, по лучшим ценам.</p>
+            <h1>Современная типография нового формата</h1>
+            <p>Более 5-и точек по всей Москве</p>
         </div>
     </section>
 
@@ -873,7 +909,7 @@ $categoryColors = [
             </div>
             <div class="footer-section">
                 <h3>Контакты</h3>
-                <p><i class="fas fa-phone"></i> +7 (XXX) XXX-XX-XX</p>
+                <p><i class="fas fa-phone"></i> +7 (985) 315-20-05</p>
                 <p><i class="fas fa-envelope"></i> <?= ADMIN_EMAIL ?></p>
                 <p><i class="fas fa-map-marker-alt"></i> Москва, Россия</p>
             </div>
