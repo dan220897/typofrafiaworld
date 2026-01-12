@@ -599,7 +599,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
     <header class="header">
         <div class="header-container">
             <a href="/" class="logo">
-                <i class="fas fa-print"></i> <?= SITE_NAME ?>
+                <img src="logo.png" height="22vw" />
             </a>
             <nav class="header-nav">
                 <?php include 'components/mega-menu.php'; ?>
@@ -608,8 +608,9 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
+                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
                 <?php else: ?>
-                    <a href="/" class="btn btn-primary">Войти</a>
+                    <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
                 <?php include 'components/cart.php'; ?>
             </nav>
