@@ -19,34 +19,43 @@ class EmailService {
         try {
             // Код в начале темы письма
             $subject = "{$code} - Код подтверждения для " . SITE_NAME;
-            
+
             // HTML шаблон письма
             $message = $this->getEmailTemplate($code);
-            
+
             // Заголовки для HTML письма
             $headers = "MIME-Version: 1.0\r\n";
             $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
             $headers .= "From: {$this->fromName} <{$this->fromEmail}>\r\n";
             $headers .= "Reply-To: {$this->fromEmail}\r\n";
             $headers .= "X-Mailer: PHP/" . phpversion();
-            
+
+            // Логируем попытку отправки
+            logMessage("Попытка отправки email на {$email} с кодом {$code}", 'INFO');
+
             // Отправляем письмо
-            $sent = mail($email, $subject, $message, $headers);
-            
+            $sent = @mail($email, $subject, $message, $headers);
+
+            // Проверяем результат и последнюю ошибку
+            $lastError = error_get_last();
+
             if (!$sent) {
-                throw new Exception('Ошибка отправки письма');
+                $errorMsg = $lastError ? $lastError['message'] : 'mail() вернул false';
+                logMessage("Ошибка mail(): {$errorMsg}. Возможно, mail() не настроен на сервере. Проверьте настройки SMTP.", 'ERROR');
+
+                throw new Exception('Не удалось отправить письмо. Пожалуйста, обратитесь к администратору.');
             }
-            
-            logMessage("Email код отправлен на адрес {$email}", 'INFO');
-            
+
+            logMessage("Email код успешно отправлен на адрес {$email}", 'INFO');
+
             return [
                 'success' => true,
                 'message' => 'Код отправлен на email'
             ];
-            
+
         } catch (Exception $e) {
             logMessage("Ошибка отправки Email на {$email}: " . $e->getMessage(), 'ERROR');
-            
+
             return [
                 'success' => false,
                 'error' => $e->getMessage()
