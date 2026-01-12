@@ -11,12 +11,10 @@ if (file_exists($autoloadPath)) {
     logMessage("PHPMailer не установлен. Используется fallback на mail()", 'WARNING');
 }
 
-// Подключаем классы PHPMailer только если они доступны
-if (PHPMAILER_AVAILABLE) {
-    use PHPMailer\PHPMailer\PHPMailer;
-    use PHPMailer\PHPMailer\Exception;
-    use PHPMailer\PHPMailer\SMTP;
-}
+// Импорт классов PHPMailer (безопасно даже если не установлен, пока не используется)
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
 class EmailService {
     private $db;
