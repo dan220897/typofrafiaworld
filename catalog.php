@@ -459,6 +459,99 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             padding-left: 5px;
         }
 
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--white);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            color: var(--white);
+        }
+
+        .footer-locations-wrapper {
+            max-width: 1280px;
+            margin: 0 auto 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-locations-wrapper h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .footer-locations-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .footer-location {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .footer-location:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .footer-location .location-name {
+            color: var(--white);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-location .location-name i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .footer-location .location-address {
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .footer-location .location-hours {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer-location .location-hours i {
+            margin-right: 0.4rem;
+        }
+
         .footer-bottom {
             text-align: center;
             padding-top: 2rem;
