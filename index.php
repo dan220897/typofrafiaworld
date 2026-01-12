@@ -968,7 +968,16 @@ ease;
                 <h3>Услуги</h3>
                 <a href="/">Каталог услуг</a>
                 <a href="/catalog.php?category=Визитки">Визитки</a>
+                <a href="/catalog.php?category=Листовки">Листовки</a>
+                <a href="/catalog.php?category=Флаеры">Флаеры</a>
+                <a href="/catalog.php?category=Буклеты">Буклеты</a>
+                <a href="/catalog.php?category=Брошюры">Брошюры</a>
                 <a href="/catalog.php?category=Баннеры">Баннеры</a>
+                <a href="/catalog.php?category=Календари">Календари</a>
+                <a href="/catalog.php?category=Наклейки">Наклейки</a>
+                <a href="/catalog.php?category=Плакаты">Плакаты</a>
+                <a href="/catalog.php?category=Пакеты">Пакеты</a>
+                <a href="/catalog.php?category=Папки">Папки</a>
                 <a href="/catalog.php?category=Дизайн">Дизайн</a>
             </div>
             <div class="footer-section">
