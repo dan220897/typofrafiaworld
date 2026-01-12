@@ -37,7 +37,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: montserrat;
             color: var(--dark);
             background-color: var(--light-gray);
             line-height: 1.6;
@@ -68,9 +68,8 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
 
         /* Header */
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            
             backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -84,6 +83,19 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        
+        btn-primary {
+            color: var(--gray) !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s 
+ease;
+
+        }
+        
+        .btn-primary:hover {
+            color: var(--primary);
         }
 
         .logo {
@@ -143,19 +155,10 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             text-decoration: none;
             display: inline-block;
             font-size: 0.95rem;
+            color:#000;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
+        
 
         /* Hero */
         .hero {
@@ -202,11 +205,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
             padding: 0 2rem;
         }
 
-        /* About Section */
-        .about-section {
-            padding: 5rem 0;
-        }
-
+        
         .about-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -267,7 +266,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
         .stat-number {
             font-size: 3rem;
             font-weight: 800;
-            color: var(--primary);
+            color:#000;
             margin-bottom: 0.5rem;
         }
 
@@ -311,7 +310,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
 
         .value-icon {
             font-size: 3.5rem;
-            color: var(--primary);
+            color: #000;
             margin-bottom: 1.5rem;
         }
 
@@ -636,30 +635,25 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
     <header class="header">
         <div class="header-container">
             <a href="/" class="logo">
-                <i class="fas fa-print"></i> <?= SITE_NAME ?>
+                <img src="logo.png" height="22vw" />
             </a>
             <nav class="header-nav">
                 <?php include 'components/mega-menu.php'; ?>
-                <a href="/about.php" class="nav-link active">О нас</a>
+                <a href="/about.php" class="nav-link">О нас</a>
                 <a href="/portfolio.php" class="nav-link">Портфолио</a>
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
+                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
                 <?php else: ?>
-                    <a href="/" class="btn btn-primary">Войти</a>
+                    <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
                 <?php include 'components/cart.php'; ?>
             </nav>
         </div>
     </header>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>О нашей типографии</h1>
-            <p>Профессиональные полиграфические услуги с 2010 года</p>
-        </div>
-    </section>
+    
 
     <!-- About Section -->
     <section class="about-section">
@@ -701,7 +695,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
                         <div class="stat-label">Выполненных заказов</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">24/7</div>
+                        <div class="stat-number">12/7</div>
                         <div class="stat-label">Онлайн поддержка</div>
                     </div>
                 </div>
@@ -712,7 +706,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
     <!-- Values -->
     <section class="values">
         <div class="container">
-            <h2>Наши ценности</h2>
+            
             <div class="values-grid">
                 <div class="value-card">
                     <div class="value-icon">
@@ -739,42 +733,7 @@ $currentUser = $isAuthenticated ? $userService->getCurrentUser() : null;
         </div>
     </section>
 
-    <!-- Team -->
-    <section class="team">
-        <div class="container">
-            <h2>Наша команда</h2>
-            <div class="team-grid">
-                <div class="team-member">
-                    <div class="team-avatar">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <h3>Алексей Иванов</h3>
-                    <p>Генеральный директор</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-avatar">
-                        <i class="fas fa-palette"></i>
-                    </div>
-                    <h3>Мария Петрова</h3>
-                    <p>Арт-директор</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-avatar">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <h3>Дмитрий Сидоров</h3>
-                    <p>Технический директор</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-avatar">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3>Елена Смирнова</h3>
-                    <p>Менеджер проектов</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    
 
     <!-- Telegram Widget -->
     <div class="telegram-widget">
