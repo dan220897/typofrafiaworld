@@ -1164,14 +1164,19 @@ try {
             <?php if (!empty($params['quantities'])): ?>
             <div class="form-group">
                 <label>Тираж</label>
-                <select id="quantity" onchange="calculatePrice()">
+                <select id="quantity" onchange="handleQuantityChange()">
                     <option value="">Выберите тираж</option>
                     <?php foreach ($params['quantities'] as $qty): ?>
                         <option value="<?= $qty['id'] ?>" data-quantity="<?= $qty['quantity'] ?>" data-multiplier="<?= $qty['multiplier'] ?? 1 ?>" data-price="<?= $qty['price'] ?>">
                             <?= htmlspecialchars($qty['label']) ?>
                         </option>
                     <?php endforeach; ?>
+                    <option value="custom">Свой тираж...</option>
                 </select>
+            </div>
+            <div class="form-group" id="customQuantityGroup" style="display: none;">
+                <label>Введите тираж</label>
+                <input type="number" id="customQuantity" min="1" placeholder="Например, 150" onchange="calculatePrice()" oninput="calculatePrice()">
             </div>
             <?php endif; ?>
 
@@ -1226,6 +1231,22 @@ try {
             baseQuantity = parseFloat(quantitySelect.options[1].dataset.quantity || 1);
         }
 
+        function handleQuantityChange() {
+            const quantitySelect = document.getElementById('quantity');
+            const customQuantityGroup = document.getElementById('customQuantityGroup');
+            const customQuantityInput = document.getElementById('customQuantity');
+
+            if (quantitySelect.value === 'custom') {
+                customQuantityGroup.style.display = 'block';
+                customQuantityInput.focus();
+            } else {
+                customQuantityGroup.style.display = 'none';
+                customQuantityInput.value = '';
+            }
+
+            calculatePrice();
+        }
+
         function calculatePrice() {
             let total = basePrice;
 
@@ -1255,15 +1276,27 @@ try {
 
             // Количество
             if (quantitySelect && quantitySelect.value) {
-                const quantityOption = quantitySelect.options[quantitySelect.selectedIndex];
-                const qtyCount = parseFloat(quantityOption.dataset.quantity || 1);
-                const qtyMultiplier = parseFloat(quantityOption.dataset.multiplier || 1);
-                const qtyPrice = parseFloat(quantityOption.dataset.price || 0);
+                if (quantitySelect.value === 'custom') {
+                    // Пользовательский тираж
+                    const customQuantityInput = document.getElementById('customQuantity');
+                    const customQty = parseFloat(customQuantityInput.value || 0);
 
-                // Формула: (базовая_цена + доп_цена) × (количество / базовый_тираж) × множитель_скидки
-                // Пример для визиток: (500₽ + 0₽) × (500 / 100) × 0.80 = 500 × 5 × 0.80 = 2000₽
-                // Пример для печати: (3₽ + 0₽) × (10 / 1) × 1.00 = 3 × 10 × 1.00 = 30₽
-                total = (total + qtyPrice) * (qtyCount / baseQuantity) * qtyMultiplier;
+                    if (customQty > 0) {
+                        // Для пользовательского тиража используем множитель 1.0 (без скидки)
+                        total = total * (customQty / baseQuantity) * 1.0;
+                    }
+                } else {
+                    // Предустановленный тираж
+                    const quantityOption = quantitySelect.options[quantitySelect.selectedIndex];
+                    const qtyCount = parseFloat(quantityOption.dataset.quantity || 1);
+                    const qtyMultiplier = parseFloat(quantityOption.dataset.multiplier || 1);
+                    const qtyPrice = parseFloat(quantityOption.dataset.price || 0);
+
+                    // Формула: (базовая_цена + доп_цена) × (количество / базовый_тираж) × множитель_скидки
+                    // Пример для визиток: (500₽ + 0₽) × (500 / 100) × 0.80 = 500 × 5 × 0.80 = 2000₽
+                    // Пример для печати: (3₽ + 0₽) × (10 / 1) × 1.00 = 3 × 10 × 1.00 = 30₽
+                    total = (total + qtyPrice) * (qtyCount / baseQuantity) * qtyMultiplier;
+                }
             }
 
             // Отображаем цену
@@ -1296,9 +1329,24 @@ try {
                 parameters.sides = sidesSelect.options[sidesSelect.selectedIndex].text;
             }
             if (quantitySelect && quantitySelect.value) {
-                const selectedOption = quantitySelect.options[quantitySelect.selectedIndex];
-                parameters.quantity = selectedOption.text;
-                quantityValue = parseInt(selectedOption.dataset.quantity || 1);
+                if (quantitySelect.value === 'custom') {
+                    // Пользовательский тираж
+                    const customQuantityInput = document.getElementById('customQuantity');
+                    const customQty = parseInt(customQuantityInput.value || 0);
+
+                    if (customQty > 0) {
+                        parameters.quantity = customQty + ' шт.';
+                        quantityValue = customQty;
+                    } else {
+                        alert('Пожалуйста, введите количество тиража');
+                        return;
+                    }
+                } else {
+                    // Предустановленный тираж
+                    const selectedOption = quantitySelect.options[quantitySelect.selectedIndex];
+                    parameters.quantity = selectedOption.text;
+                    quantityValue = parseInt(selectedOption.dataset.quantity || 1);
+                }
             }
 
             // Получаем итоговую цену
