@@ -381,6 +381,8 @@ function handleGetOrderById($orderId, $userService) {
             'discount_amount' => (float)$order['discount_amount'],
             'final_amount' => (float)$order['final_amount'],
             'payment_status' => $order['payment_status'],
+            'tinkoff_payment_id' => $order['tinkoff_payment_id'],
+            'tinkoff_payment_url' => $order['tinkoff_payment_url'],
             'delivery_method' => $order['delivery_method'],
             'delivery_address' => $order['delivery_address'],
             'notes' => $order['notes'],
@@ -405,6 +407,7 @@ function handleGetOrderById($orderId, $userService) {
                 'quantity' => (int)$item['quantity'],
                 'parameters' => $item['parameters'] ? json_decode($item['parameters'], true) : null,
                 'unit_price' => (float)$item['unit_price'],
+                'price' => (float)$item['total_price'], // Для совместимости с order-details.php
                 'total_price' => (float)$item['total_price'],
                 'design_status' => $item['design_status'],
                 'notes' => $item['notes']
@@ -439,10 +442,15 @@ function handleGetOrderById($orderId, $userService) {
         }
         
         logMessage("Получена детальная информация о заказе ID: {$orderId} для пользователя ID: {$userId}", 'INFO');
-        
+
+        // Извлекаем items из orderData для совместимости с order-details.php
+        $items = $orderData['items'];
+        unset($orderData['items']);
+
         sendJsonResponse([
             'success' => true,
-            'order' => $orderData
+            'order' => $orderData,
+            'items' => $items
         ]);
         
     } catch (Exception $e) {
