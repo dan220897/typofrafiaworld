@@ -242,6 +242,24 @@ try {
             font-weight: 600;
         }
 
+        .payment-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--white);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .payment-link:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
         .total-amount {
             font-size: 1.8rem;
             font-weight: 700;
@@ -403,6 +421,16 @@ try {
                                 <span class="info-label"><i class="fas fa-credit-card"></i> Оплата:</span>
                                 <span class="info-value">${getPaymentStatusLabel(order.payment_status)}</span>
                             </div>
+                            ${order.tinkoff_payment_url ? `
+                            <div class="info-row">
+                                <span class="info-label"><i class="fas fa-link"></i> Ссылка на оплату:</span>
+                                <span class="info-value">
+                                    <a href="${order.tinkoff_payment_url}" target="_blank" class="payment-link">
+                                        <i class="fas fa-external-link-alt"></i> Оплатить заказ
+                                    </a>
+                                </span>
+                            </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
