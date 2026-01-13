@@ -225,7 +225,7 @@ try {
         }
 
         .location-name {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: var(--dark);
             margin-bottom: 0.5rem;
@@ -307,13 +307,11 @@ try {
         }
 
         .btn-call {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: var(--white);
+            color:black;
         }
 
         .btn-call:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            
         }
 
 
@@ -491,7 +489,7 @@ try {
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
-                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
+                    
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
@@ -510,7 +508,7 @@ try {
                         <div class="location-card">
                             <div class="location-header">
                                 <h3 class="location-name">
-                                    <i class="fas fa-map-marker-alt"></i>
+                                    
                                     <?= htmlspecialchars($point['name']) ?>
                                 </h3>
                             </div>
@@ -546,7 +544,7 @@ try {
                                 </a>
                                 <a href="<?= MANAGER_TELEGRAM_LINK ?>" target="_blank" class="location-btn btn-telegram">
                                     <i class="fab fa-telegram"></i>
-                                    Telegram
+                                    
                                 </a>
                             </div>
                         </div>
@@ -558,6 +556,7 @@ try {
         </div>
     </section>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -570,9 +569,9 @@ try {
                 <h3>Услуги</h3>
                 <?php
                 $firstHalf = array_slice($categories, 0, ceil(count($categories) / 2));
-                foreach ($firstHalf as $cat):
+                foreach ($firstHalf as $category):
                 ?>
-                    <a href="/catalog.php?category=<?= urlencode($cat) ?>"><?= htmlspecialchars($cat) ?></a>
+                    <a href="/catalog.php?category=<?= urlencode($category) ?>"><?= htmlspecialchars($category) ?></a>
                 <?php endforeach; ?>
             </div>
 
@@ -580,12 +579,12 @@ try {
                 <h3>&nbsp;</h3>
                 <?php
                 $secondHalf = array_slice($categories, ceil(count($categories) / 2));
-                foreach ($secondHalf as $cat):
+                foreach ($secondHalf as $category):
                 ?>
-                    <a href="/catalog.php?category=<?= urlencode($cat) ?>"><?= htmlspecialchars($cat) ?></a>
+                    <a href="/catalog.php?category=<?= urlencode($category) ?>"><?= htmlspecialchars($category) ?></a>
                 <?php endforeach; ?>
             </div>
-
+            
             <div class="footer-section">
                 <h3>Контакты</h3>
                 <p><i class="fas fa-phone"></i> +7 (985) 315-20-05</p>
