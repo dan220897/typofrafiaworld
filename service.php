@@ -182,7 +182,7 @@ try {
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: montserrat;
             color: var(--dark);
             background: #f5f7fa;
             
@@ -191,9 +191,9 @@ try {
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            
             backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
+            
             position: sticky;
             top: 0;
             z-index: 100;
@@ -292,7 +292,7 @@ try {
         .service-info h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            color: var(--primary);
+            
             line-height: 1.2;
         }
 
@@ -432,7 +432,7 @@ try {
 
         .features h2 {
             margin-bottom: 2rem;
-            font-size: 2rem;
+            font-size: 1.4rem;
             color: var(--dark);
         }
 
@@ -473,9 +473,7 @@ try {
             transition: transform 0.3s ease;
         }
 
-        .feature-card:hover .feature-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
+        
 
         .feature-card h3 {
             font-size: 1.25rem;
@@ -1074,7 +1072,7 @@ try {
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
-                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
+                    
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
