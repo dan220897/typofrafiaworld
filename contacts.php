@@ -50,7 +50,7 @@ try {
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: montserrat;
             color: var(--dark);
             background-color: var(--light-gray);
             line-height: 1.6;
@@ -73,10 +73,8 @@ try {
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
-            position: sticky;
+            
+           
             top: 0;
             z-index: 100;
         }
@@ -144,15 +142,11 @@ try {
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+            color:black;
         }
 
         .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            
         }
 
         .hero {
@@ -602,12 +596,7 @@ try {
         </div>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Контакты</h1>
-            <p>Свяжитесь с нами любым удобным способом</p>
-        </div>
-    </section>
+    
 
     <section class="contacts-section">
         <div class="container">
