@@ -95,7 +95,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: montserrat;
             color: var(--dark);
             background-color: var(--light-gray);
             line-height: 1.6;
@@ -118,9 +118,9 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            
             backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
+            
             position: sticky;
             top: 0;
             z-index: 100;
@@ -230,9 +230,9 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
 
         .page-title {
             font-size: 2.75rem;
-            font-weight: 800;
+            font-weight: 700;
             margin-bottom: 1rem;
-            color: var(--primary);
+            
         }
 
         .page-description {
@@ -296,9 +296,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             position: relative;
         }
 
-        .service-card:hover .service-icon {
-            transform: scale(1.15) rotateY(180deg);
-        }
+       
 
         .service-name {
             font-size: 1.35rem;
@@ -608,7 +606,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
-                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
+                    
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
