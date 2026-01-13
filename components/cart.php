@@ -288,6 +288,24 @@
         color: var(--secondary);
     }
 
+    .user-data-notice {
+        background: #e0f2fe;
+        border: 1px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #0c4a6e;
+        font-size: 0.9rem;
+    }
+
+    .user-data-notice i {
+        font-size: 1.2rem;
+        color: #0ea5e9;
+    }
+
     .form-input {
         width: 100%;
         padding: 0.75rem;
@@ -449,6 +467,12 @@
     <!-- Форма оформления заказа -->
     <div class="cart-body checkout-form" id="checkoutForm">
         <form id="checkoutFormElement" onsubmit="submitCheckout(event)">
+            <!-- Сообщение для авторизованных пользователей -->
+            <div class="user-data-notice" id="userDataNotice" style="display: none;">
+                <i class="fas fa-info-circle"></i>
+                <span>Ваши данные заполнены автоматически. Для изменения обратитесь к <a href="<?= MANAGER_TELEGRAM_LINK ?>" target="_blank" style="color: var(--primary); text-decoration: underline;">менеджеру</a>.</span>
+            </div>
+
             <div class="form-group">
                 <label class="form-label required" for="checkoutName">Имя</label>
                 <input type="text" id="checkoutName" class="form-input" required>
@@ -770,15 +794,57 @@
     }
 
     // Показать форму оформления
-    function showCheckoutForm() {
+    async function showCheckoutForm() {
         document.getElementById('cartContent').style.display = 'none';
         document.getElementById('checkoutForm').classList.add('active');
         document.getElementById('cartFooter').style.display = 'none';
         document.getElementById('cartPopupTitle').textContent = 'Оформление заказа';
 
+        // Проверяем авторизацию и заполняем данные
+        await checkAuthAndFillForm();
+
         // Инициализируем карту
         initMap();
         renderPickupPoints();
+    }
+
+    // Проверить авторизацию и заполнить форму
+    async function checkAuthAndFillForm() {
+        try {
+            const response = await fetch('/api/auth.php?action=check', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            if (data.success && data.authenticated && data.user) {
+                const user = data.user;
+
+                // Заполняем поля
+                const nameInput = document.getElementById('checkoutName');
+                const phoneInput = document.getElementById('checkoutPhone');
+                const emailInput = document.getElementById('checkoutEmail');
+                const notice = document.getElementById('userDataNotice');
+
+                if (user.name) nameInput.value = user.name;
+                if (user.phone) phoneInput.value = user.phone;
+                if (user.email) emailInput.value = user.email;
+
+                // Делаем поля только для чтения
+                nameInput.readOnly = true;
+                phoneInput.readOnly = true;
+                emailInput.readOnly = true;
+
+                // Добавляем стиль для readonly полей
+                nameInput.style.backgroundColor = '#f3f4f6';
+                phoneInput.style.backgroundColor = '#f3f4f6';
+                emailInput.style.backgroundColor = '#f3f4f6';
+
+                // Показываем уведомление
+                notice.style.display = 'flex';
+            }
+        } catch (error) {
+            console.log('Пользователь не авторизован');
+        }
     }
 
     // Инициализировать карту Яндекс

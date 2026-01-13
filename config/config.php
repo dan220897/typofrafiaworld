@@ -23,6 +23,7 @@ define('BOT_TOKEN', '8265444504:AAE2pfiHbPQPqy6RM8bueO831cPFtz3sWqg');
 define('TELEGRAM_API_URL', 'https://api.telegram.org/bot' . BOT_TOKEN . '/');
 define('MANAGER_CHAT_ID', '-1003168549220');
 define('TELEGRAM_NOTIFICATIONS_ENABLED', true);
+define('MANAGER_TELEGRAM_LINK', 'https://t.me/typografia_manager'); // Ссылка на менеджера
 
 // Настройки Email и SMTP
 define('USE_SMTP', true); // Использовать SMTP вместо mail()

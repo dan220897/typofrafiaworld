@@ -376,6 +376,44 @@ function checkout($db, $sessionId, $userId) {
                 $stmt->execute([$name, $phone, $email]);
                 $userId = $db->lastInsertId();
             }
+        } else {
+            // Для авторизованных пользователей обновляем недостающие данные
+            $stmt = $db->prepare("SELECT name, phone, email FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $currentUser = $stmt->fetch();
+
+            if ($currentUser) {
+                $updateFields = [];
+                $updateValues = [];
+
+                // Обновляем имя, если оно было пустым
+                if (empty($currentUser['name']) && !empty($name)) {
+                    $updateFields[] = "name = ?";
+                    $updateValues[] = $name;
+                }
+
+                // Обновляем телефон, если он был пустым
+                if (empty($currentUser['phone']) && !empty($phone)) {
+                    $updateFields[] = "phone = ?";
+                    $updateValues[] = $phone;
+                }
+
+                // Обновляем email, если он был пустым
+                if (empty($currentUser['email']) && !empty($email)) {
+                    $updateFields[] = "email = ?";
+                    $updateValues[] = $email;
+                }
+
+                // Если есть что обновить
+                if (!empty($updateFields)) {
+                    $updateValues[] = $userId;
+                    $sql = "UPDATE users SET " . implode(', ', $updateFields) . " WHERE id = ?";
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute($updateValues);
+
+                    logMessage("Профиль пользователя {$userId} обновлен недостающими данными", 'INFO');
+                }
+            }
         }
 
         // Рассчитываем сумму заказа
