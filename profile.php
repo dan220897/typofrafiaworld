@@ -71,6 +71,10 @@ try {
         }
 
         .header {
+            
+            backdrop-filter: blur(10px);
+            
+            position: sticky;
             top: 0;
             z-index: 100;
         }
@@ -91,43 +95,89 @@ try {
             transition: transform 0.3s ease;
         }
 
-        .logo img {
-            height: 50px;
-            width: auto;
+        
+
+        .logo:hover img {
+            transform: scale(1.05);
         }
 
-        .logo:hover { transform: scale(1.05); }
-
-        .header-nav {
+        .nav {
             display: flex;
             gap: 2rem;
             align-items: center;
         }
 
         .nav-link {
-            color: var(--gray);
+           color: var(--gray);
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
             position: relative;
         }
 
-        .nav-link.active,
-        .nav-link:hover { color: var(--primary); }
+        .nav-link:hover {
+            color: var(--primary);
+        }
 
-        .nav-link::after {
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .nav-link.active::after {
             content: '';
             position: absolute;
             bottom: -5px;
             left: 0;
-            width: 0;
+            width: 100%;
             height: 2px;
             background: var(--primary);
-            transition: width 0.3s ease;
         }
 
-        .nav-link.active::after,
-        .nav-link:hover::after { width: 100%; }
+        .auth-button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 400;
+            color: var(--dark);
+            font-size:0.9rem;
+        }
+
+        .logout-button {
+            
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
 
         .btn {
             padding: 0.625rem 1.5rem;
@@ -263,7 +313,7 @@ try {
         }
 
         .edit-notice {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            
             border-left: 4px solid var(--warning);
             padding: 1.5rem;
             border-radius: 12px;
@@ -517,51 +567,54 @@ try {
     <header class="header">
         <div class="header-container">
             <a href="/" class="logo">
-                <img src="logo.png" height="22vw" />
+                <img src="logo.png" height="22vw" alt="<?= SITE_NAME ?>">
             </a>
-            <nav class="header-nav">
+             <div class="user-info">
+                <?php if ($isAuthenticated): ?>
+                    <span class="user-name">
+                        
+                        <?php
+                        if (!empty($currentUser['email'])) {
+                            echo htmlspecialchars($currentUser['email']);
+                        } elseif (!empty($currentUser['name'])) {
+                            echo htmlspecialchars($currentUser['name']);
+                        } else {
+                            echo htmlspecialchars($currentUser['phone']);
+                        }
+                        ?>
+                    </span>
+                    
+                <?php else: ?>
+                    <button class="auth-button" onclick="openAuthModal()">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </button>
+                <?php endif; ?>
+            </div>
+            <nav class="nav">
                 <?php include 'components/mega-menu.php'; ?>
                 <a href="/about.php" class="nav-link">О нас</a>
                 <a href="/portfolio.php" class="nav-link">Портфолио</a>
                 <a href="/contacts.php" class="nav-link">Контакты</a>
-                <a href="/orders.php" class="nav-link">Мои заказы</a>
-                <a href="/profile.php" class="nav-link active">
-                    <?php
-                    if (!empty($currentUser['email'])) {
-                        echo htmlspecialchars($currentUser['email']);
-                    } elseif (!empty($currentUser['name'])) {
-                        echo htmlspecialchars($currentUser['name']);
-                    } else {
-                        echo htmlspecialchars($currentUser['phone']);
-                    }
-                    ?>
-                </a>
-                <?php include 'components/cart.php'; ?>
+                <?php if ($isAuthenticated): ?>
+                    <a href="/orders.php" class="nav-link ">Мои заказы</a>
+                    <a href="/profile.php" class="nav-link active"><i class="fas fa-user"></i></a>
+                    <button class="logout-button" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> 
+                    </button>
+                    
+                <?php endif; ?>
             </nav>
+           
         </div>
     </header>
 
-    <section class="hero">
-        <h1>Мой профиль</h1>
-    </section>
+   
 
     <section class="profile-section">
         <div class="container">
             <div class="profile-card">
                 <div class="profile-header">
-                    <div class="profile-avatar">
-                        <?php
-                        $initial = '';
-                        if (!empty($currentUser['name'])) {
-                            $initial = mb_strtoupper(mb_substr($currentUser['name'], 0, 1));
-                        } elseif (!empty($currentUser['email'])) {
-                            $initial = mb_strtoupper(mb_substr($currentUser['email'], 0, 1));
-                        } else {
-                            $initial = '👤';
-                        }
-                        echo htmlspecialchars($initial);
-                        ?>
-                    </div>
+                    
                     <div class="profile-header-info">
                         <h2>
                             <?php
@@ -659,6 +712,7 @@ try {
         </div>
     </section>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -671,9 +725,9 @@ try {
                 <h3>Услуги</h3>
                 <?php
                 $firstHalf = array_slice($categories, 0, ceil(count($categories) / 2));
-                foreach ($firstHalf as $cat):
+                foreach ($firstHalf as $category):
                 ?>
-                    <a href="/catalog.php?category=<?= urlencode($cat) ?>"><?= htmlspecialchars($cat) ?></a>
+                    <a href="/catalog.php?category=<?= urlencode($category) ?>"><?= htmlspecialchars($category) ?></a>
                 <?php endforeach; ?>
             </div>
 
@@ -681,12 +735,12 @@ try {
                 <h3>&nbsp;</h3>
                 <?php
                 $secondHalf = array_slice($categories, ceil(count($categories) / 2));
-                foreach ($secondHalf as $cat):
+                foreach ($secondHalf as $category):
                 ?>
-                    <a href="/catalog.php?category=<?= urlencode($cat) ?>"><?= htmlspecialchars($cat) ?></a>
+                    <a href="/catalog.php?category=<?= urlencode($category) ?>"><?= htmlspecialchars($category) ?></a>
                 <?php endforeach; ?>
             </div>
-
+            
             <div class="footer-section">
                 <h3>Контакты</h3>
                 <p><i class="fas fa-phone"></i> +7 (985) 315-20-05</p>
