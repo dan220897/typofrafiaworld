@@ -131,15 +131,20 @@ function getCart($db, $sessionId, $userId) {
 function addToCart($db, $sessionId, $userId) {
     $data = json_decode(file_get_contents('php://input'), true);
 
+    logMessage("addToCart вызван с данными: " . json_encode($data), 'DEBUG');
+
     if (!isset($data['service_id']) || !isset($data['quantity']) || !isset($data['unit_price'])) {
         sendError('Missing required fields: service_id, quantity, unit_price', 400);
     }
 
+    // Явное приведение service_id к целому числу или строке (в зависимости от типа в БД)
     $serviceId = $data['service_id'];
     $quantity = (int)$data['quantity'];
     $unitPrice = (float)$data['unit_price'];
     $parameters = isset($data['parameters']) ? json_encode($data['parameters'], JSON_UNESCAPED_UNICODE) : '{}';
     $totalPrice = $unitPrice * $quantity;
+
+    logMessage("Обработанные данные: service_id={$serviceId}, quantity={$quantity}, unit_price={$unitPrice}, total_price={$totalPrice}", 'INFO');
 
     // Проверяем существование услуги
     $stmt = $db->prepare("SELECT id FROM services WHERE id = ?");
@@ -177,11 +182,14 @@ function addToCart($db, $sessionId, $userId) {
         $stmt->execute([$quantity, $quantity, $existingItem['id']]);
     } else {
         // Добавляем новый товар
+        logMessage("Добавление нового товара в корзину: session_id=" . ($userId ? 'null' : $sessionId) . ", user_id={$userId}, service_id={$serviceId}, quantity={$quantity}", 'INFO');
+
         $stmt = $db->prepare("
             INSERT INTO cart (session_id, user_id, service_id, quantity, parameters, unit_price, total_price, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         ");
-        $stmt->execute([
+
+        $result = $stmt->execute([
             $userId ? null : $sessionId,
             $userId,
             $serviceId,
@@ -190,6 +198,14 @@ function addToCart($db, $sessionId, $userId) {
             $unitPrice,
             $totalPrice
         ]);
+
+        if (!$result) {
+            logMessage("Ошибка добавления товара в корзину: " . json_encode($stmt->errorInfo()), 'ERROR');
+            sendError('Ошибка добавления товара в корзину', 500);
+        } else {
+            $cartId = $db->lastInsertId();
+            logMessage("Товар успешно добавлен в корзину с ID: {$cartId}", 'INFO');
+        }
     }
 
     // Возвращаем обновленную корзину
