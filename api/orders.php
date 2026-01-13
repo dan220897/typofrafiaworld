@@ -167,16 +167,44 @@ function handleGetOrders($userService) {
 
     try {
         $db = Database::getInstance()->getConnection();
-        
-        // Строим WHERE условие
-        $whereConditions = ['o.user_id = ?'];
-        $params = [$userId];
-        
+
+        // Получаем информацию о текущем пользователе
+        $currentUser = $userService->getCurrentUser();
+        $userEmail = $currentUser['email'] ?? null;
+        $userPhone = $currentUser['phone'] ?? null;
+
+        // Находим все связанные user_id (по email или phone)
+        $relatedUserIds = [$userId];
+
+        if ($userEmail) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $stmt->execute([$userEmail, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        if ($userPhone) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE phone = ? AND id != ?");
+            $stmt->execute([$userPhone, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        $relatedUserIds = array_unique($relatedUserIds);
+        logMessage("Поиск заказов для связанных user_id: " . implode(', ', $relatedUserIds), 'DEBUG');
+
+        // Строим WHERE условие с учетом всех связанных user_id
+        $placeholders = implode(',', array_fill(0, count($relatedUserIds), '?'));
+        $whereConditions = ["o.user_id IN ({$placeholders})"];
+        $params = $relatedUserIds;
+
         if ($status && array_key_exists($status, ORDER_STATUSES)) {
             $whereConditions[] = 'o.status = ?';
             $params[] = $status;
         }
-        
+
         $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
         
         // Получаем общее количество заказов
@@ -190,7 +218,7 @@ function handleGetOrders($userService) {
         
         // Получаем заказы с дополнительной информацией
         $stmt = $db->prepare("
-            SELECT 
+            SELECT
                 o.id,
                 o.order_number,
                 o.status,
@@ -211,10 +239,12 @@ function handleGetOrders($userService) {
             ORDER BY o.created_at DESC
             LIMIT ? OFFSET ?
         ");
-        
-        $params[] = $limit;
-        $params[] = $offset;
-        $stmt->execute($params);
+
+        // Создаем копию params для добавления limit и offset
+        $queryParams = $params;
+        $queryParams[] = $limit;
+        $queryParams[] = $offset;
+        $stmt->execute($queryParams);
         $orders = $stmt->fetchAll();
 
         // Отладка: выводим количество найденных заказов
@@ -264,18 +294,46 @@ function handleGetOrders($userService) {
  */
 function handleGetOrderById($orderId, $userService) {
     $userId = $_SESSION['user_id'];
-    
+
     try {
         $db = Database::getInstance()->getConnection();
-        
-        // Получаем заказ с проверкой владельца
+
+        // Получаем информацию о текущем пользователе
+        $currentUser = $userService->getCurrentUser();
+        $userEmail = $currentUser['email'] ?? null;
+        $userPhone = $currentUser['phone'] ?? null;
+
+        // Находим все связанные user_id (по email или phone)
+        $relatedUserIds = [$userId];
+
+        if ($userEmail) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $stmt->execute([$userEmail, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        if ($userPhone) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE phone = ? AND id != ?");
+            $stmt->execute([$userPhone, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        $relatedUserIds = array_unique($relatedUserIds);
+        $placeholders = implode(',', array_fill(0, count($relatedUserIds), '?'));
+
+        // Получаем заказ с проверкой владельца (по всем связанным user_id)
         $stmt = $db->prepare("
             SELECT o.*, u.phone, u.name as user_name, u.email
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
-            WHERE o.id = ? AND o.user_id = ?
+            WHERE o.id = ? AND o.user_id IN ({$placeholders})
         ");
-        $stmt->execute([$orderId, $userId]);
+        $params = array_merge([$orderId], $relatedUserIds);
+        $stmt->execute($params);
         $order = $stmt->fetch();
         
         if (!$order) {
