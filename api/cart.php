@@ -342,8 +342,11 @@ function checkout($db, $sessionId, $userId) {
     $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (empty($cartItems)) {
+        logMessage("Корзина пуста для sessionId: {$sessionId}, userId: " . ($userId ?? 'null'), 'ERROR');
         sendError('Cart is empty', 400);
     }
+
+    logMessage("Найдено товаров в корзине: " . count($cartItems) . " для user_id: {$userId}", 'INFO');
 
     // Начинаем транзакцию
     $db->beginTransaction();
@@ -435,15 +438,22 @@ function checkout($db, $sessionId, $userId) {
         $stmt->execute([$orderNumber, $userId, $totalAmount, $totalAmount, $deliveryAddress]);
         $orderId = $db->lastInsertId();
 
+        logMessage("Создан заказ ID: {$orderId}, order_number: {$orderNumber}, user_id: {$userId}, total: {$totalAmount}", 'INFO');
+
         // Добавляем товары в заказ
+        logMessage("Добавляем товары в заказ ID: {$orderId}, количество товаров: " . count($cartItems), 'INFO');
+
         foreach ($cartItems as $item) {
+            logMessage("Вставка товара: service_id={$item['service_id']}, quantity={$item['quantity']}, unit_price={$item['unit_price']}, total_price={$item['total_price']}", 'DEBUG');
+
             $stmt = $db->prepare("
                 INSERT INTO order_items (
                     order_id, service_id, quantity, parameters,
                     unit_price, total_price, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, NOW())
             ");
-            $stmt->execute([
+
+            $result = $stmt->execute([
                 $orderId,
                 $item['service_id'],
                 $item['quantity'],
@@ -451,6 +461,13 @@ function checkout($db, $sessionId, $userId) {
                 $item['unit_price'],
                 $item['total_price']
             ]);
+
+            if (!$result) {
+                logMessage("Ошибка вставки товара в order_items: " . json_encode($stmt->errorInfo()), 'ERROR');
+            } else {
+                $insertedId = $db->lastInsertId();
+                logMessage("Товар успешно добавлен в order_items с ID: {$insertedId}", 'INFO');
+            }
         }
 
         // Очищаем корзину
@@ -470,6 +487,7 @@ function checkout($db, $sessionId, $userId) {
         $stmt->execute([$orderId]);
 
         $db->commit();
+        logMessage("Транзакция успешно завершена для заказа ID: {$orderId}", 'INFO');
 
         // Отправляем уведомления (TODO: Telegram, Email, SMS)
 
@@ -481,6 +499,7 @@ function checkout($db, $sessionId, $userId) {
 
     } catch (Exception $e) {
         $db->rollBack();
+        logMessage("Ошибка при создании заказа, транзакция откачена: " . $e->getMessage() . "\nStack trace: " . $e->getTraceAsString(), 'ERROR');
         throw $e;
     }
 }
