@@ -198,213 +198,124 @@ try {
 
         .contacts-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
             margin-bottom: 4rem;
         }
 
-        .contact-info h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: var(--dark);
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
+        .location-card {
             background: var(--white);
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        .contact-item:hover {
-            transform: translateX(5px);
+            border-radius: 20px;
+            padding: 2rem;
             box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
 
-        .contact-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: var(--primary);
+        .location-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+
+        .location-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .location-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-size: 1.5rem;
-            flex-shrink: 0;
+            gap: 0.75rem;
         }
 
-        .contact-details h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
+        .location-name i {
+            color: var(--primary);
         }
 
-        .contact-details p {
+        .location-detail {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
             color: var(--gray);
-            font-size: 1rem;
         }
 
-        .contact-details a {
+        .location-detail i {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-top: 0.25rem;
+        }
+
+        .location-detail-text {
+            flex: 1;
+        }
+
+        .location-detail-text strong {
+            color: var(--dark);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .location-detail a {
             color: var(--primary);
             text-decoration: none;
+            font-weight: 600;
             transition: color 0.3s ease;
         }
 
-        .contact-details a:hover {
+        .location-detail a:hover {
             color: var(--primary-hover);
         }
 
-        .contact-form {
-            background: var(--white);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .contact-form h3 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: var(--dark);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--dark);
-            font-size: 0.9rem;
-        }
-
-        .form-input,
-        .form-textarea {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        .map {
-            width: 100%;
-            height: 400px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            background: #e5e7eb;
+        .location-actions {
             display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .map i {
-            font-size: 4rem;
-            color: var(--gray);
-        }
-
-        .telegram-widget {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 99;
-            display: flex;
-            align-items: center;
             gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--light-gray);
         }
 
-        .telegram-info {
-            background: var(--white);
-            padding: 0.75rem 1.25rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow-lg);
-            opacity: 0;
-            transform: translateX(20px);
-            transition: all 0.3s ease;
-            max-width: 0;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .telegram-widget:hover .telegram-info {
-            opacity: 1;
-            transform: translateX(0);
-            max-width: 250px;
-        }
-
-        .telegram-info-text {
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 0.25rem;
-            font-size: 0.9rem;
-        }
-
-        .telegram-info-status {
-            font-size: 0.75rem;
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .telegram-info-status::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .telegram-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #0088cc;
-            color: var(--white);
-            border: none;
-            font-size: 1.75rem;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0, 136, 204, 0.4);
-            transition: all 0.3s ease;
+        .location-btn {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
         }
 
-        .telegram-btn:hover {
-            transform: scale(1.1) rotate(10deg);
-            box-shadow: 0 12px 28px rgba(0, 136, 204, 0.5);
+        .btn-telegram {
+            background: linear-gradient(135deg, #0088cc, #229ED9);
+            color: var(--white);
         }
+
+        .btn-telegram:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 136, 204, 0.3);
+        }
+
+        .btn-call {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: var(--white);
+        }
+
+        .btn-call:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
 
         .footer {
             background: var(--dark);
@@ -558,19 +469,12 @@ try {
             .hero h1 { font-size: 2rem; }
             .hero p { font-size: 1rem; }
             .contacts-section { padding: 3rem 0; }
-            .contact-info h2 { font-size: 1.75rem; }
-            .contact-form { padding: 2rem; }
-            .contact-form h3 { font-size: 1.5rem; }
-            .telegram-widget { bottom: 1.5rem; right: 1.5rem; }
-            .telegram-btn { width: 56px; height: 56px; font-size: 1.5rem; }
-            .telegram-widget:hover .telegram-info { display: none; }
         }
 
         @media (max-width: 480px) {
             .header-nav a:not(.btn) { display: none; }
             .hero h1 { font-size: 1.5rem; }
             .btn { padding: 0.5rem 1.25rem; font-size: 0.85rem; }
-            .contact-form { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -601,85 +505,58 @@ try {
     <section class="contacts-section">
         <div class="container">
             <div class="contacts-grid">
-                <div class="contact-info">
-                    <h2>Как нас найти</h2>
+                <?php if (!empty($pickupPoints)): ?>
+                    <?php foreach ($pickupPoints as $point): ?>
+                        <div class="location-card">
+                            <div class="location-header">
+                                <h3 class="location-name">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <?= htmlspecialchars($point['name']) ?>
+                                </h3>
+                            </div>
 
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Адрес</h3>
-                            <p>г. Москва, ул. Примерная, д. 123</p>
-                        </div>
-                    </div>
+                            <div class="location-detail">
+                                <i class="fas fa-location-dot"></i>
+                                <div class="location-detail-text">
+                                    <strong>Адрес</strong>
+                                    <?= htmlspecialchars($point['address']) ?>
+                                </div>
+                            </div>
 
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Телефон</h3>
-                            <p><a href="tel:+7XXXXXXXXXX">+7 (XXX) XXX-XX-XX</a></p>
-                        </div>
-                    </div>
+                            <div class="location-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="location-detail-text">
+                                    <strong>Телефон</strong>
+                                    <a href="tel:<?= htmlspecialchars($point['phone']) ?>"><?= htmlspecialchars($point['phone']) ?></a>
+                                </div>
+                            </div>
 
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Email</h3>
-                            <p><a href="mailto:<?= ADMIN_EMAIL ?>"><?= ADMIN_EMAIL ?></a></p>
-                        </div>
-                    </div>
+                            <div class="location-detail">
+                                <i class="fas fa-clock"></i>
+                                <div class="location-detail-text">
+                                    <strong>Часы работы</strong>
+                                    <?= htmlspecialchars($point['working_hours']) ?>
+                                </div>
+                            </div>
 
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-clock"></i>
+                            <div class="location-actions">
+                                <a href="tel:<?= htmlspecialchars($point['phone']) ?>" class="location-btn btn-call">
+                                    <i class="fas fa-phone"></i>
+                                    Позвонить
+                                </a>
+                                <a href="<?= MANAGER_TELEGRAM_LINK ?>" target="_blank" class="location-btn btn-telegram">
+                                    <i class="fab fa-telegram"></i>
+                                    Telegram
+                                </a>
+                            </div>
                         </div>
-                        <div class="contact-details">
-                            <h3>Часы работы</h3>
-                            <p>Пн-Пт: 9:00 - 18:00<br>Сб-Вс: Выходной</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="contact-form">
-                    <h3>Напишите нам</h3>
-                    <form id="contactForm" onsubmit="handleContactForm(event)">
-                        <div class="form-group">
-                            <label for="name">Ваше имя</label>
-                            <input type="text" id="name" class="form-input" placeholder="Иван Иванов" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" class="form-input" placeholder="example@mail.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Сообщение</label>
-                            <textarea id="message" class="form-textarea" placeholder="Ваше сообщение..." required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Отправить сообщение</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="map">
-                <i class="fas fa-map-marked-alt"></i>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Точки самовывоза не найдены</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
-
-    <div class="telegram-widget">
-        <div class="telegram-info">
-            <div class="telegram-info-text">Свяжитесь с нами в Telegram</div>
-            <div class="telegram-info-status">Мы сейчас в сети</div>
-        </div>
-        <button class="telegram-btn" onclick="window.open('https://t.me/your_bot', '_blank')" title="Написать в Telegram">
-            <i class="fab fa-telegram-plane"></i>
-        </button>
-    </div>
 
     <footer class="footer">
         <div class="footer-content">
@@ -752,31 +629,5 @@ try {
         </div>
     </footer>
 
-    <script>
-        function handleContactForm(event) {
-            event.preventDefault();
-            alert('Спасибо за ваше сообщение! Мы свяжемся с вами в ближайшее время.');
-            document.getElementById('contactForm').reset();
-        }
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const items = document.querySelectorAll('.contact-item');
-            items.forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(30px)';
-                el.style.transition = 'all 0.6s ease';
-                observer.observe(el);
-            });
-        });
-    </script>
 </body>
 </html>
