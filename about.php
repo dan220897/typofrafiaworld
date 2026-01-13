@@ -229,6 +229,7 @@ ease;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
             align-items: center;
+            padding-top:55px;
             margin-bottom: 5rem;
         }
 
@@ -755,7 +756,7 @@ ease;
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
-                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
+                    
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
