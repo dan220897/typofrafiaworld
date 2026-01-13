@@ -152,11 +152,19 @@ function handlePutRequest($action, $userService, $chatService) {
  */
 function handleGetOrders($userService) {
     $userId = $_SESSION['user_id'];
+
+    // Отладочная информация
+    logMessage("Запрос списка заказов - User ID: {$userId}, Session: " . json_encode([
+        'user_id' => $_SESSION['user_id'] ?? 'not set',
+        'user_email' => $_SESSION['user_email'] ?? 'not set',
+        'user_phone' => $_SESSION['user_phone'] ?? 'not set'
+    ]), 'DEBUG');
+
     $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? min(50, max(1, (int)$_GET['limit'])) : 20;
     $status = isset($_GET['status']) ? $_GET['status'] : null;
     $offset = ($page - 1) * $limit;
-    
+
     try {
         $db = Database::getInstance()->getConnection();
         
@@ -208,7 +216,10 @@ function handleGetOrders($userService) {
         $params[] = $offset;
         $stmt->execute($params);
         $orders = $stmt->fetchAll();
-        
+
+        // Отладка: выводим количество найденных заказов
+        logMessage("Найдено заказов для user_id {$userId}: " . count($orders) . " из {$totalCount} всего", 'DEBUG');
+
         // Форматируем заказы
         $formattedOrders = [];
         foreach ($orders as $order) {

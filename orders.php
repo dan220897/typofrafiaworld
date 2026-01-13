@@ -549,7 +549,16 @@ try {
             <div class="user-info">
                 <?php if ($isAuthenticated): ?>
                     <span class="user-name">
-                        <i class="fas fa-user"></i> <?= htmlspecialchars($currentUser['phone']) ?>
+                        <i class="fas fa-user"></i>
+                        <?php
+                        if (!empty($currentUser['email'])) {
+                            echo htmlspecialchars($currentUser['email']);
+                        } elseif (!empty($currentUser['name'])) {
+                            echo htmlspecialchars($currentUser['name']);
+                        } else {
+                            echo htmlspecialchars($currentUser['phone']);
+                        }
+                        ?>
                     </span>
                     <button class="logout-button" onclick="logout()">
                         <i class="fas fa-sign-out-alt"></i> Выход
@@ -565,6 +574,11 @@ try {
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Debug info -->
+        <?php if ($currentUser): ?>
+            <!-- User ID: <?= $currentUser['id'] ?> | Email: <?= $currentUser['email'] ?? 'not set' ?> | Phone: <?= $currentUser['phone'] ?? 'not set' ?> -->
+        <?php endif; ?>
+
         <div class="page-header">
             <h1 class="page-title"><i class="fas fa-shopping-bag"></i> Мои заказы</h1>
             <p class="page-subtitle">История ваших заказов и текущие заявки</p>
@@ -686,9 +700,12 @@ try {
                 }
 
                 const data = await response.json();
+                console.log('Ответ API:', data); // Отладка
 
                 if (data.success) {
                     allOrders = data.orders || [];
+                    console.log('Количество заказов:', allOrders.length); // Отладка
+                    console.log('Заказы:', allOrders); // Отладка
                     renderOrders();
                 } else {
                     showError(data.error || 'Не удалось загрузить заказы');
