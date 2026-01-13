@@ -342,7 +342,9 @@ function handleGetOrderById($orderId, $userService) {
         
         // Получаем позиции заказа
         $stmt = $db->prepare("
-            SELECT oi.*, s.name as service_name, s.description as service_description
+            SELECT oi.*,
+                   COALESCE(s.label, s.name) as service_name,
+                   s.description as service_description
             FROM order_items oi
             LEFT JOIN services s ON oi.service_id = s.id
             WHERE oi.order_id = ?
