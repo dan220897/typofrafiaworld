@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require_once 'config/config.php';
 require_once 'classes/UserService.php';
 
@@ -885,7 +888,7 @@ ease;
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
-                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
+                   
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
