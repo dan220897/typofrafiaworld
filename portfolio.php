@@ -61,7 +61,7 @@ $portfolioItems = [
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: montserrat;
             color: var(--dark);
             background-color: var(--light-gray);
             line-height: 1.6;
@@ -84,9 +84,9 @@ $portfolioItems = [
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            
             backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
+           
             position: sticky;
             top: 0;
             z-index: 100;
@@ -155,15 +155,11 @@ $portfolioItems = [
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+            color:black;
         }
 
         .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            
         }
 
         .hero {
@@ -515,7 +511,7 @@ $portfolioItems = [
                 <a href="/contacts.php" class="nav-link">Контакты</a>
                 <?php if ($isAuthenticated): ?>
                     <a href="/orders.php" class="nav-link">Мои заказы</a>
-                    <a href="/profile.php" class="nav-link"><?= htmlspecialchars($currentUser['name']) ?></a>
+                    
                 <?php else: ?>
                     <a href="#login" class="btn btn-primary" onclick="showAuthModal()">Войти</a>
                 <?php endif; ?>
@@ -524,12 +520,7 @@ $portfolioItems = [
         </div>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Наши работы</h1>
-            <p>Примеры выполненных проектов</p>
-        </div>
-    </section>
+    
 
     <section class="portfolio-section">
         <div class="container">
