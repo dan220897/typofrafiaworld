@@ -58,7 +58,7 @@ try {
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: montserrat;
             color: var(--dark);
             background-color: var(--light-gray);
             line-height: 1.6;
@@ -71,9 +71,9 @@ try {
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            
             backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
+            
             position: sticky;
             top: 0;
             z-index: 100;
@@ -95,11 +95,7 @@ try {
             transition: transform 0.3s ease;
         }
 
-        .logo img {
-            height: 50px;
-            width: auto;
-            transition: transform 0.3s ease;
-        }
+        
 
         .logo:hover img {
             transform: scale(1.05);
@@ -112,10 +108,10 @@ try {
         }
 
         .nav-link {
-            color: var(--dark);
+           color: var(--gray);
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
             position: relative;
         }
 
@@ -162,13 +158,14 @@ try {
         }
 
         .user-name {
-            font-weight: 600;
+            font-weight: 400;
             color: var(--dark);
+            font-size:0.9rem;
         }
 
         .logout-button {
-            background: var(--danger);
-            color: var(--white);
+            
+            color: black;
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 50px;
@@ -309,7 +306,7 @@ try {
         .order-amount {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary);
+            
             text-align: right;
             margin-top: 1rem;
             padding-top: 1rem;
@@ -336,14 +333,10 @@ try {
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--white);
+            color:black;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
+        
 
         .btn-secondary {
             background: var(--light-gray);
@@ -397,129 +390,142 @@ try {
             to { transform: rotate(360deg); }
         }
 
+        /* Footer */
         .footer {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background: var(--dark);
             color: var(--white);
-            padding: 3rem 2rem 1.5rem;
-            margin-top: 4rem;
+            padding: 4rem 2rem 1.5rem;
+            margin-top: 6rem;
         }
 
-        .footer-container {
+        .footer-content {
             max-width: 1280px;
             margin: 0 auto;
-        }
-
-        .footer-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+            gap: 3rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .footer-locations-wrapper {
+            max-width: 1280px;
+            margin: 0 auto 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-locations-wrapper h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
         }
 
         .footer-section h3 {
+            margin-bottom: 1.25rem;
             font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: var(--white);
+            font-weight: 700;
         }
 
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-links a {
-            color: #9ca3af;
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            transition: color 0.3s ease;
+            display: block;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            padding-left: 0;
         }
 
-        .footer-links a:hover {
+        .footer-section a:hover {
             color: var(--white);
+            padding-left: 5px;
         }
 
-        .footer-contact p {
-            color: #9ca3af;
-            margin-bottom: 0.5rem;
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
         }
 
         .footer-social {
             display: flex;
             gap: 1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .footer-social a {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
             color: var(--white);
-            text-decoration: none;
+            font-size: 1.2rem;
             transition: all 0.3s ease;
         }
 
         .footer-social a:hover {
             background: var(--primary);
             transform: translateY(-3px);
+            color: var(--white);
         }
 
-        .footer-locations {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .footer-locations h3 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .locations-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .locations-grid {
+        .footer-locations-container {
             display: flex;
+            flex-wrap: wrap;
             gap: 1.5rem;
-            padding-bottom: 1rem;
         }
 
-        .location-card {
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 1.5rem;
+        .footer-location {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
             transition: all 0.3s ease;
         }
 
-        .location-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-3px);
+        .footer-location:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
         }
 
-        .location-card h4 {
+        .footer-location .location-name {
             color: var(--white);
+            font-weight: 600;
             margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
-        .location-card p {
-            color: #9ca3af;
-            font-size: 0.9rem;
-            margin: 0.25rem 0;
+        .footer-location .location-name i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .footer-location .location-address {
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .footer-location .location-hours {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer-location .location-hours i {
+            margin-right: 0.4rem;
         }
 
         .footer-bottom {
             text-align: center;
             padding-top: 2rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #9ca3af;
+            opacity: 0.7;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 768px) {
@@ -534,22 +540,12 @@ try {
     <header class="header">
         <div class="header-container">
             <a href="/" class="logo">
-                <img src="/assets/img/logo.png" alt="<?= SITE_NAME ?>">
+                <img src="logo.png" height="22vw" alt="<?= SITE_NAME ?>">
             </a>
-            <nav class="nav">
-                <a href="/" class="nav-link">Главная</a>
-                <a href="/catalog.php" class="nav-link">Каталог</a>
-                <a href="/portfolio.php" class="nav-link">Портфолио</a>
-                <a href="/about.php" class="nav-link">О нас</a>
-                <a href="/contacts.php" class="nav-link">Контакты</a>
-                <?php if ($isAuthenticated): ?>
-                    <a href="/orders.php" class="nav-link active">Мои заказы</a>
-                <?php endif; ?>
-            </nav>
-            <div class="user-info">
+             <div class="user-info">
                 <?php if ($isAuthenticated): ?>
                     <span class="user-name">
-                        <i class="fas fa-user"></i>
+                        
                         <?php
                         if (!empty($currentUser['email'])) {
                             echo htmlspecialchars($currentUser['email']);
@@ -560,15 +556,28 @@ try {
                         }
                         ?>
                     </span>
-                    <button class="logout-button" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> Выход
-                    </button>
+                    
                 <?php else: ?>
                     <button class="auth-button" onclick="openAuthModal()">
                         <i class="fas fa-sign-in-alt"></i> Войти
                     </button>
                 <?php endif; ?>
             </div>
+            <nav class="nav">
+                <?php include 'components/mega-menu.php'; ?>
+                <a href="/about.php" class="nav-link">О нас</a>
+                <a href="/portfolio.php" class="nav-link">Портфолио</a>
+                <a href="/contacts.php" class="nav-link">Контакты</a>
+                <?php if ($isAuthenticated): ?>
+                    <a href="/orders.php" class="nav-link active">Мои заказы</a>
+                    <a href="/profile.php" class="nav-link"><i class="fas fa-user"></i></a>
+                    <button class="logout-button" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> 
+                    </button>
+                    
+                <?php endif; ?>
+            </nav>
+           
         </div>
     </header>
 
@@ -579,20 +588,7 @@ try {
             <!-- User ID: <?= $currentUser['id'] ?> | Email: <?= $currentUser['email'] ?? 'not set' ?> | Phone: <?= $currentUser['phone'] ?? 'not set' ?> -->
         <?php endif; ?>
 
-        <div class="page-header">
-            <h1 class="page-title"><i class="fas fa-shopping-bag"></i> Мои заказы</h1>
-            <p class="page-subtitle">История ваших заказов и текущие заявки</p>
-        </div>
-
-        <!-- Filters -->
-        <div class="filters">
-            <button class="filter-button active" data-status="all">Все заказы</button>
-            <button class="filter-button" data-status="new">Новые</button>
-            <button class="filter-button" data-status="processing">В работе</button>
-            <button class="filter-button" data-status="ready">Готовы</button>
-            <button class="filter-button" data-status="completed">Завершенные</button>
-            <button class="filter-button" data-status="canceled">Отмененные</button>
-        </div>
+        
 
         <!-- Orders Grid -->
         <div id="ordersContainer">
@@ -603,85 +599,7 @@ try {
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-grid">
-                <div class="footer-section">
-                    <h3>О компании</h3>
-                    <ul class="footer-links">
-                        <li><a href="/about.php">О нас</a></li>
-                        <li><a href="/portfolio.php">Портфолио</a></li>
-                        <li><a href="/contacts.php">Контакты</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h3>Услуги</h3>
-                    <ul class="footer-links">
-                        <?php
-                        $half = ceil(count($categories) / 2);
-                        for ($i = 0; $i < $half; $i++):
-                            if (isset($categories[$i])):
-                        ?>
-                            <li><a href="/catalog.php?category=<?= urlencode($categories[$i]) ?>"><?= htmlspecialchars($categories[$i]) ?></a></li>
-                        <?php
-                            endif;
-                        endfor;
-                        ?>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h3>Еще услуги</h3>
-                    <ul class="footer-links">
-                        <?php
-                        for ($i = $half; $i < count($categories); $i++):
-                            if (isset($categories[$i])):
-                        ?>
-                            <li><a href="/catalog.php?category=<?= urlencode($categories[$i]) ?>"><?= htmlspecialchars($categories[$i]) ?></a></li>
-                        <?php
-                            endif;
-                        endfor;
-                        ?>
-                    </ul>
-                </div>
-
-                <div class="footer-section footer-contact">
-                    <h3>Контакты</h3>
-                    <p><i class="fas fa-phone"></i> <?= PHONE_NUMBER ?></p>
-                    <p><i class="fas fa-envelope"></i> <?= EMAIL_FROM_ADDRESS ?></p>
-                    <div class="footer-social">
-                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" title="Telegram"><i class="fab fa-telegram"></i></a>
-                        <a href="#" title="VK"><i class="fab fa-vk"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <?php if (!empty($pickupPoints)): ?>
-            <div class="footer-locations">
-                <h3>Наши точки</h3>
-                <div class="locations-wrapper">
-                    <div class="locations-grid">
-                        <?php foreach ($pickupPoints as $point): ?>
-                            <div class="location-card">
-                                <h4><?= htmlspecialchars($point['name']) ?></h4>
-                                <p><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($point['address']) ?></p>
-                                <p><i class="fas fa-phone"></i> <?= htmlspecialchars($point['phone']) ?></p>
-                                <p><i class="fas fa-clock"></i> <?= htmlspecialchars($point['working_hours']) ?></p>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <div class="footer-bottom">
-                <p>&copy; <?= date('Y') ?> <?= SITE_NAME ?>. Все права защищены.</p>
-            </div>
-        </div>
-    </footer>
+    
 
     <script>
         let currentFilter = 'all';
@@ -750,9 +668,7 @@ try {
                         <div class="order-number">
                             <i class="fas fa-hashtag"></i> ${order.order_number || order.id}
                         </div>
-                        <div class="order-status status-${order.status}">
-                            ${getStatusLabel(order.status)}
-                        </div>
+                        
                     </div>
                     <div class="order-details">
                         <div class="order-detail">
