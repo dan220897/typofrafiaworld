@@ -204,11 +204,31 @@
     }
 
     .cart-item-qty-input {
-        width: 50px;
+        width: 60px;
         text-align: center;
         border: 1px solid var(--light-gray);
         border-radius: 4px;
         padding: 0.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .cart-item-qty-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Скрываем стрелки у input[type=number] */
+    .cart-item-qty-input::-webkit-outer-spin-button,
+    .cart-item-qty-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .cart-item-qty-input[type=number] {
+        -moz-appearance: textfield;
     }
 
     .cart-item-price {
@@ -633,6 +653,9 @@
 
     // Обновить количество товара
     async function updateCartItemQuantity(cartId, quantity) {
+        // Валидация: минимум 1
+        quantity = Math.max(1, parseInt(quantity) || 1);
+
         try {
             const response = await fetch('/api/cart.php?action=update', {
                 method: 'PUT',
@@ -652,9 +675,14 @@
                 cartState.total = data.data.total_amount;
                 cartState.count = data.data.total_items;
                 updateCartUI();
+            } else {
+                // Если ошибка, перезагружаем корзину для восстановления корректного состояния
+                loadCart();
             }
         } catch (error) {
             console.error('Error updating cart:', error);
+            // При ошибке перезагружаем корзину
+            loadCart();
         }
     }
 
@@ -734,7 +762,14 @@
                                 <button class="cart-item-qty-btn" onclick="updateCartItemQuantity(${item.id}, ${item.quantity - 1})">
                                     <i class="fas fa-minus"></i>
                                 </button>
-                                <span>${item.quantity}</span>
+                                <input
+                                    type="number"
+                                    class="cart-item-qty-input"
+                                    value="${item.quantity}"
+                                    min="1"
+                                    onchange="updateCartItemQuantity(${item.id}, parseInt(this.value) || 1)"
+                                    onclick="this.select()"
+                                >
                                 <button class="cart-item-qty-btn" onclick="updateCartItemQuantity(${item.id}, ${item.quantity + 1})">
                                     <i class="fas fa-plus"></i>
                                 </button>
