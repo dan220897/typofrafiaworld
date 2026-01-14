@@ -199,12 +199,17 @@ class Order {
     }
     
     // Получить статистику по статусам
-    public function getStatusStats() {
-        $query = "SELECT status, COUNT(*) as count 
-                 FROM " . $this->table_name . " 
-                 GROUP BY status 
-                 ORDER BY 
-                    CASE status 
+    public function getStatusStats($location_id = null) {
+        $query = "SELECT status, COUNT(*) as count
+                 FROM " . $this->table_name;
+
+        if ($location_id !== null) {
+            $query .= " WHERE location_id = " . intval($location_id);
+        }
+
+        $query .= " GROUP BY status
+                 ORDER BY
+                    CASE status
                         WHEN 'draft' THEN 1
                         WHEN 'pending' THEN 2
                         WHEN 'confirmed' THEN 3
@@ -214,7 +219,7 @@ class Order {
                         WHEN 'cancelled' THEN 7
                         ELSE 8
                     END";
-        
+
         $stmt = $this->conn->query($query);
         return $stmt->fetchAll();
     }

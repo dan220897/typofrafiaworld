@@ -4,9 +4,25 @@
 class Dashboard {
     private $conn;
     private $debug = true; // Включить отладку
-    
+    private $location_id = null;
+
     public function __construct($db) {
         $this->conn = $db;
+
+        // Проверяем, является ли пользователь location admin
+        if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'location') {
+            $this->location_id = $_SESSION['location_id'] ?? null;
+        }
+    }
+
+    /**
+     * Добавляет условие фильтрации по location_id к SQL запросу
+     */
+    private function addLocationFilter($hasWhere = false) {
+        if ($this->location_id !== null) {
+            return ($hasWhere ? ' AND ' : ' WHERE ') . "location_id = " . intval($this->location_id);
+        }
+        return '';
     }
     
     public function getStats() {
@@ -55,39 +71,39 @@ class Dashboard {
     private function getOrderStats() {
         try {
             // Всего заказов
-            $query = "SELECT COUNT(*) as total FROM orders";
+            $query = "SELECT COUNT(*) as total FROM orders" . $this->addLocationFilter();
             $stmt = $this->conn->query($query);
             if (!$stmt) {
                 throw new Exception("Ошибка запроса заказов: " . implode(' ', $this->conn->errorInfo()));
             }
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $total = $result['total'] ?? 0;
-            
+
             // Заказы за текущий месяц
-            $query = "SELECT COUNT(*) as count FROM orders 
-                     WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) 
-                     AND YEAR(created_at) = YEAR(CURRENT_DATE())";
+            $query = "SELECT COUNT(*) as count FROM orders
+                     WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+                     AND YEAR(created_at) = YEAR(CURRENT_DATE())" . $this->addLocationFilter(true);
             $stmt = $this->conn->query($query);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $thisMonth = $result['count'] ?? 0;
-            
+
             // Заказы за прошлый месяц
-            $query = "SELECT COUNT(*) as count FROM orders 
+            $query = "SELECT COUNT(*) as count FROM orders
                      WHERE MONTH(created_at) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))
-                     AND YEAR(created_at) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))";
+                     AND YEAR(created_at) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))" . $this->addLocationFilter(true);
             $stmt = $this->conn->query($query);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $lastMonth = $result['count'] ?? 0;
-            
+
             $change = $this->calculatePercentChange($thisMonth, $lastMonth);
-            
+
             return [
                 'total' => $total,
                 'this_month' => $thisMonth,
                 'last_month' => $lastMonth,
                 'change' => $change
             ];
-            
+
         } catch (Exception $e) {
             if ($this->debug) {
                 echo "Ошибка getOrderStats: " . $e->getMessage() . "<br>";
@@ -99,38 +115,38 @@ class Dashboard {
     private function getRevenueStats() {
         try {
             // Общая выручка
-            $query = "SELECT IFNULL(SUM(final_amount), 0) as total FROM orders WHERE payment_status = 'paid'";
+            $query = "SELECT IFNULL(SUM(final_amount), 0) as total FROM orders WHERE payment_status = 'paid'" . $this->addLocationFilter(true);
             $stmt = $this->conn->query($query);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $total = $result['total'] ?? 0;
-            
+
             // Выручка за текущий месяц
-            $query = "SELECT IFNULL(SUM(final_amount), 0) as amount FROM orders 
+            $query = "SELECT IFNULL(SUM(final_amount), 0) as amount FROM orders
                      WHERE payment_status = 'paid'
-                     AND MONTH(created_at) = MONTH(CURRENT_DATE()) 
-                     AND YEAR(created_at) = YEAR(CURRENT_DATE())";
+                     AND MONTH(created_at) = MONTH(CURRENT_DATE())
+                     AND YEAR(created_at) = YEAR(CURRENT_DATE())" . $this->addLocationFilter(true);
             $stmt = $this->conn->query($query);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $thisMonth = $result['amount'] ?? 0;
-            
+
             // Выручка за прошлый месяц
-            $query = "SELECT IFNULL(SUM(final_amount), 0) as amount FROM orders 
+            $query = "SELECT IFNULL(SUM(final_amount), 0) as amount FROM orders
                      WHERE payment_status = 'paid'
                      AND MONTH(created_at) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))
-                     AND YEAR(created_at) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))";
+                     AND YEAR(created_at) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))" . $this->addLocationFilter(true);
             $stmt = $this->conn->query($query);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $lastMonth = $result['amount'] ?? 0;
-            
+
             $change = $this->calculatePercentChange($thisMonth, $lastMonth);
-            
+
             return [
                 'total' => $total,
                 'this_month' => $thisMonth,
                 'last_month' => $lastMonth,
                 'change' => $change
             ];
-            
+
         } catch (Exception $e) {
             if ($this->debug) {
                 echo "Ошибка getRevenueStats: " . $e->getMessage() . "<br>";
@@ -201,16 +217,17 @@ class Dashboard {
         try {
             $query = "SELECT o.*, u.name as user_name, u.phone as user_phone
                      FROM orders o
-                     LEFT JOIN users u ON o.user_id = u.id
+                     LEFT JOIN users u ON o.user_id = u.id" .
+                     $this->addLocationFilter() . "
                      ORDER BY o.created_at DESC
                      LIMIT :limit";
-            
+
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
-            
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
         } catch (Exception $e) {
             if ($this->debug) {
                 echo "Ошибка getRecentOrders: " . $e->getMessage() . "<br>";
@@ -256,36 +273,36 @@ class Dashboard {
             $labels = [];
             $orders = [];
             $revenue = [];
-            
+
             // Генерируем даты за последние N дней
             for ($i = $days - 1; $i >= 0; $i--) {
                 $date = date('Y-m-d', strtotime("-$i days"));
                 $labels[] = date('d.m', strtotime($date));
-                
+
                 // Заказы за день
-                $query = "SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = :date";
+                $query = "SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = :date" . $this->addLocationFilter(true);
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(':date', $date);
                 $stmt->execute();
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 $orders[] = $result['count'] ?? 0;
-                
+
                 // Выручка за день
-                $query = "SELECT IFNULL(SUM(final_amount), 0) as amount FROM orders 
-                         WHERE DATE(created_at) = :date AND payment_status = 'paid'";
+                $query = "SELECT IFNULL(SUM(final_amount), 0) as amount FROM orders
+                         WHERE DATE(created_at) = :date AND payment_status = 'paid'" . $this->addLocationFilter(true);
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(':date', $date);
                 $stmt->execute();
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 $revenue[] = floatval($result['amount'] ?? 0);
             }
-            
+
             return [
                 'labels' => $labels,
                 'orders' => $orders,
                 'revenue' => $revenue
             ];
-            
+
         } catch (Exception $e) {
             if ($this->debug) {
                 echo "Ошибка getChartData: " . $e->getMessage() . "<br>";

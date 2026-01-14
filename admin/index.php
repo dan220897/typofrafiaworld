@@ -79,8 +79,24 @@ require_once 'includes/header.php';
 <div class="dashboard-container">
     <!-- Приветствие -->
     <div class="welcome-section">
-        <h1>Добро пожаловать, <?php echo htmlspecialchars($_SESSION['admin_name']); ?>!</h1>
-        <p class="text-muted">Роль: <?php echo getAdminRoleLabel($_SESSION['admin_role']); ?></p>
+        <h1>Добро пожаловать, <?php
+            if (isLocationAdmin()) {
+                echo htmlspecialchars($_SESSION['location_name'] ?? 'Администратор точки');
+            } else {
+                echo htmlspecialchars($_SESSION['admin_name'] ?? 'Администратор');
+            }
+        ?>!</h1>
+        <p class="text-muted">
+            <?php
+            if (isLocationAdmin()) {
+                echo 'Роль: Администратор точки';
+            } elseif (isSuperAdmin()) {
+                echo 'Роль: Суперадминистратор';
+            } else {
+                echo 'Роль: ' . getAdminRoleLabel($_SESSION['admin_role'] ?? 'admin');
+            }
+            ?>
+        </p>
         <p class="text-muted">Последний вход: <?php echo !empty($_SESSION['last_login']) ? formatTime($_SESSION['last_login']) : 'впервые'; ?></p>
     </div>
     
@@ -164,51 +180,7 @@ require_once 'includes/header.php';
                 </div>
             </div>
         </div>
-        
-        <!-- Активные чаты -->
-        <div class="stat-card">
-            <div class="stat-icon chats">
-                <i class="fas fa-comments"></i>
-            </div>
-            <div class="stat-content">
-                <h3><?php echo isset($stats['chats']['active']) ? $stats['chats']['active'] : '0'; ?></h3>
-                <p>Активных чатов</p>
-                <div class="stat-details">
-                    <?php if (isset($stats['chats']['unread'])): ?>
-                    <p>Непрочитанных: <strong><?php echo $stats['chats']['unread']; ?></strong></p>
-                    <?php endif; ?>
-                    <?php if (isset($stats['chats']['avg_response_time'])): ?>
-                    <p>Среднее время ответа: <strong><?php echo $stats['chats']['avg_response_time']; ?> мин</strong></p>
-                    <?php endif; ?>
-                    <?php if (isset($stats['chats']['resolved_today'])): ?>
-                    <p>Решено сегодня: <strong><?php echo $stats['chats']['resolved_today']; ?></strong></p>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Товары -->
-        <div class="stat-card">
-            <div class="stat-icon products">
-                <i class="fas fa-box-open"></i>
-            </div>
-            <div class="stat-content">
-                <h3><?php echo isset($stats['products']['total']) ? number_format($stats['products']['total']) : '0'; ?></h3>
-                <p>Товаров в каталоге</p>
-                <div class="stat-details">
-                    <?php if (isset($stats['products']['out_of_stock'])): ?>
-                    <p>Нет в наличии: <strong><?php echo $stats['products']['out_of_stock']; ?></strong></p>
-                    <?php endif; ?>
-                    <?php if (isset($stats['products']['low_stock'])): ?>
-                    <p>Заканчиваются: <strong><?php echo $stats['products']['low_stock']; ?></strong></p>
-                    <?php endif; ?>
-                    <?php if (isset($stats['products']['popular'])): ?>
-                    <p>Популярных: <strong><?php echo $stats['products']['popular']; ?></strong></p>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        
+
         <!-- Посещаемость -->
         <div class="stat-card">
             <div class="stat-icon visitors">
