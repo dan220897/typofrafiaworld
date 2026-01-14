@@ -76,7 +76,11 @@ class Order {
         if (!empty($filters['user_id'])) {
             $query .= " AND o.user_id = :user_id";
         }
-        
+
+        if (isset($filters['location_id'])) {
+            $query .= " AND o.location_id = :location_id";
+        }
+
         $query .= " GROUP BY o.id
                    ORDER BY o.created_at DESC
                    LIMIT :limit OFFSET :offset";
@@ -108,7 +112,11 @@ class Order {
         if (!empty($filters['user_id'])) {
             $stmt->bindParam(":user_id", $filters['user_id']);
         }
-        
+
+        if (isset($filters['location_id'])) {
+            $stmt->bindParam(":location_id", $filters['location_id'], PDO::PARAM_INT);
+        }
+
         $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
         $stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
         
@@ -163,33 +171,41 @@ class Order {
         if (!empty($filters['user_id'])) {
             $query .= " AND o.user_id = :user_id";
         }
-        
+
+        if (isset($filters['location_id'])) {
+            $query .= " AND o.location_id = :location_id";
+        }
+
         $stmt = $this->conn->prepare($query);
-        
+
         // Привязываем параметры
         if (!empty($filters['search'])) {
             $search = "%{$filters['search']}%";
             $stmt->bindParam(":search", $search);
         }
-        
+
         if (!empty($filters['status'])) {
             $stmt->bindParam(":status", $filters['status']);
         }
-        
+
         if (!empty($filters['payment_status'])) {
             $stmt->bindParam(":payment_status", $filters['payment_status']);
         }
-        
+
         if (!empty($filters['date_from'])) {
             $stmt->bindParam(":date_from", $filters['date_from']);
         }
-        
+
         if (!empty($filters['date_to'])) {
             $stmt->bindParam(":date_to", $filters['date_to']);
         }
-        
+
         if (!empty($filters['user_id'])) {
             $stmt->bindParam(":user_id", $filters['user_id']);
+        }
+
+        if (isset($filters['location_id'])) {
+            $stmt->bindParam(":location_id", $filters['location_id'], PDO::PARAM_INT);
         }
         
         $stmt->execute();

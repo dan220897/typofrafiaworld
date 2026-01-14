@@ -508,22 +508,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <span>Пользователи</span>
                     </a>
                 </div>
-                
-                <!-- Контент -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Контент</div>
-                    
-                    <a href="/admin/reviews.php" class="nav-link <?php echo $current_page == 'reviews' ? 'active' : ''; ?>" data-tooltip="Отзывы">
-                        <i class="fas fa-star"></i>
-                        <span>Отзывы</span>
-                    </a>
-                    
-                    <a href="/admin/promocodes.php" class="nav-link <?php echo $current_page == 'promocodes' ? 'active' : ''; ?>" data-tooltip="Промокоды">
-                        <i class="fas fa-ticket-alt"></i>
-                        <span>Промокоды</span>
-                    </a>
-                </div>
-                
+
                 <?php if (isSuperAdmin()): ?>
                 <!-- Администрирование -->
                 <div class="nav-section">
@@ -569,19 +554,11 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 </div>
                 
                 <div class="header-right">
-                    <!-- Уведомления -->
-                    <button class="header-btn" onclick="toggleNotifications()">
-                        <i class="fas fa-bell"></i>
-                        <?php if (isset($unread_notifications) && $unread_notifications > 0): ?>
-                        <span class="notification-badge"></span>
-                        <?php endif; ?>
-                    </button>
-                    
                     <!-- Быстрые действия -->
-                    <button class="header-btn" onclick="showQuickActions()">
+                    <button class="header-btn" id="quickActionsBtn">
                         <i class="fas fa-plus"></i>
                     </button>
-                    
+
                     <!-- Меню пользователя -->
                     <div class="user-menu" onclick="toggleUserMenu()">
                         <div class="user-avatar">
@@ -619,15 +596,6 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         
                         <!-- Дропдаун меню -->
                         <div class="dropdown-menu" id="userDropdown">
-                            <a href="/admin/profile.php" class="dropdown-item">
-                                <i class="fas fa-user"></i>
-                                <span>Профиль</span>
-                            </a>
-                            <a href="/admin/activity.php" class="dropdown-item">
-                                <i class="fas fa-chart-line"></i>
-                                <span>Активность</span>
-                            </a>
-                            <div class="dropdown-divider"></div>
                             <a href="/admin/logout.php" class="dropdown-item">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>Выйти</span>
@@ -686,18 +654,107 @@ function toggleUserMenu() {
 document.addEventListener('click', function(event) {
     const userMenu = document.querySelector('.user-menu');
     const dropdown = document.getElementById('userDropdown');
-    
-    if (!userMenu.contains(event.target)) {
+
+    if (userMenu && !userMenu.contains(event.target)) {
         dropdown.classList.remove('show');
+    }
+
+    // Закрытие быстрых действий при клике вне его
+    const quickActionsBtn = document.getElementById('quickActionsBtn');
+    const quickActionsMenu = document.getElementById('quickActionsMenu');
+
+    if (quickActionsMenu && !quickActionsBtn?.contains(event.target) && !quickActionsMenu.contains(event.target)) {
+        quickActionsMenu.classList.remove('show');
     }
 });
 
-// Заглушки для функций (замените на реальные)
-function toggleNotifications() {
-    alert('Функция уведомлений в разработке');
-}
-
-function showQuickActions() {
-    alert('Функция быстрых действий в разработке');
+// Быстрые действия
+const quickActionsBtn = document.getElementById('quickActionsBtn');
+if (quickActionsBtn) {
+    quickActionsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('quickActionsMenu');
+        if (menu) {
+            menu.classList.toggle('show');
+        }
+    });
 }
 </script>
+
+<!-- Меню быстрых действий -->
+<div class="quick-actions-menu" id="quickActionsMenu">
+    <div class="quick-action-item" onclick="window.location.href='/admin/orders.php?action=create'">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Новый заказ</span>
+    </div>
+    <div class="quick-action-item" onclick="window.location.href='/admin/users.php?action=create'">
+        <i class="fas fa-user-plus"></i>
+        <span>Новый клиент</span>
+    </div>
+    <?php if (isSuperAdmin()): ?>
+    <div class="quick-action-item" onclick="window.location.href='/admin/services.php?action=create'">
+        <i class="fas fa-clipboard-list"></i>
+        <span>Новая услуга</span>
+    </div>
+    <div class="quick-action-item" onclick="window.location.href='/admin/locations.php?action=create'">
+        <i class="fas fa-map-marked-alt"></i>
+        <span>Новая точка</span>
+    </div>
+    <?php endif; ?>
+</div>
+
+<style>
+.quick-actions-menu {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+}
+
+.quick-actions-menu.show {
+    display: block;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quick-action-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: #333;
+}
+
+.quick-action-item:hover {
+    background: #f3f4f6;
+}
+
+.quick-action-item i {
+    width: 20px;
+    text-align: center;
+    color: #3b82f6;
+}
+
+.quick-action-item span {
+    font-size: 14px;
+    font-weight: 500;
+}
+</style>

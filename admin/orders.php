@@ -38,8 +38,9 @@ if (isLocationAdmin()) {
 }
 
 $offset = ($page - 1) * $per_page;
-$orders = $order->getOrders($filters, $per_page, $offset);
-$total_orders = $order->getOrdersCount($filters);
+$result = $order->getOrders($filters, $per_page, $offset);
+$orders = $result['data'];
+$total_orders = $result['total'];
 $total_pages = ceil($total_orders / $per_page);
 
 // Получаем статистику по статусам
