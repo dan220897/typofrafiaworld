@@ -6,9 +6,9 @@ require_once 'classes/AdminLog.php';
 require_once 'classes/Admin.php';
 
 // Проверяем авторизацию и права
-checkAdminAuth('view_logs');
+checkAdminAuth();
 
-if ($_SESSION['admin_role'] !== 'super_admin') {
+if (!isSuperAdmin()) {
     header('Location: /admin/403.php');
     exit;
 }

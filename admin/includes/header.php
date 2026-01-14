@@ -472,12 +472,12 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 <!-- Основное меню -->
                 <div class="nav-section">
                     <div class="nav-section-title">Основное</div>
-                    
+
                     <a href="/admin/index.php" class="nav-link <?php echo $current_page == 'index' ? 'active' : ''; ?>" data-tooltip="Дашборд">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Дашборд</span>
                     </a>
-                    
+
                     <a href="/admin/orders.php" class="nav-link <?php echo $current_page == 'orders' ? 'active' : ''; ?>" data-tooltip="Заказы">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Заказы</span>
@@ -485,7 +485,8 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <span class="nav-badge"><?php echo $stats['new_orders']; ?></span>
                         <?php endif; ?>
                     </a>
-                    
+
+                    <?php if (!isLocationAdmin()): ?>
                     <a href="/admin/chats.php" class="nav-link <?php echo $current_page == 'chats' ? 'active' : ''; ?>" data-tooltip="Чаты">
                         <i class="fas fa-comments"></i>
                         <span>Чаты</span>
@@ -493,12 +494,15 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <span class="nav-badge"><?php echo $stats['unread_chats']; ?></span>
                         <?php endif; ?>
                     </a>
-                    
+                    <?php endif; ?>
+
+                    <?php if (isSuperAdmin()): ?>
                     <a href="/admin/services.php" class="nav-link <?php echo $current_page == 'services' ? 'active' : ''; ?>" data-tooltip="Услуги">
                         <i class="fas fa-clipboard-list"></i>
                         <span>Услуги</span>
                     </a>
-                    
+                    <?php endif; ?>
+
                     <a href="/admin/users.php" class="nav-link <?php echo $current_page == 'users' ? 'active' : ''; ?>" data-tooltip="Пользователи">
                         <i class="fas fa-users"></i>
                         <span>Пользователи</span>
@@ -520,21 +524,26 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                     </a>
                 </div>
                 
-                <?php if ($_SESSION['admin_role'] === 'super_admin'): ?>
+                <?php if (isSuperAdmin()): ?>
                 <!-- Администрирование -->
                 <div class="nav-section">
                     <div class="nav-section-title">Администрирование</div>
-                    
+
+                    <a href="/admin/locations.php" class="nav-link <?php echo $current_page == 'locations' ? 'active' : ''; ?>" data-tooltip="Точки">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Точки</span>
+                    </a>
+
                     <a href="/admin/admins.php" class="nav-link <?php echo $current_page == 'admins' ? 'active' : ''; ?>" data-tooltip="Администраторы">
                         <i class="fas fa-user-shield"></i>
                         <span>Администраторы</span>
                     </a>
-                    
+
                     <a href="/admin/settings.php" class="nav-link <?php echo $current_page == 'settings' ? 'active' : ''; ?>" data-tooltip="Настройки">
                         <i class="fas fa-cog"></i>
                         <span>Настройки</span>
                     </a>
-                    
+
                     <a href="/admin/logs.php" class="nav-link <?php echo $current_page == 'logs' ? 'active' : ''; ?>" data-tooltip="Логи">
                         <i class="fas fa-history"></i>
                         <span>Логи</span>
@@ -576,11 +585,35 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                     <!-- Меню пользователя -->
                     <div class="user-menu" onclick="toggleUserMenu()">
                         <div class="user-avatar">
-                            <?php echo mb_substr($_SESSION['admin_name'], 0, 1); ?>
+                            <?php
+                            if (isLocationAdmin()) {
+                                echo mb_substr($_SESSION['location_name'] ?? 'L', 0, 1);
+                            } else {
+                                echo mb_substr($_SESSION['admin_name'] ?? 'A', 0, 1);
+                            }
+                            ?>
                         </div>
                         <div class="user-info">
-                            <div class="user-name"><?php echo htmlspecialchars($_SESSION['admin_name']); ?></div>
-                            <div class="user-role"><?php echo getAdminRoleLabel($_SESSION['admin_role']); ?></div>
+                            <div class="user-name">
+                                <?php
+                                if (isLocationAdmin()) {
+                                    echo htmlspecialchars($_SESSION['location_name'] ?? 'Location Admin');
+                                } else {
+                                    echo htmlspecialchars($_SESSION['admin_name'] ?? 'Admin');
+                                }
+                                ?>
+                            </div>
+                            <div class="user-role">
+                                <?php
+                                if (isLocationAdmin()) {
+                                    echo 'Администратор точки';
+                                } elseif (isSuperAdmin()) {
+                                    echo 'Суперадминистратор';
+                                } else {
+                                    echo 'Администратор';
+                                }
+                                ?>
+                            </div>
                         </div>
                         <i class="fas fa-chevron-down"></i>
                         

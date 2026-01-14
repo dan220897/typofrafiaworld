@@ -10,9 +10,9 @@ require_once 'classes/Service.php';
 // Проверяем авторизацию
 checkAdminAuth();
 
-// Проверяем права доступа
-if (!in_array($_SESSION['admin_role'], ['super_admin', 'manager']) && !hasPermission($_SESSION['admin_id'], 'manage_services')) {
-    header('Location: /admin/');
+// Проверяем права доступа - только для суперадмина
+if (!isSuperAdmin()) {
+    header('Location: /admin/403.php');
     exit;
 }
 

@@ -32,13 +32,22 @@ $filters = [
     'date_to' => $date_to ?: null
 ];
 
+// Добавляем фильтр по локации для location admins
+if (isLocationAdmin()) {
+    $filters['location_id'] = getCurrentLocationId();
+}
+
 $offset = ($page - 1) * $per_page;
 $orders = $order->getOrders($filters, $per_page, $offset);
 $total_orders = $order->getOrdersCount($filters);
 $total_pages = ceil($total_orders / $per_page);
 
 // Получаем статистику по статусам
-$status_stats = $order->getStatusStats();
+if (isLocationAdmin()) {
+    $status_stats = $order->getStatusStats(getCurrentLocationId());
+} else {
+    $status_stats = $order->getStatusStats();
+}
 
 // Заголовок страницы
 $page_title = 'Управление заказами';
