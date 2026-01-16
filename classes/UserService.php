@@ -1,5 +1,5 @@
 <?php
-// Config должен быть подключен ДО создания UserService
+require_once dirname(__DIR__) . '/config/config.php';
 require_once dirname(__DIR__) . '/classes/EmailService.php';
 
 class UserService {
