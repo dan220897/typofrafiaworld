@@ -1,6 +1,6 @@
 <?php
 require_once 'config/config.php';
-require_once 'classes/UserService.php';
+require_once __DIR__ . '/../classes/UserService.php';
 
 $userService = new UserService();
 $isAuthenticated = $userService->isAuthenticated();
