@@ -52,34 +52,6 @@ if (is_array($result) && isset($result['data'])) {
 
 $total_pages = ceil($total_orders / $per_page);
 
-// DEBUG: Временный вывод для отладки
-if (isLocationAdmin()) {
-    echo "<!-- DEBUG INFO -->";
-    echo "<pre style='background: #f0f0f0; padding: 20px; margin: 20px; border: 2px solid red;'>";
-    echo "=== DEBUG ===\n";
-    echo "Admin Type: location\n";
-    echo "Location ID: " . getCurrentLocationId() . "\n";
-    echo "Filters: " . print_r($filters, true) . "\n";
-    echo "Raw Result Type: " . gettype($result) . "\n";
-    if (is_array($result)) {
-        echo "Result Keys: " . implode(', ', array_keys($result)) . "\n";
-        if (isset($result['data'])) {
-            echo "Result['data'] count: " . count($result['data']) . "\n";
-            echo "Result['total']: " . $result['total'] . "\n";
-        }
-    }
-    echo "Orders Variable Type: " . gettype($orders) . "\n";
-    echo "Orders Count: " . (is_array($orders) ? count($orders) : 'not array') . "\n";
-    echo "Total Orders: " . $total_orders . "\n";
-    if (is_array($orders) && count($orders) > 0) {
-        echo "First Order Sample:\n";
-        print_r($orders[0]);
-    } else {
-        echo "Orders array is empty!\n";
-    }
-    echo "</pre>";
-}
-
 // Получаем статистику по статусам
 if (isLocationAdmin()) {
     $status_stats = $order->getStatusStats(getCurrentLocationId());
