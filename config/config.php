@@ -116,19 +116,21 @@ class Database {
 }
 
 // Функция логирования
-function logMessage($message, $level = 'INFO') {
-    if (!LOG_ERRORS) return;
-    
-    $timestamp = date('Y-m-d H:i:s');
-    $logEntry = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
-    
-    // Создаем директорию для логов если её нет
-    $logDir = dirname(LOG_FILE);
-    if (!is_dir($logDir)) {
-        mkdir($logDir, 0755, true);
+if (!function_exists('logMessage')) {
+    function logMessage($message, $level = 'INFO') {
+        if (!LOG_ERRORS) return;
+
+        $timestamp = date('Y-m-d H:i:s');
+        $logEntry = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
+
+        // Создаем директорию для логов если её нет
+        $logDir = dirname(LOG_FILE);
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+
+        error_log($logEntry, 3, LOG_FILE);
     }
-    
-    error_log($logEntry, 3, LOG_FILE);
 }
 
 // Функция для безопасного получения данных из массива
