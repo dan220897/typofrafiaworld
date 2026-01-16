@@ -1,9 +1,6 @@
 <?php
 // admin/config/config.php - Основные настройки системы
 
-// Подключаем класс Database
-require_once __DIR__ . '/database.php';
-
 // Запуск сессии
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
