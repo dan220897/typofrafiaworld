@@ -1,5 +1,5 @@
 <?php
-// Config должен быть подключен ДО создания EmailService
+require_once dirname(__DIR__) . '/config/config.php';
 
 // Проверяем наличие autoload.php перед подключением
 $autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
