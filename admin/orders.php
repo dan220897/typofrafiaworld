@@ -39,8 +39,17 @@ if (isLocationAdmin()) {
 
 $offset = ($page - 1) * $per_page;
 $result = $order->getOrders($filters, $per_page, $offset);
-$orders = $result['data'];
-$total_orders = $result['total'];
+
+// Проверяем структуру данных
+if (is_array($result) && isset($result['data'])) {
+    $orders = $result['data'];
+    $total_orders = $result['total'];
+} else {
+    // Если getOrders вернул старую структуру (просто массив)
+    $orders = $result;
+    $total_orders = count($orders);
+}
+
 $total_pages = ceil($total_orders / $per_page);
 
 // Получаем статистику по статусам
@@ -128,78 +137,78 @@ require_once 'includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($orders['data'])): ?>
+                <?php if (empty($orders)): ?>
                 <tr>
                     <td colspan="9" class="text-center">Заказы не найдены</td>
                 </tr>
                 <?php else: ?>
-                <?php foreach ($orders['data'] as $order): ?>
-                <tr data-order-id="<?php echo $order['id']; ?>" class="order-row">
+                <?php foreach ($orders as $orderItem): ?>
+                <tr data-order-id="<?php echo $orderItem['id']; ?>" class="order-row">
                     <td>
-                        <a href="order-details.php?id=<?php echo $order['id']; ?>" class="order-number">
-                            #<?php echo $order['order_number']; ?>
+                        <a href="order-details.php?id=<?php echo $orderItem['id']; ?>" class="order-number">
+                            #<?php echo $orderItem['order_number']; ?>
                         </a>
                     </td>
                     <td>
                         <div class="customer-info">
-                            <strong><?php echo htmlspecialchars($order['user_name'] ?? 'Гость'); ?></strong>
+                            <strong><?php echo htmlspecialchars($orderItem['user_name'] ?? 'Гость'); ?></strong>
                             <br>
-                            <small><?php echo htmlspecialchars($order['user_phone']); ?></small>
+                            <small><?php echo htmlspecialchars($orderItem['user_phone']); ?></small>
                         </div>
                     </td>
                     <td>
                         <div class="services-list">
-                            <?php echo htmlspecialchars($order['items_summary']); ?>
-                            <?php if ($order['items_count'] > 2): ?>
-                            <br><small>и еще <?php echo $order['items_count'] - 2; ?></small>
+                            <?php echo htmlspecialchars($orderItem['items_summary']); ?>
+                            <?php if ($orderItem['items_count'] > 2): ?>
+                            <br><small>и еще <?php echo $orderItem['items_count'] - 2; ?></small>
                             <?php endif; ?>
                         </div>
                     </td>
                     <td>
-                        <strong><?php echo number_format($order['final_amount'], 0, '', ' '); ?> ₽</strong>
-                        <?php if ($order['discount_amount'] > 0): ?>
-                        <br><small class="text-muted">Скидка: <?php echo number_format($order['discount_amount'], 0, '', ' '); ?> ₽</small>
+                        <strong><?php echo number_format($orderItem['final_amount'], 0, '', ' '); ?> ₽</strong>
+                        <?php if ($orderItem['discount_amount'] > 0): ?>
+                        <br><small class="text-muted">Скидка: <?php echo number_format($orderItem['discount_amount'], 0, '', ' '); ?> ₽</small>
                         <?php endif; ?>
                     </td>
                     <td>
-                        <select class="status-select" onchange="updateOrderStatus(<?php echo $order['id']; ?>, this.value)">
+                        <select class="status-select" onchange="updateOrderStatus(<?php echo $orderItem['id']; ?>, this.value)">
                             <?php foreach (ORDER_STATUSES as $key => $label): ?>
-                            <option value="<?php echo $key; ?>" <?php echo $order['status'] === $key ? 'selected' : ''; ?>>
+                            <option value="<?php echo $key; ?>" <?php echo $orderItem['status'] === $key ? 'selected' : ''; ?>>
                                 <?php echo $label; ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
                     </td>
                     <td>
-                        <span class="payment-status <?php echo $order['payment_status']; ?>">
-                            <?php echo getPaymentStatusLabel($order['payment_status']); ?>
+                        <span class="payment-status <?php echo $orderItem['payment_status']; ?>">
+                            <?php echo getPaymentStatusLabel($orderItem['payment_status']); ?>
                         </span>
                     </td>
                     <td>
-                        <?php if ($order['deadline_at']): ?>
-                        <span class="deadline <?php echo strtotime($order['deadline_at']) < time() ? 'overdue' : ''; ?>">
-                            <?php echo date('d.m.Y', strtotime($order['deadline_at'])); ?>
+                        <?php if ($orderItem['deadline_at']): ?>
+                        <span class="deadline <?php echo strtotime($orderItem['deadline_at']) < time() ? 'overdue' : ''; ?>">
+                            <?php echo date('d.m.Y', strtotime($orderItem['deadline_at'])); ?>
                         </span>
                         <?php else: ?>
                         <span class="text-muted">—</span>
                         <?php endif; ?>
                     </td>
                     <td>
-                        <small><?php echo date('d.m.Y H:i', strtotime($order['created_at'])); ?></small>
+                        <small><?php echo date('d.m.Y H:i', strtotime($orderItem['created_at'])); ?></small>
                     </td>
                     <td>
                         <div class="table-actions">
-                            <a href="order-details.php?id=<?php echo $order['id']; ?>" class="btn-icon" title="Подробнее">
+                            <a href="order-details.php?id=<?php echo $orderItem['id']; ?>" class="btn-icon" title="Подробнее">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="order-edit.php?id=<?php echo $order['id']; ?>" class="btn-icon" title="Редактировать">
+                            <a href="order-edit.php?id=<?php echo $orderItem['id']; ?>" class="btn-icon" title="Редактировать">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button class="btn-icon" onclick="printOrder(<?php echo $order['id']; ?>)" title="Печать">
+                            <button class="btn-icon" onclick="printOrder(<?php echo $orderItem['id']; ?>)" title="Печать">
                                 <i class="fas fa-print"></i>
                             </button>
                             <?php if (Admin::hasPermission('delete_orders')): ?>
-                            <button class="btn-icon text-danger" onclick="deleteOrder(<?php echo $order['id']; ?>)" title="Удалить">
+                            <button class="btn-icon text-danger" onclick="deleteOrder(<?php echo $orderItem['id']; ?>)" title="Удалить">
                                 <i class="fas fa-trash"></i>
                             </button>
                             <?php endif; ?>
