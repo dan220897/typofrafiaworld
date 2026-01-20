@@ -1306,16 +1306,18 @@ select.form-control option:checked {
 
         <!-- Список услуг -->
         <div class="services-grid" id="servicesGrid">
-            <?php foreach ($services as $srv): ?>
+            <?php foreach ($services as $srv):
+                $displayName = !empty($srv['label']) ? $srv['label'] : $srv['name'];
+            ?>
             <div class="service-card"
                  data-service-id="<?php echo $srv['id']; ?>"
-                 data-service-name="<?php echo htmlspecialchars($srv['name']); ?>"
+                 data-service-name="<?php echo htmlspecialchars($displayName); ?>"
                  data-service-category="<?php echo htmlspecialchars($srv['category'] ?? ''); ?>"
                  data-base-price="<?php echo $srv['base_price']; ?>"
-                 data-search="<?php echo strtolower(htmlspecialchars($srv['name']) . ' ' . htmlspecialchars($srv['category'] ?? '')); ?>"
+                 data-search="<?php echo strtolower(htmlspecialchars($displayName) . ' ' . htmlspecialchars($srv['category'] ?? '')); ?>"
                  onclick="selectService(<?php echo $srv['id']; ?>)">
                 <div class="service-card-header">
-                    <h4 class="service-card-title"><?php echo htmlspecialchars($srv['name']); ?></h4>
+                    <h4 class="service-card-title"><?php echo htmlspecialchars($displayName); ?></h4>
                     <?php if (!empty($srv['category'])): ?>
                     <span class="service-card-category"><?php echo htmlspecialchars($srv['category']); ?></span>
                     <?php endif; ?>

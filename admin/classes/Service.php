@@ -60,14 +60,14 @@ class Service {
         return $stmt->fetchAll();
     }
     public function getActiveServices() {
-    $query = "SELECT s.id, s.name, s.category, s.base_price, s.min_quantity, s.production_time_days
+    $query = "SELECT s.id, s.name, s.label, s.description, s.category, s.base_price, s.min_quantity, s.production_time_days
              FROM " . $this->table_name . " s
              WHERE s.is_active = 1
-             ORDER BY s.sort_order ASC, s.name ASC";
-    
+             ORDER BY s.sort_order ASC, s.label ASC, s.name ASC";
+
     $stmt = $this->conn->prepare($query);
     $stmt->execute();
-    
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
     
