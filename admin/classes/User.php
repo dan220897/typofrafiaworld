@@ -98,16 +98,27 @@ class User {
     public function getUserByPhone($phone) {
         // Нормализуем номер телефона - убираем все кроме цифр и знака +
         $phone = preg_replace('/[^0-9+]/', '', $phone);
-        
+
         $query = "SELECT * FROM " . $this->table_name . " WHERE phone = :phone LIMIT 1";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":phone", $phone);
         $stmt->execute();
-        
+
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    
+
+    // Получить пользователя по email
+    public function getUserByEmail($email) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $email);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     // Получить пользователя по ID
     public function getUserById($user_id) {
         $query = "SELECT u.*,

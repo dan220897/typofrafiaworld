@@ -31,6 +31,12 @@ $users = $user->getActiveUsers();
 // Получаем список активных услуг
 $services = $service->getActiveServices();
 
+// Получаем список активных точек самовывоза
+$query = "SELECT id, name, address, working_hours FROM pickup_points WHERE is_active = 1 ORDER BY sort_order, name";
+$stmt = $db->prepare($query);
+$stmt->execute();
+$pickupPoints = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // Обработка AJAX запроса для создания новой услуги
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'create_service') {
     header('Content-Type: application/json');
@@ -87,21 +93,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
         
         if (!$selectedUserId) {
             // Создаем нового пользователя
+            $newUserEmail = trim($_POST['new_user_email'] ?? '');
             $newUserPhone = trim($_POST['new_user_phone'] ?? '');
-            
-            // Очищаем номер от форматирования, оставляем только цифры
-            $newUserPhone = preg_replace('/\D/', '', $newUserPhone);
-            
-            // Проверяем длину
-            if (strlen($newUserPhone) !== 11 || $newUserPhone[0] !== '7') {
-                throw new Exception('Некорректный номер телефона. Введите номер в формате +7 (XXX) XXX-XX-XX');
+
+            // Валидация email (обязательно)
+            if (empty($newUserEmail) || !filter_var($newUserEmail, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception('Введите корректный email адрес');
             }
-            
-            // Форматируем для сохранения в БД
-            $newUserPhone = '+' . $newUserPhone;
-            
-            // Проверяем, может пользователь уже существует
-            $existingUser = $user->getUserByPhone($newUserPhone);
+
+            // Обработка телефона (необязательно)
+            if (!empty($newUserPhone)) {
+                // Очищаем номер от форматирования, оставляем только цифры
+                $newUserPhone = preg_replace('/\D/', '', $newUserPhone);
+
+                // Проверяем формат если телефон указан
+                if (strlen($newUserPhone) !== 11 || $newUserPhone[0] !== '7') {
+                    throw new Exception('Некорректный номер телефона. Введите номер в формате +7 (XXX) XXX-XX-XX');
+                }
+
+                // Форматируем для сохранения в БД
+                $newUserPhone = '+' . $newUserPhone;
+            } else {
+                $newUserPhone = null;
+            }
+
+            // Проверяем, может пользователь уже существует по email
+            $existingUser = $user->getUserByEmail($newUserEmail);
             if ($existingUser) {
                 $selectedUserId = $existingUser['id'];
             } else {
@@ -109,10 +126,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
                 $newUserData = [
                     'phone' => $newUserPhone,
                     'name' => trim($_POST['new_user_name'] ?? ''),
-                    'email' => trim($_POST['new_user_email'] ?? ''),
+                    'email' => $newUserEmail,
                     'company_name' => trim($_POST['new_user_company'] ?? '')
                 ];
-                
+
                 $selectedUserId = $user->createUser($newUserData);
                 $isNewUser = true;
             }
@@ -181,22 +198,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
         // Обновляем дополнительную информацию о заказе
         $updateData = [];
         $updateParams = ['id' => $order_id];
-        
-        if (!empty($_POST['delivery_type'])) {
-            $updateData[] = "delivery_method = :delivery_method";
-            $updateParams['delivery_method'] = $_POST['delivery_type'];
+
+        // Обрабатываем пункт самовывоза
+        if (!empty($_POST['pickup_point_id'])) {
+            $pickupPointId = intval($_POST['pickup_point_id']);
+
+            // Получаем информацию о пункте самовывоза
+            $pickupQuery = "SELECT name, address FROM pickup_points WHERE id = ? AND is_active = 1";
+            $pickupStmt = $db->prepare($pickupQuery);
+            $pickupStmt->execute([$pickupPointId]);
+            $pickupPoint = $pickupStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($pickupPoint) {
+                $updateData[] = "delivery_method = :delivery_method";
+                $updateParams['delivery_method'] = 'pickup';
+
+                $updateData[] = "delivery_address = :delivery_address";
+                $updateParams['delivery_address'] = $pickupPoint['name'] . ' - ' . $pickupPoint['address'];
+
+                // Сохраняем ID пункта самовывоза если поле есть в таблице
+                try {
+                    $checkColumn = $db->query("SHOW COLUMNS FROM orders LIKE 'pickup_point_id'");
+                    if ($checkColumn->rowCount() > 0) {
+                        $updateData[] = "pickup_point_id = :pickup_point_id";
+                        $updateParams['pickup_point_id'] = $pickupPointId;
+                    }
+                } catch (Exception $e) {
+                    // Поле не существует, пропускаем
+                }
+            }
         }
-        
-        if (!empty($_POST['delivery_address'])) {
-            $updateData[] = "delivery_address = :delivery_address";
-            $updateParams['delivery_address'] = $_POST['delivery_address'];
-        }
-        
+
         if (!empty($_POST['deadline_at'])) {
             $updateData[] = "deadline_at = :deadline_at";
             $updateParams['deadline_at'] = $_POST['deadline_at'];
         }
-        
+
         if (!empty($updateData)) {
             $query = "UPDATE orders SET " . implode(', ', $updateData) . " WHERE id = :id";
             $stmt = $db->prepare($query);
@@ -681,6 +718,18 @@ input[type="tel"]:invalid:focus {
     border: 1px solid #fecaca;
 }
 
+/* Калькулятор услуг */
+.service-calculator {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.service-calculator select,
+.service-calculator input {
+    font-size: 0.875rem;
+}
+
 /* Адаптив */
 @media (max-width: 768px) {
     .form-row {
@@ -785,25 +834,25 @@ input[type="tel"]:invalid:focus {
                 <div class="client-form-section <?php echo !$user_id ? 'active' : ''; ?>" id="newClientForm">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Телефон *</label>
-                            <input type="tel" name="new_user_phone" id="newUserPhone" class="form-control" 
-                                   placeholder="+7 (999) 123-45-67">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="new_user_email" id="newUserEmail" class="form-control"
+                                   placeholder="email@example.com" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Имя</label>
-                            <input type="text" name="new_user_name" class="form-control" 
+                            <input type="text" name="new_user_name" class="form-control"
                                    placeholder="Иван Иванов">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="new_user_email" class="form-control" 
-                                   placeholder="email@example.com">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" name="new_user_phone" id="newUserPhone" class="form-control"
+                                   placeholder="+7 (999) 123-45-67">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Компания</label>
-                            <input type="text" name="new_user_company" class="form-control" 
+                            <input type="text" name="new_user_company" class="form-control"
                                    placeholder="ООО Рога и копыта">
                         </div>
                     </div>
@@ -860,7 +909,7 @@ input[type="tel"]:invalid:focus {
                         <td>
                             <div class="item-total" data-total="0">₽0</div>
                         </td>
-                        <td>
+                        <td class="item-notes-cell">
                             <input type="text" name="items[0][notes]" class="form-control" placeholder="...">
                         </td>
                         <td>
@@ -900,34 +949,33 @@ input[type="tel"]:invalid:focus {
             <div class="card-header">
                 <h2 class="card-title">Дополнительная информация</h2>
             </div>
-            
+
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Способ доставки</label>
-                    <select name="delivery_type" class="form-control">
-                        <option value="">Не указан</option>
-                        <option value="pickup">Самовывоз</option>
-                        <option value="delivery">Доставка</option>
-                        <option value="courier">Курьер</option>
+                    <label class="form-label">Пункт самовывоза *</label>
+                    <select name="pickup_point_id" id="pickupPointSelect" class="form-control" required>
+                        <option value="">Выберите пункт самовывоза</option>
+                        <?php foreach ($pickupPoints as $point): ?>
+                        <option value="<?php echo $point['id']; ?>"
+                                data-address="<?php echo htmlspecialchars($point['address']); ?>"
+                                data-hours="<?php echo htmlspecialchars($point['working_hours'] ?? ''); ?>">
+                            <?php echo htmlspecialchars($point['name']); ?>
+                        </option>
+                        <?php endforeach; ?>
                     </select>
+                    <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;" id="pickupPointInfo"></div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Срок выполнения</label>
-                    <input type="date" name="deadline_at" class="form-control" 
+                    <input type="date" name="deadline_at" class="form-control"
                            min="<?php echo date('Y-m-d'); ?>">
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">Адрес доставки</label>
-                <textarea name="delivery_address" class="form-control" rows="3" 
-                          placeholder="Укажите адрес доставки..."></textarea>
-            </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Комментарий к заказу</label>
-                <textarea name="comment" class="form-control" rows="3" 
+                <textarea name="comment" class="form-control" rows="3"
                           placeholder="Дополнительная информация о заказе..."></textarea>
             </div>
         </div>
@@ -1065,17 +1113,43 @@ function initPhoneMask() {
     });
 }
 
+// Показать информацию о выбранном пункте самовывоза
+function updatePickupPointInfo() {
+    const select = document.getElementById('pickupPointSelect');
+    const infoDiv = document.getElementById('pickupPointInfo');
+
+    if (select.value) {
+        const option = select.options[select.selectedIndex];
+        const address = option.dataset.address;
+        const hours = option.dataset.hours;
+
+        let html = '<i class="fas fa-map-marker-alt"></i> ' + address;
+        if (hours) {
+            html += '<br><i class="fas fa-clock"></i> ' + hours;
+        }
+        infoDiv.innerHTML = html;
+    } else {
+        infoDiv.innerHTML = '';
+    }
+}
+
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
     // Инициализируем маску телефона
     initPhoneMask();
+
+    // Добавляем обработчик изменения пункта самовывоза
+    const pickupSelect = document.getElementById('pickupPointSelect');
+    if (pickupSelect) {
+        pickupSelect.addEventListener('change', updatePickupPointInfo);
+    }
     
 // Устанавливаем правильный required атрибут в зависимости от выбранного типа клиента
     const clientType = document.querySelector('input[name="client_type"]:checked');
     if (clientType && clientType.value === 'new') {
-        const phoneInput = document.getElementById('newUserPhone');
-        if (phoneInput) {
-            phoneInput.setAttribute('required', 'required');
+        const emailInput = document.getElementById('newUserEmail');
+        if (emailInput) {
+            emailInput.setAttribute('required', 'required');
         }
     }
 
@@ -1124,33 +1198,33 @@ document.addEventListener('DOMContentLoaded', function() {
 // Переключение между формами клиента
 // Переключение между формами клиента
 function toggleClientForm(type) {
-    const phoneInput = document.getElementById('newUserPhone');
-    
+    const emailInput = document.getElementById('newUserEmail');
+
     if (type === 'existing') {
         document.getElementById('existingClientForm').classList.add('active');
         document.getElementById('newClientForm').classList.remove('active');
-        
+
         // Убираем required с полей нового клиента
-        if (phoneInput) {
-            phoneInput.removeAttribute('required');
+        if (emailInput) {
+            emailInput.removeAttribute('required');
         }
-        
+
         // Очищаем поля нового клиента
         document.querySelectorAll('#newClientForm input').forEach(input => input.value = '');
     } else {
         document.getElementById('newClientForm').classList.add('active');
         document.getElementById('existingClientForm').classList.remove('active');
-        
-        // Добавляем required обратно
-        if (phoneInput) {
-            phoneInput.setAttribute('required', 'required');
+
+        // Добавляем required к email
+        if (emailInput) {
+            emailInput.setAttribute('required', 'required');
         }
-        
+
         // Сбрасываем выбор существующего клиента
         document.querySelectorAll('.client-card').forEach(card => card.classList.remove('selected'));
         document.getElementById('selectedUserId').value = '';
         selectedClientId = null;
-        
+
         // Инициализируем маску телефона при переключении
         setTimeout(() => {
             initPhoneMask();
@@ -1193,7 +1267,7 @@ function addItem() {
         <td>
             <div class="item-total" data-total="0">₽0</div>
         </td>
-        <td>
+        <td class="item-notes-cell">
             <input type="text" name="items[${itemIndex}][notes]" class="form-control" placeholder="...">
         </td>
         <td>
@@ -1283,11 +1357,164 @@ document.getElementById('serviceModalForm').addEventListener('submit', function(
 // Обновление цены при выборе услуги
 function updateServicePrice(select) {
     const option = select.options[select.selectedIndex];
-    const price = parseFloat(option.dataset.price || 0);
+    const serviceId = select.value;
     const row = select.closest('tr');
     const priceInput = row.querySelector('.price-input');
-    
-    priceInput.value = price;
+    const notesCell = row.querySelector('.item-notes-cell');
+
+    if (!serviceId) {
+        // Сброс
+        priceInput.value = 0;
+        notesCell.innerHTML = '<input type="text" name="items[' + row.dataset.index + '][notes]" class="form-control" placeholder="...">';
+        updateItemTotal(priceInput);
+        return;
+    }
+
+    // Загружаем параметры услуги
+    fetch('/admin/api/get-service-params.php?service_id=' + serviceId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.params) {
+                const params = data.params;
+                const index = row.dataset.index;
+
+                // Создаем HTML для калькулятора параметров
+                let calculatorHtml = '<div class="service-calculator" data-index="' + index + '" data-base-price="' + params.base_price + '" data-base-quantity="' + params.base_quantity + '">';
+
+                // Размеры
+                if (params.sizes && params.sizes.length > 0) {
+                    calculatorHtml += '<select class="form-control calc-size" data-param="size" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<option value="">Размер</option>';
+                    params.sizes.forEach(size => {
+                        calculatorHtml += '<option value="' + size.id + '" data-price="' + size.price + '">' + escapeHtml(size.label) + '</option>';
+                    });
+                    calculatorHtml += '</select>';
+                }
+
+                // Плотность
+                if (params.densities && params.densities.length > 0) {
+                    calculatorHtml += '<select class="form-control calc-density" data-param="density" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<option value="">Плотность</option>';
+                    params.densities.forEach(density => {
+                        calculatorHtml += '<option value="' + density.id + '" data-price="' + density.price + '">' + escapeHtml(density.label) + '</option>';
+                    });
+                    calculatorHtml += '</select>';
+                }
+
+                // Стороны печати
+                if (params.sides && params.sides.length > 0) {
+                    calculatorHtml += '<select class="form-control calc-sides" data-param="sides" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<option value="">Печать</option>';
+                    params.sides.forEach(side => {
+                        calculatorHtml += '<option value="' + side.id + '" data-multiplier="' + side.multiplier + '">' + escapeHtml(side.label) + '</option>';
+                    });
+                    calculatorHtml += '</select>';
+                }
+
+                // Количество
+                if (params.quantities && params.quantities.length > 0) {
+                    calculatorHtml += '<select class="form-control calc-quantity" data-param="quantity" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<option value="">Тираж</option>';
+                    params.quantities.forEach(qty => {
+                        calculatorHtml += '<option value="' + qty.id + '" data-quantity="' + qty.quantity + '" data-multiplier="' + (qty.multiplier || 1) + '" data-price="' + (qty.price || 0) + '">' + escapeHtml(qty.label) + '</option>';
+                    });
+                    calculatorHtml += '<option value="custom">Свой тираж...</option>';
+                    calculatorHtml += '</select>';
+                    calculatorHtml += '<input type="number" class="form-control calc-custom-quantity" placeholder="Кол-во" style="display:none; margin-top:0.5rem;" onchange="calculateServicePrice(' + index + ')">';
+                }
+
+                calculatorHtml += '</div>';
+
+                // Вставляем калькулятор
+                notesCell.innerHTML = calculatorHtml;
+
+                // Устанавливаем начальную цену
+                priceInput.value = params.base_price || 0;
+                updateItemTotal(priceInput);
+            } else {
+                // Нет параметров - используем базовую цену
+                const price = parseFloat(option.dataset.price || 0);
+                priceInput.value = price;
+                notesCell.innerHTML = '<input type="text" name="items[' + row.dataset.index + '][notes]" class="form-control" placeholder="...">';
+                updateItemTotal(priceInput);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading service params:', error);
+            const price = parseFloat(option.dataset.price || 0);
+            priceInput.value = price;
+            updateItemTotal(priceInput);
+        });
+}
+
+// Рассчитать цену услуги с параметрами
+function calculateServicePrice(index) {
+    const row = document.querySelector(`.item-row[data-index="${index}"]`);
+    const calculator = row.querySelector('.service-calculator');
+    const priceInput = row.querySelector('.price-input');
+    const quantityInput = row.querySelector('.quantity-input');
+
+    if (!calculator) return;
+
+    let basePrice = parseFloat(calculator.dataset.basePrice || 0);
+    let baseQuantity = parseFloat(calculator.dataset.baseQuantity || 1);
+    let total = basePrice;
+
+    // Размер
+    const sizeSelect = calculator.querySelector('.calc-size');
+    if (sizeSelect && sizeSelect.value) {
+        const option = sizeSelect.options[sizeSelect.selectedIndex];
+        total += parseFloat(option.dataset.price || 0);
+    }
+
+    // Плотность
+    const densitySelect = calculator.querySelector('.calc-density');
+    if (densitySelect && densitySelect.value) {
+        const option = densitySelect.options[densitySelect.selectedIndex];
+        total += parseFloat(option.dataset.price || 0);
+    }
+
+    // Стороны (множитель)
+    let sidesMultiplier = 1;
+    const sidesSelect = calculator.querySelector('.calc-sides');
+    if (sidesSelect && sidesSelect.value) {
+        const option = sidesSelect.options[sidesSelect.selectedIndex];
+        sidesMultiplier = parseFloat(option.dataset.multiplier || 1);
+    }
+
+    total *= sidesMultiplier;
+
+    // Количество
+    const quantitySelect = calculator.querySelector('.calc-quantity');
+    const customQuantityInput = calculator.querySelector('.calc-custom-quantity');
+
+    if (quantitySelect && quantitySelect.value) {
+        if (quantitySelect.value === 'custom') {
+            // Показываем поле для ввода
+            customQuantityInput.style.display = 'block';
+            const customQty = parseFloat(customQuantityInput.value || 0);
+            if (customQty > 0) {
+                // Для пользовательского тиража используем множитель 1.0
+                total = total * (customQty / baseQuantity) * 1.0;
+                quantityInput.value = customQty;
+            }
+        } else {
+            // Скрываем поле для ввода
+            customQuantityInput.style.display = 'none';
+
+            const option = quantitySelect.options[quantitySelect.selectedIndex];
+            const qtyCount = parseFloat(option.dataset.quantity || 1);
+            const qtyMultiplier = parseFloat(option.dataset.multiplier || 1);
+            const qtyPrice = parseFloat(option.dataset.price || 0);
+
+            // Формула как в калькуляторе на сайте
+            total = (total + qtyPrice) * (qtyCount / baseQuantity) * qtyMultiplier;
+            quantityInput.value = qtyCount;
+        }
+    }
+
+    // Обновляем цену
+    priceInput.value = Math.max(0, total).toFixed(2);
     updateItemTotal(priceInput);
 }
 
@@ -1344,7 +1571,7 @@ function escapeHtml(text) {
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     // Проверка клиента
     const clientType = document.querySelector('input[name="client_type"]:checked').value;
-    
+
     if (clientType === 'existing') {
         const userId = document.getElementById('selectedUserId').value;
         if (!userId) {
@@ -1353,14 +1580,25 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
             return false;
         }
     } else {
-        const phone = document.querySelector('input[name="new_user_phone"]').value;
-        const phoneDigits = phone.replace(/\D/g, '');
-        
-        if (!phone || phoneDigits.length !== 11) {
+        const email = document.querySelector('input[name="new_user_email"]').value.trim();
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             e.preventDefault();
-            alert('Введите корректный номер телефона');
-            document.getElementById('newUserPhone').focus();
+            alert('Введите корректный email адрес');
+            document.getElementById('newUserEmail').focus();
             return false;
+        }
+
+        // Проверка телефона только если он заполнен
+        const phone = document.querySelector('input[name="new_user_phone"]').value;
+        if (phone) {
+            const phoneDigits = phone.replace(/\D/g, '');
+            if (phoneDigits.length !== 11) {
+                e.preventDefault();
+                alert('Введите корректный номер телефона или оставьте поле пустым');
+                document.getElementById('newUserPhone').focus();
+                return false;
+            }
         }
     }
     
