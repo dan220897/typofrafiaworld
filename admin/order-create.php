@@ -749,6 +749,201 @@ select.form-control option:checked {
     border: 1px solid #fecaca;
 }
 
+/* Выбор услуги - новый дизайн */
+.service-display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.btn-select-service {
+    padding: 0.75rem 1rem;
+    background: #3b82f6;
+    color: #ffffff;
+    border: 2px dashed #3b82f6;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.btn-select-service:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.selected-service-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: #f0f9ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+}
+
+.service-name-display {
+    flex: 1;
+    font-weight: 500;
+    color: #1e40af;
+}
+
+.btn-change-service {
+    padding: 0.25rem 0.5rem;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-change-service:hover {
+    background: #2563eb;
+}
+
+/* Модальное окно выбора услуг */
+.service-search-box {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.service-search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.service-search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #1f2937;
+    background-color: #ffffff;
+    transition: all 0.2s;
+}
+
+.service-search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.service-card {
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.service-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.service-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 0.5rem;
+}
+
+.service-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    flex: 1;
+}
+
+.service-card-category {
+    padding: 0.25rem 0.5rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.service-card-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.service-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.service-card-price {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #059669;
+}
+
+.btn-select-this-service {
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-select-this-service:hover {
+    background: #2563eb;
+}
+
+.no-services-found {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #9ca3af;
+}
+
+.no-services-found i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
 /* Калькулятор услуг */
 .service-calculator {
     display: flex;
@@ -934,18 +1129,17 @@ select.form-control option:checked {
                     <!-- Первая пустая строка -->
                     <tr class="item-row" data-index="0">
                         <td>
-                            <div class="add-service-row">
-                                <select name="items[0][service_id]" class="form-control service-select" onchange="updateServicePrice(this)">
-                                    <option value="">Выберите услугу</option>
-                                    <?php foreach ($services as $srv): ?>
-                                    <option value="<?php echo $srv['id']; ?>" data-price="<?php echo $srv['base_price']; ?>">
-                                        <?php echo htmlspecialchars($srv['name']); ?>
-                                    </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <a href="#" class="add-custom-service" onclick="openServiceModal(0); return false;">
-                                    <i class="fas fa-plus-circle"></i> Новая
-                                </a>
+                            <div class="service-display">
+                                <input type="hidden" name="items[0][service_id]" class="service-id-input" value="">
+                                <button type="button" class="btn-select-service" onclick="openServiceSelector(0)">
+                                    <i class="fas fa-plus-circle"></i> Выбрать услугу
+                                </button>
+                                <div class="selected-service-info" style="display: none;">
+                                    <div class="service-name-display"></div>
+                                    <button type="button" class="btn-change-service" onclick="openServiceSelector(0)">
+                                        <i class="fas fa-edit"></i> Изменить
+                                    </button>
+                                </div>
                             </div>
                         </td>
                         <td>
@@ -1089,6 +1283,60 @@ select.form-control option:checked {
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Модальное окно для выбора услуги -->
+<div id="serviceSelectorModal" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Выбрать услугу</h3>
+            <button class="close" onclick="closeServiceSelectorModal()">&times;</button>
+        </div>
+
+        <input type="hidden" id="serviceSelectorItemIndex" value="">
+
+        <!-- Поиск -->
+        <div class="service-search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="serviceSearchInput" class="service-search-input"
+                   placeholder="Поиск по названию или категории услуги..."
+                   onkeyup="filterServices()">
+        </div>
+
+        <!-- Список услуг -->
+        <div class="services-grid" id="servicesGrid">
+            <?php foreach ($services as $srv): ?>
+            <div class="service-card"
+                 data-service-id="<?php echo $srv['id']; ?>"
+                 data-service-name="<?php echo htmlspecialchars($srv['name']); ?>"
+                 data-service-category="<?php echo htmlspecialchars($srv['category'] ?? ''); ?>"
+                 data-base-price="<?php echo $srv['base_price']; ?>"
+                 data-search="<?php echo strtolower(htmlspecialchars($srv['name']) . ' ' . htmlspecialchars($srv['category'] ?? '')); ?>"
+                 onclick="selectService(<?php echo $srv['id']; ?>)">
+                <div class="service-card-header">
+                    <h4 class="service-card-title"><?php echo htmlspecialchars($srv['name']); ?></h4>
+                    <?php if (!empty($srv['category'])): ?>
+                    <span class="service-card-category"><?php echo htmlspecialchars($srv['category']); ?></span>
+                    <?php endif; ?>
+                </div>
+                <?php if (!empty($srv['description'])): ?>
+                <p class="service-card-description"><?php echo htmlspecialchars(mb_substr($srv['description'], 0, 100)); ?><?php echo mb_strlen($srv['description']) > 100 ? '...' : ''; ?></p>
+                <?php endif; ?>
+                <div class="service-card-footer">
+                    <span class="service-card-price">от <?php echo number_format($srv['base_price'], 0, ',', ' '); ?> ₽</span>
+                    <button type="button" class="btn-select-this-service">
+                        <i class="fas fa-check"></i> Выбрать
+                    </button>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="no-services-found" id="noServicesFound" style="display: none;">
+            <i class="fas fa-search"></i>
+            <p>Услуги не найдены</p>
+        </div>
     </div>
 </div>
 
@@ -1289,21 +1537,20 @@ function addItem() {
     const row = document.createElement('tr');
     row.className = 'item-row';
     row.dataset.index = itemIndex;
-    
-    const servicesOptions = services.map(srv => 
-        `<option value="${srv.id}" data-price="${srv.base_price}">${escapeHtml(srv.name)}</option>`
-    ).join('');
-    
+
     row.innerHTML = `
         <td>
-            <div class="add-service-row">
-                <select name="items[${itemIndex}][service_id]" class="form-control service-select" onchange="updateServicePrice(this)">
-                    <option value="">Выберите услугу</option>
-                    ${servicesOptions}
-                </select>
-                <a href="#" class="add-custom-service" onclick="openServiceModal(${itemIndex}); return false;">
-                    <i class="fas fa-plus-circle"></i> Новая
-                </a>
+            <div class="service-display">
+                <input type="hidden" name="items[${itemIndex}][service_id]" class="service-id-input" value="">
+                <button type="button" class="btn-select-service" onclick="openServiceSelector(${itemIndex})">
+                    <i class="fas fa-plus-circle"></i> Выбрать услугу
+                </button>
+                <div class="selected-service-info" style="display: none;">
+                    <div class="service-name-display"></div>
+                    <button type="button" class="btn-change-service" onclick="openServiceSelector(${itemIndex})">
+                        <i class="fas fa-edit"></i> Изменить
+                    </button>
+                </div>
             </div>
         </td>
         <td>
@@ -1404,21 +1651,101 @@ document.getElementById('serviceModalForm').addEventListener('submit', function(
     });
 });
 
-// Обновление цены при выборе услуги
-function updateServicePrice(select) {
-    const option = select.options[select.selectedIndex];
-    const serviceId = select.value;
-    const row = select.closest('tr');
+// Открыть модальное окно выбора услуги
+function openServiceSelector(itemIndex) {
+    document.getElementById('serviceSelectorItemIndex').value = itemIndex;
+    document.getElementById('serviceSelectorModal').style.display = 'block';
+    document.getElementById('serviceSearchInput').value = '';
+    filterServices();
+}
+
+// Закрыть модальное окно выбора услуги
+function closeServiceSelectorModal() {
+    document.getElementById('serviceSelectorModal').style.display = 'none';
+}
+
+// Закрыть модальное окно по клику на overlay
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('serviceSelectorModal');
+    if (e.target === modal) {
+        closeServiceSelectorModal();
+    }
+});
+
+// Закрыть модальное окно по нажатию Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('serviceSelectorModal');
+        if (modal.style.display === 'block') {
+            closeServiceSelectorModal();
+        }
+    }
+});
+
+// Поиск услуг
+function filterServices() {
+    const searchTerm = document.getElementById('serviceSearchInput').value.toLowerCase();
+    const serviceCards = document.querySelectorAll('.service-card');
+    let visibleCount = 0;
+
+    serviceCards.forEach(card => {
+        const searchData = card.dataset.search;
+        if (searchData.includes(searchTerm)) {
+            card.style.display = 'flex';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Показываем сообщение "ничего не найдено"
+    const noServicesFound = document.getElementById('noServicesFound');
+    const servicesGrid = document.getElementById('servicesGrid');
+    if (visibleCount === 0) {
+        servicesGrid.style.display = 'none';
+        noServicesFound.style.display = 'block';
+    } else {
+        servicesGrid.style.display = 'grid';
+        noServicesFound.style.display = 'none';
+    }
+}
+
+// Выбрать услугу
+function selectService(serviceId) {
+    const itemIndex = document.getElementById('serviceSelectorItemIndex').value;
+    const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
+    const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
+
+    if (!row || !serviceCard) return;
+
+    const serviceName = serviceCard.dataset.serviceName;
+    const basePrice = parseFloat(serviceCard.dataset.basePrice || 0);
+
+    // Обновляем скрытое поле
+    const serviceIdInput = row.querySelector('.service-id-input');
+    serviceIdInput.value = serviceId;
+
+    // Показываем выбранную услугу
+    const selectButton = row.querySelector('.btn-select-service');
+    const selectedInfo = row.querySelector('.selected-service-info');
+    const serviceNameDisplay = row.querySelector('.service-name-display');
+
+    selectButton.style.display = 'none';
+    selectedInfo.style.display = 'flex';
+    serviceNameDisplay.textContent = serviceName;
+
+    // Закрываем модальное окно
+    closeServiceSelectorModal();
+
+    // Загружаем параметры услуги и обновляем калькулятор
+    loadServiceParams(itemIndex, serviceId, basePrice);
+}
+
+// Загрузить параметры услуги
+function loadServiceParams(itemIndex, serviceId, basePrice) {
+    const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
     const priceInput = row.querySelector('.price-input');
     const notesCell = row.querySelector('.item-notes-cell');
-
-    if (!serviceId) {
-        // Сброс
-        priceInput.value = 0;
-        notesCell.innerHTML = '<input type="text" name="items[' + row.dataset.index + '][notes]" class="form-control" placeholder="...">';
-        updateItemTotal(priceInput);
-        return;
-    }
 
     // Загружаем параметры услуги
     fetch('/admin/api/get-service-params.php?service_id=' + serviceId)
@@ -1426,14 +1753,13 @@ function updateServicePrice(select) {
         .then(data => {
             if (data.success && data.params) {
                 const params = data.params;
-                const index = row.dataset.index;
 
                 // Создаем HTML для калькулятора параметров
-                let calculatorHtml = '<div class="service-calculator" data-index="' + index + '" data-base-price="' + params.base_price + '" data-base-quantity="' + params.base_quantity + '">';
+                let calculatorHtml = '<div class="service-calculator" data-index="' + itemIndex + '" data-base-price="' + params.base_price + '" data-base-quantity="' + params.base_quantity + '">';
 
                 // Размеры
                 if (params.sizes && params.sizes.length > 0) {
-                    calculatorHtml += '<select class="form-control calc-size" data-param="size" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<select class="form-control calc-size" data-param="size" onchange="calculateServicePrice(' + itemIndex + ')">';
                     calculatorHtml += '<option value="">Размер</option>';
                     params.sizes.forEach(size => {
                         calculatorHtml += '<option value="' + size.id + '" data-price="' + size.price + '">' + escapeHtml(size.label) + '</option>';
@@ -1443,7 +1769,7 @@ function updateServicePrice(select) {
 
                 // Плотность
                 if (params.densities && params.densities.length > 0) {
-                    calculatorHtml += '<select class="form-control calc-density" data-param="density" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<select class="form-control calc-density" data-param="density" onchange="calculateServicePrice(' + itemIndex + ')">';
                     calculatorHtml += '<option value="">Плотность</option>';
                     params.densities.forEach(density => {
                         calculatorHtml += '<option value="' + density.id + '" data-price="' + density.price + '">' + escapeHtml(density.label) + '</option>';
@@ -1453,7 +1779,7 @@ function updateServicePrice(select) {
 
                 // Стороны печати
                 if (params.sides && params.sides.length > 0) {
-                    calculatorHtml += '<select class="form-control calc-sides" data-param="sides" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<select class="form-control calc-sides" data-param="sides" onchange="calculateServicePrice(' + itemIndex + ')">';
                     calculatorHtml += '<option value="">Печать</option>';
                     params.sides.forEach(side => {
                         calculatorHtml += '<option value="' + side.id + '" data-multiplier="' + side.multiplier + '">' + escapeHtml(side.label) + '</option>';
@@ -1463,14 +1789,14 @@ function updateServicePrice(select) {
 
                 // Количество
                 if (params.quantities && params.quantities.length > 0) {
-                    calculatorHtml += '<select class="form-control calc-quantity" data-param="quantity" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<select class="form-control calc-quantity" data-param="quantity" onchange="calculateServicePrice(' + itemIndex + ')">';
                     calculatorHtml += '<option value="">Тираж</option>';
                     params.quantities.forEach(qty => {
                         calculatorHtml += '<option value="' + qty.id + '" data-quantity="' + qty.quantity + '" data-multiplier="' + (qty.multiplier || 1) + '" data-price="' + (qty.price || 0) + '">' + escapeHtml(qty.label) + '</option>';
                     });
                     calculatorHtml += '<option value="custom">Свой тираж...</option>';
                     calculatorHtml += '</select>';
-                    calculatorHtml += '<input type="number" class="form-control calc-custom-quantity" placeholder="Кол-во" style="display:none; margin-top:0.5rem;" onchange="calculateServicePrice(' + index + ')">';
+                    calculatorHtml += '<input type="number" class="form-control calc-custom-quantity" placeholder="Кол-во" style="display:none; margin-top:0.5rem;" onchange="calculateServicePrice(' + itemIndex + ')">';
                 }
 
                 calculatorHtml += '</div>';
@@ -1479,20 +1805,18 @@ function updateServicePrice(select) {
                 notesCell.innerHTML = calculatorHtml;
 
                 // Устанавливаем начальную цену
-                priceInput.value = params.base_price || 0;
+                priceInput.value = params.base_price || basePrice;
                 updateItemTotal(priceInput);
             } else {
                 // Нет параметров - используем базовую цену
-                const price = parseFloat(option.dataset.price || 0);
-                priceInput.value = price;
-                notesCell.innerHTML = '<input type="text" name="items[' + row.dataset.index + '][notes]" class="form-control" placeholder="...">';
+                priceInput.value = basePrice;
+                notesCell.innerHTML = '<input type="text" name="items[' + itemIndex + '][notes]" class="form-control" placeholder="...">';
                 updateItemTotal(priceInput);
             }
         })
         .catch(error => {
             console.error('Error loading service params:', error);
-            const price = parseFloat(option.dataset.price || 0);
-            priceInput.value = price;
+            priceInput.value = basePrice;
             updateItemTotal(priceInput);
         });
 }
