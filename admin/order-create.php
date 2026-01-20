@@ -434,6 +434,8 @@ body {
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 0.875rem;
+    color: #1f2937;
+    background-color: #ffffff;
     transition: border-color 0.2s;
 }
 
@@ -587,6 +589,19 @@ input[type="tel"]:invalid:focus {
     margin: 0;
 }
 
+/* Стили для селектов */
+.items-table select,
+select.form-control {
+    color: #1f2937;
+    background-color: #ffffff;
+}
+
+.items-table select option,
+select.form-control option {
+    color: #1f2937;
+    background-color: #ffffff;
+}
+
 .btn-remove-item {
     background: #fee2e2;
     color: #991b1b;
@@ -728,6 +743,13 @@ input[type="tel"]:invalid:focus {
 .service-calculator select,
 .service-calculator input {
     font-size: 0.875rem;
+    color: #1f2937;
+    background-color: #ffffff;
+}
+
+.service-calculator select option {
+    color: #1f2937;
+    background-color: #ffffff;
 }
 
 /* Адаптив */
