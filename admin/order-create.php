@@ -434,8 +434,8 @@ body {
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 0.875rem;
-    color: #1f2937;
-    background-color: #ffffff;
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
     transition: border-color 0.2s;
 }
 
@@ -592,14 +592,30 @@ input[type="tel"]:invalid:focus {
 /* Стили для селектов */
 .items-table select,
 select.form-control {
-    color: #1f2937;
-    background-color: #ffffff;
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
 }
 
 .items-table select option,
 select.form-control option {
-    color: #1f2937;
-    background-color: #ffffff;
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
+    padding: 0.5rem;
+}
+
+/* Стили для выделенных опций в селекте */
+.items-table select option:hover,
+select.form-control option:hover,
+.items-table select option:focus,
+select.form-control option:focus {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.items-table select option:checked,
+select.form-control option:checked {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
 }
 
 .btn-remove-item {
@@ -743,13 +759,25 @@ select.form-control option {
 .service-calculator select,
 .service-calculator input {
     font-size: 0.875rem;
-    color: #1f2937;
-    background-color: #ffffff;
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
 }
 
 .service-calculator select option {
-    color: #1f2937;
-    background-color: #ffffff;
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
+    padding: 0.5rem;
+}
+
+.service-calculator select option:hover,
+.service-calculator select option:focus {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.service-calculator select option:checked {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
 }
 
 /* Адаптив */
