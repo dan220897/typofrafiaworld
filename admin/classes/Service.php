@@ -22,7 +22,7 @@ class Service {
         
         // Применяем фильтры
         if (!empty($filters['search'])) {
-            $query .= " AND (s.name LIKE :search OR s.description LIKE :search)";
+            $query .= " AND (s.name LIKE :search OR s.label LIKE :search OR s.description LIKE :search)";
         }
         
         if (!empty($filters['category'])) {

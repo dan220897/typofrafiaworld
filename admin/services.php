@@ -654,7 +654,10 @@ textarea.form-control {
                             <i class="fas fa-grip-vertical"></i>
                         </td>
                         <td>
-                            <div class="service-name"><?php echo htmlspecialchars($srv['name']); ?></div>
+                            <div class="service-name"><?php echo htmlspecialchars(!empty($srv['label']) ? $srv['label'] : $srv['name']); ?></div>
+                            <?php if (!empty($srv['name']) && strtolower($srv['name']) !== strtolower($srv['label'] ?? '')): ?>
+                                <div class="service-description" style="font-family: 'Courier New', monospace; font-size: 0.75rem; color: #9ca3af;"><?php echo htmlspecialchars($srv['name']); ?></div>
+                            <?php endif; ?>
                             <?php if ($srv['description']): ?>
                                 <div class="service-description"><?php echo htmlspecialchars($srv['description']); ?></div>
                             <?php endif; ?>
