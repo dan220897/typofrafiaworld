@@ -35,12 +35,17 @@ $offset = ($page - 1) * $limit;
 
 // Получаем список услуг
 try {
-    $services = $service->getServices($filters, $limit, $offset);
+    $result = $service->getServices($filters, $limit, $offset);
+    $services = $result['data'];
+    $total_services = $result['total'];
+    $total_pages = ceil($total_services / $limit);
     $categories = $service->getCategories();
     $stats = $service->getServiceStats();
 } catch (Exception $e) {
     $_SESSION['error'] = 'Ошибка при загрузке услуг: ' . $e->getMessage();
     $services = [];
+    $total_services = 0;
+    $total_pages = 0;
     $categories = [];
     $stats = [];
 }
@@ -505,6 +510,57 @@ textarea.form-control {
     margin-bottom: 0.5rem;
 }
 
+/* Пагинация */
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    border-radius: 0 0 8px 8px;
+}
+
+.pagination-info {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.pagination {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.pagination-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #374151;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-btn:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.pagination-btn.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.pagination-dots {
+    padding: 0 0.5rem;
+    color: #9ca3af;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     .services-header {
@@ -512,35 +568,45 @@ textarea.form-control {
         align-items: stretch;
         gap: 1rem;
     }
-    
+
     .filters-bar {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .search-box {
         min-width: auto;
     }
-    
+
     .services-table {
         overflow-x: auto;
     }
-    
+
     .services-table table {
         min-width: 800px;
     }
-    
+
     .modal-content {
         max-width: 95%;
         margin: 1rem;
     }
-    
+
     .row {
         flex-direction: column;
     }
-    
+
     .col-md-4 {
         width: 100%;
+    }
+
+    .pagination-wrapper {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 
@@ -713,6 +779,53 @@ textarea.form-control {
             </table>
         <?php endif; ?>
     </div>
+
+    <!-- Пагинация -->
+    <?php if ($total_pages > 1): ?>
+    <div class="pagination-wrapper">
+        <div class="pagination-info">
+            Показано <?php echo count($services); ?> из <?php echo $total_services; ?> услуг
+        </div>
+        <div class="pagination">
+            <?php if ($page > 1): ?>
+            <a href="?page=<?php echo $page - 1; ?><?php echo !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : ''; ?><?php echo !empty($filters['category']) ? '&category=' . urlencode($filters['category']) : ''; ?><?php echo isset($_GET['status']) ? '&status=' . urlencode($_GET['status']) : ''; ?>" class="pagination-btn">
+                <i class="fas fa-chevron-left"></i> Назад
+            </a>
+            <?php endif; ?>
+
+            <?php
+            $start_page = max(1, $page - 2);
+            $end_page = min($total_pages, $page + 2);
+
+            if ($start_page > 1): ?>
+                <a href="?page=1<?php echo !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : ''; ?><?php echo !empty($filters['category']) ? '&category=' . urlencode($filters['category']) : ''; ?><?php echo isset($_GET['status']) ? '&status=' . urlencode($_GET['status']) : ''; ?>" class="pagination-btn">1</a>
+                <?php if ($start_page > 2): ?>
+                    <span class="pagination-dots">...</span>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                <a href="?page=<?php echo $i; ?><?php echo !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : ''; ?><?php echo !empty($filters['category']) ? '&category=' . urlencode($filters['category']) : ''; ?><?php echo isset($_GET['status']) ? '&status=' . urlencode($_GET['status']) : ''; ?>"
+                   class="pagination-btn <?php echo $i === $page ? 'active' : ''; ?>">
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+
+            <?php if ($end_page < $total_pages): ?>
+                <?php if ($end_page < $total_pages - 1): ?>
+                    <span class="pagination-dots">...</span>
+                <?php endif; ?>
+                <a href="?page=<?php echo $total_pages; ?><?php echo !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : ''; ?><?php echo !empty($filters['category']) ? '&category=' . urlencode($filters['category']) : ''; ?><?php echo isset($_GET['status']) ? '&status=' . urlencode($_GET['status']) : ''; ?>" class="pagination-btn"><?php echo $total_pages; ?></a>
+            <?php endif; ?>
+
+            <?php if ($page < $total_pages): ?>
+            <a href="?page=<?php echo $page + 1; ?><?php echo !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : ''; ?><?php echo !empty($filters['category']) ? '&category=' . urlencode($filters['category']) : ''; ?><?php echo isset($_GET['status']) ? '&status=' . urlencode($_GET['status']) : ''; ?>" class="pagination-btn">
+                Вперед <i class="fas fa-chevron-right"></i>
+            </a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <!-- Модальное окно создания/редактирования услуги -->

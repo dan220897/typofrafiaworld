@@ -19,45 +19,91 @@ class Service {
                  LEFT JOIN service_parameters sp ON s.id = sp.service_id AND sp.is_active = 1
                  LEFT JOIN service_price_rules spr ON s.id = spr.service_id AND spr.is_active = 1
                  WHERE 1=1";
-        
+
         // Применяем фильтры
         if (!empty($filters['search'])) {
             $query .= " AND (s.name LIKE :search OR s.label LIKE :search OR s.description LIKE :search)";
         }
-        
+
         if (!empty($filters['category'])) {
             $query .= " AND s.category = :category";
         }
-        
+
         if (isset($filters['is_active'])) {
             $query .= " AND s.is_active = :is_active";
         }
-        
+
         $query .= " GROUP BY s.id
                    ORDER BY s.sort_order ASC, s.name ASC
                    LIMIT :limit OFFSET :offset";
-        
+
         $stmt = $this->conn->prepare($query);
-        
+
         if (!empty($filters['search'])) {
             $search = "%{$filters['search']}%";
             $stmt->bindParam(":search", $search);
         }
-        
+
         if (!empty($filters['category'])) {
             $stmt->bindParam(":category", $filters['category']);
         }
-        
+
         if (isset($filters['is_active'])) {
             $stmt->bindParam(":is_active", $filters['is_active']);
         }
-        
+
         $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
         $stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
-        
+
         $stmt->execute();
-        
-        return $stmt->fetchAll();
+
+        $services = $stmt->fetchAll();
+
+        // Возвращаем результат с общим количеством
+        return [
+            'data' => $services,
+            'total' => $this->getServicesCount($filters)
+        ];
+    }
+
+    // Получить количество услуг с учетом фильтров
+    public function getServicesCount($filters = []) {
+        $query = "SELECT COUNT(DISTINCT s.id) as total
+                 FROM " . $this->table_name . " s
+                 WHERE 1=1";
+
+        // Применяем фильтры
+        if (!empty($filters['search'])) {
+            $query .= " AND (s.name LIKE :search OR s.label LIKE :search OR s.description LIKE :search)";
+        }
+
+        if (!empty($filters['category'])) {
+            $query .= " AND s.category = :category";
+        }
+
+        if (isset($filters['is_active'])) {
+            $query .= " AND s.is_active = :is_active";
+        }
+
+        $stmt = $this->conn->prepare($query);
+
+        if (!empty($filters['search'])) {
+            $search = "%{$filters['search']}%";
+            $stmt->bindParam(":search", $search);
+        }
+
+        if (!empty($filters['category'])) {
+            $stmt->bindParam(":category", $filters['category']);
+        }
+
+        if (isset($filters['is_active'])) {
+            $stmt->bindParam(":is_active", $filters['is_active']);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        return $result['total'] ?? 0;
     }
     public function getActiveServices() {
     $query = "SELECT s.id, s.name, s.label, s.description, s.category,
