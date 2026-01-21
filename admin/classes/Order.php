@@ -37,16 +37,18 @@ class Order {
     
     // Получить список заказов с фильтрацией
     public function getOrders($filters = [], $limit = 50, $offset = 0) {
-        $query = "SELECT o.*, 
+        $query = "SELECT o.*,
                         u.name as user_name, u.phone as user_phone, u.company_name,
+                        l.name as location_name,
                         COUNT(DISTINCT oi.id) as items_count,
-                        (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
-                         FROM order_items oi2 
-                         JOIN services s ON oi2.service_id = s.id 
-                         WHERE oi2.order_id = o.id 
+                        (SELECT GROUP_CONCAT(s.name SEPARATOR ', ')
+                         FROM order_items oi2
+                         JOIN services s ON oi2.service_id = s.id
+                         WHERE oi2.order_id = o.id
                          LIMIT 3) as services_list
                  FROM " . $this->table_name . " o
                  LEFT JOIN users u ON o.user_id = u.id
+                 LEFT JOIN locations l ON o.location_id = l.id
                  LEFT JOIN order_items oi ON o.id = oi.order_id
                  WHERE 1=1";
         

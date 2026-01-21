@@ -27,44 +27,49 @@ class Dashboard {
     
     public function getStats() {
         $stats = [];
-        
+
         try {
             // Проверяем подключение
             if (!$this->conn) {
                 throw new Exception("Нет подключения к базе данных");
             }
-            
+
             // Заказы
             $stats['orders'] = $this->getOrderStats();
-            
+
             // Выручка
             $stats['revenue'] = $this->getRevenueStats();
-            
+
             // Пользователи
             $stats['users'] = $this->getUserStats();
-            
+
             // Чаты
             $stats['chats'] = $this->getChatStats();
-            
+
             // Последние заказы
             $stats['recent_orders'] = $this->getRecentOrders();
-            
+
             // Активные чаты
             $stats['active_chats'] = $this->getActiveChats();
-            
+
             // Данные для графиков
             $chartData = $this->getChartData();
             $stats['chart_labels'] = $chartData['labels'];
             $stats['orders_chart_data'] = $chartData['orders'];
             $stats['revenue_chart_data'] = $chartData['revenue'];
-            
+
+            // Статистика по точкам (только для суперадмина)
+            if ($this->location_id === null) {
+                $stats['locations_stats'] = $this->getLocationStats();
+            }
+
         } catch (Exception $e) {
             if ($this->debug) {
                 throw $e;
             }
             error_log("Dashboard error: " . $e->getMessage());
         }
-        
+
         return $stats;
     }
     
@@ -335,7 +340,7 @@ class Dashboard {
     public function checkTables() {
         $tables = ['orders', 'users', 'chats', 'messages', 'admins'];
         $missing = [];
-        
+
         foreach ($tables as $table) {
             try {
                 $query = "SELECT 1 FROM $table LIMIT 1";
@@ -344,12 +349,41 @@ class Dashboard {
                 $missing[] = $table;
             }
         }
-        
+
         if (!empty($missing)) {
             throw new Exception("Отсутствуют таблицы: " . implode(', ', $missing));
         }
-        
+
         return true;
+    }
+
+    // Получить статистику по точкам
+    private function getLocationStats() {
+        try {
+            $query = "SELECT
+                        l.id,
+                        l.name,
+                        COUNT(DISTINCT o.id) as orders_count,
+                        IFNULL(SUM(CASE WHEN o.payment_status = 'paid' THEN o.final_amount ELSE 0 END), 0) as revenue,
+                        COUNT(DISTINCT CASE WHEN DATE(o.created_at) = CURDATE() THEN o.id END) as orders_today,
+                        COUNT(DISTINCT CASE WHEN o.status = 'pending' THEN o.id END) as orders_pending,
+                        COUNT(DISTINCT CASE WHEN o.status = 'in_production' THEN o.id END) as orders_in_production,
+                        COUNT(DISTINCT CASE WHEN o.status = 'ready' THEN o.id END) as orders_ready
+                      FROM locations l
+                      LEFT JOIN orders o ON l.id = o.location_id
+                      WHERE l.is_active = 1
+                      GROUP BY l.id, l.name
+                      ORDER BY orders_count DESC";
+
+            $stmt = $this->conn->query($query);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (Exception $e) {
+            if ($this->debug) {
+                echo "Ошибка getLocationStats: " . $e->getMessage() . "<br>";
+            }
+            return [];
+        }
     }
 }
 ?>

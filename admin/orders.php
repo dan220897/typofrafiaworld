@@ -14,6 +14,7 @@ $status = $_GET['status'] ?? 'all';
 $search = $_GET['search'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
 $date_to = $_GET['date_to'] ?? '';
+$location_filter = $_GET['location'] ?? 'all';
 $page = max(1, intval($_GET['page'] ?? 1));
 $per_page = 20;
 
@@ -21,6 +22,17 @@ $per_page = 20;
 $database = new Database();
 $db = $database->getConnection();
 $order = new Order($db);
+
+// Получаем список точек для фильтра (только для суперадмина)
+$locations = [];
+if (isSuperAdmin()) {
+    try {
+        $stmt = $db->query("SELECT id, name FROM locations WHERE is_active = 1 ORDER BY name");
+        $locations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        $locations = [];
+    }
+}
 
 
 
@@ -35,6 +47,9 @@ $filters = [
 // Добавляем фильтр по локации для location admins
 if (isLocationAdmin()) {
     $filters['location_id'] = getCurrentLocationId();
+} elseif (isSuperAdmin() && $location_filter !== 'all') {
+    // Для суперадмина добавляем фильтр по выбранной точке
+    $filters['location_id'] = intval($location_filter);
 }
 
 $offset = ($page - 1) * $per_page;
@@ -96,25 +111,38 @@ require_once 'includes/header.php';
     <div class="filters-section">
         <form method="GET" action="" class="filters-form">
             <div class="filter-group">
-                <input type="text" name="search" class="form-control" placeholder="Поиск по номеру, клиенту..." 
+                <input type="text" name="search" class="form-control" placeholder="Поиск по номеру, клиенту..."
                        value="<?php echo htmlspecialchars($search); ?>">
             </div>
-            
+
+            <?php if (isSuperAdmin() && !empty($locations)): ?>
             <div class="filter-group">
-                <input type="date" name="date_from" class="form-control" 
+                <select name="location" class="form-control">
+                    <option value="all">Все точки</option>
+                    <?php foreach ($locations as $loc): ?>
+                    <option value="<?php echo $loc['id']; ?>" <?php echo $location_filter == $loc['id'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($loc['name']); ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?php endif; ?>
+
+            <div class="filter-group">
+                <input type="date" name="date_from" class="form-control"
                        value="<?php echo $date_from; ?>" placeholder="От">
             </div>
-            
+
             <div class="filter-group">
-                <input type="date" name="date_to" class="form-control" 
+                <input type="date" name="date_to" class="form-control"
                        value="<?php echo $date_to; ?>" placeholder="До">
             </div>
-            
+
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-search"></i> Найти
             </button>
-            
-            <?php if ($search || $date_from || $date_to): ?>
+
+            <?php if ($search || $date_from || $date_to || $location_filter !== 'all'): ?>
             <a href="orders.php" class="btn btn-link">Сбросить</a>
             <?php endif; ?>
         </form>
@@ -127,6 +155,7 @@ require_once 'includes/header.php';
                 <tr>
                     <th>Номер</th>
                     <th>Клиент</th>
+                    <?php if (isSuperAdmin()): ?><th>Точка</th><?php endif; ?>
                     <th>Услуги</th>
                     <th>Сумма</th>
                     <th>Статус</th>
@@ -139,7 +168,7 @@ require_once 'includes/header.php';
             <tbody>
                 <?php if (empty($orders)): ?>
                 <tr>
-                    <td colspan="9" class="text-center">Заказы не найдены</td>
+                    <td colspan="<?php echo isSuperAdmin() ? '10' : '9'; ?>" class="text-center">Заказы не найдены</td>
                 </tr>
                 <?php else: ?>
                 <?php foreach ($orders as $orderItem): ?>
@@ -156,6 +185,13 @@ require_once 'includes/header.php';
                             <small><?php echo htmlspecialchars($orderItem['user_phone']); ?></small>
                         </div>
                     </td>
+                    <?php if (isSuperAdmin()): ?>
+                    <td>
+                        <span class="location-badge">
+                            <?php echo htmlspecialchars($orderItem['location_name'] ?? 'Не указана'); ?>
+                        </span>
+                    </td>
+                    <?php endif; ?>
                     <td>
                         <div class="services-list">
                             <?php echo htmlspecialchars($orderItem['items_summary']); ?>
@@ -503,6 +539,15 @@ require_once 'includes/header.php';
     background: #3b82f6;
     color: white;
     border-color: #3b82f6;
+}
+
+.location-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #e0e7ff;
+    color: #4338ca;
 }
 </style>
 

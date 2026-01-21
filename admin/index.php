@@ -260,6 +260,46 @@ require_once 'includes/header.php';
         </div>
     </div>
     
+    <!-- Статистика по точкам (только для суперадмина) -->
+    <?php if (isSuperAdmin() && isset($stats['locations_stats']) && !empty($stats['locations_stats'])): ?>
+    <div class="locations-stats-section">
+        <h3>Статистика по точкам</h3>
+        <div class="locations-stats-grid">
+            <?php foreach ($stats['locations_stats'] as $location): ?>
+            <div class="location-stat-card">
+                <h4><?php echo htmlspecialchars($location['name']); ?></h4>
+                <div class="location-stat-grid">
+                    <div class="location-stat-item">
+                        <span class="stat-label">Всего заказов</span>
+                        <span class="stat-value"><?php echo number_format($location['orders_count']); ?></span>
+                    </div>
+                    <div class="location-stat-item">
+                        <span class="stat-label">Выручка</span>
+                        <span class="stat-value"><?php echo number_format($location['revenue'], 0, '', ' '); ?> ₽</span>
+                    </div>
+                    <div class="location-stat-item">
+                        <span class="stat-label">Сегодня</span>
+                        <span class="stat-value"><?php echo $location['orders_today']; ?></span>
+                    </div>
+                    <div class="location-stat-item">
+                        <span class="stat-label">Ожидают</span>
+                        <span class="stat-value"><?php echo $location['orders_pending']; ?></span>
+                    </div>
+                    <div class="location-stat-item">
+                        <span class="stat-label">В работе</span>
+                        <span class="stat-value"><?php echo $location['orders_in_production']; ?></span>
+                    </div>
+                    <div class="location-stat-item">
+                        <span class="stat-label">Готовы</span>
+                        <span class="stat-value"><?php echo $location['orders_ready']; ?></span>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Последние действия -->
     <div class="recent-section">
         <!-- Последние заказы -->
@@ -559,6 +599,69 @@ require_once 'includes/header.php';
 
 .text-muted {
     color: #666;
+}
+
+.locations-stats-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.locations-stats-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.locations-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.location-stat-card {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+}
+
+.location-stat-card h4 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.location-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.location-stat-item {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+}
+
+.location-stat-item .stat-label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.location-stat-item .stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
 }
 </style>
 

@@ -699,10 +699,7 @@ textarea.form-control {
                             <button class="btn-icon" onclick="manageParameters(<?php echo $srv['id']; ?>)" title="Параметры">
                                 <i class="fas fa-cog"></i>
                             </button>
-                            <button class="btn-icon" onclick="managePricing(<?php echo $srv['id']; ?>)" title="Ценообразование">
-                                <i class="fas fa-percentage"></i>
-                            </button>
-                            <button class="btn-icon" onclick="toggleServiceStatus(<?php echo $srv['id']; ?>, <?php echo $srv['is_active']; ?>)" 
+                            <button class="btn-icon" onclick="toggleServiceStatus(<?php echo $srv['id']; ?>, <?php echo $srv['is_active']; ?>)"
                                     title="<?php echo $srv['is_active'] ? 'Деактивировать' : 'Активировать'; ?>">
                                 <i class="fas fa-<?php echo $srv['is_active'] ? 'eye-slash' : 'eye'; ?>"></i>
                             </button>
