@@ -1740,19 +1740,41 @@ function filterServices() {
 
 // Выбрать услугу
 function selectService(serviceId) {
-    const itemIndex = document.getElementById('serviceSelectorItemIndex').value;
-    const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
-    const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
+    console.log('=== selectService CALLED ===');
+    console.log('serviceId received:', serviceId, 'type:', typeof serviceId);
 
-    if (!row || !serviceCard) return;
+    const itemIndex = document.getElementById('serviceSelectorItemIndex').value;
+    console.log('itemIndex:', itemIndex);
+
+    const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
+    console.log('row found:', !!row);
+
+    const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
+    console.log('serviceCard found:', !!serviceCard);
+
+    if (serviceCard) {
+        console.log('serviceCard data-service-id:', serviceCard.dataset.serviceId);
+        console.log('serviceCard data-service-name:', serviceCard.dataset.serviceName);
+        console.log('serviceCard data-base-price:', serviceCard.dataset.basePrice);
+        console.log('serviceCard actual element:', serviceCard);
+    }
+
+    if (!row || !serviceCard) {
+        console.log('ERROR: row or serviceCard not found!');
+        return;
+    }
 
     const serviceName = serviceCard.dataset.serviceName;
     const basePrice = parseFloat(serviceCard.dataset.basePrice || 0);
+
+    console.log('serviceName to display:', serviceName);
+    console.log('basePrice to use:', basePrice);
 
     // Обновляем скрытое поле
     const serviceIdInput = row.querySelector('.service-id-input');
     if (serviceIdInput) {
         serviceIdInput.value = serviceId;
+        console.log('Set service-id-input to:', serviceId);
     }
 
     // Показываем выбранную услугу
@@ -1764,12 +1786,14 @@ function selectService(serviceId) {
         selectButton.style.display = 'none';
         selectedInfo.style.display = 'flex';
         serviceNameDisplay.textContent = serviceName;
+        console.log('Updated UI with service name:', serviceName);
     }
 
     // Закрываем модальное окно
     closeServiceSelectorModal();
 
     // Загружаем параметры услуги и обновляем калькулятор
+    console.log('Calling loadServiceParams with:', itemIndex, serviceId, basePrice);
     loadServiceParams(itemIndex, serviceId, basePrice);
 }
 
