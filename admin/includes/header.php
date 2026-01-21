@@ -501,6 +501,11 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <i class="fas fa-clipboard-list"></i>
                         <span>Услуги</span>
                     </a>
+
+                    <a href="/admin/categories.php" class="nav-link <?php echo $current_page == 'categories' ? 'active' : ''; ?>" data-tooltip="Категории">
+                        <i class="fas fa-folder"></i>
+                        <span>Категории</span>
+                    </a>
                     <?php endif; ?>
 
                     <a href="/admin/users.php" class="nav-link <?php echo $current_page == 'users' ? 'active' : ''; ?>" data-tooltip="Пользователи">
