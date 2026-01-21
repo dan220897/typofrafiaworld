@@ -429,14 +429,35 @@ class Service {
     
     // Получить категории услуг
     public function getCategories() {
-        $query = "SELECT DISTINCT category, COUNT(*) as count 
-                 FROM " . $this->table_name . " 
-                 WHERE category IS NOT NULL 
-                 GROUP BY category 
+        // Сначала пробуем получить из таблицы categories
+        $query = "SELECT name as category,
+                        (SELECT COUNT(*) FROM services WHERE category = c.name) as count,
+                        icon,
+                        description
+                 FROM categories c
+                 WHERE is_active = 1
+                 ORDER BY sort_order ASC, name ASC";
+
+        try {
+            $stmt = $this->conn->query($query);
+            $categories = $stmt->fetchAll();
+
+            // Если есть категории в справочнике, возвращаем их
+            if (!empty($categories)) {
+                return $categories;
+            }
+        } catch (PDOException $e) {
+            // Таблица categories не существует, продолжаем
+        }
+
+        // Иначе берем из services (обратная совместимость)
+        $query = "SELECT DISTINCT category, COUNT(*) as count
+                 FROM " . $this->table_name . "
+                 WHERE category IS NOT NULL AND category != ''
+                 GROUP BY category
                  ORDER BY category";
-        
+
         $stmt = $this->conn->query($query);
-        
         return $stmt->fetchAll();
     }
     

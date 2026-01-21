@@ -37,6 +37,7 @@ class Category {
 
     // Получить все категории
     public function getAll($filters = []) {
+        // Сначала пытаемся получить из таблицы categories
         $query = "SELECT c.*,
                         (SELECT COUNT(*) FROM services WHERE category = c.name) as services_count
                  FROM " . $this->table_name . " c
@@ -57,6 +58,45 @@ class Category {
         if (isset($filters['is_active'])) {
             $stmt->bindParam(':is_active', $filters['is_active'], PDO::PARAM_INT);
         }
+
+        if (!empty($filters['search'])) {
+            $search = "%{$filters['search']}%";
+            $stmt->bindParam(':search', $search);
+        }
+
+        $stmt->execute();
+        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Если таблица categories пуста, получаем категории из services
+        if (empty($categories)) {
+            return $this->getCategoriesFromServices($filters);
+        }
+
+        return $categories;
+    }
+
+    // Получить категории из таблицы services (для обратной совместимости)
+    private function getCategoriesFromServices($filters = []) {
+        $query = "SELECT
+                    category as name,
+                    category as slug,
+                    '' as description,
+                    'fa-folder' as icon,
+                    0 as sort_order,
+                    1 as is_active,
+                    COUNT(*) as services_count,
+                    MIN(created_at) as created_at,
+                    MAX(updated_at) as updated_at
+                 FROM services
+                 WHERE category IS NOT NULL AND category != ''";
+
+        if (!empty($filters['search'])) {
+            $query .= " AND category LIKE :search";
+        }
+
+        $query .= " GROUP BY category ORDER BY category ASC";
+
+        $stmt = $this->conn->prepare($query);
 
         if (!empty($filters['search'])) {
             $search = "%{$filters['search']}%";
@@ -104,6 +144,12 @@ class Category {
 
     // Обновить категорию
     public function update($id, $data) {
+        // Получаем старое название категории
+        $oldCategory = $this->getById($id);
+        if (!$oldCategory) {
+            return false;
+        }
+
         $query = "UPDATE " . $this->table_name . "
                  SET name = :name,
                      slug = :slug,
@@ -126,7 +172,18 @@ class Category {
         $stmt->bindParam(':sort_order', $data['sort_order'], PDO::PARAM_INT);
         $stmt->bindParam(':is_active', $data['is_active'], PDO::PARAM_INT);
 
-        return $stmt->execute();
+        $result = $stmt->execute();
+
+        // Если название изменилось, обновляем в services
+        if ($result && $oldCategory['name'] !== $data['name']) {
+            $updateServicesQuery = "UPDATE services SET category = :new_name WHERE category = :old_name";
+            $updateStmt = $this->conn->prepare($updateServicesQuery);
+            $updateStmt->bindParam(':new_name', $data['name']);
+            $updateStmt->bindParam(':old_name', $oldCategory['name']);
+            $updateStmt->execute();
+        }
+
+        return $result;
     }
 
     // Удалить категорию
@@ -220,27 +277,68 @@ class Category {
         return $slug;
     }
 
+    // Получить только активные категории для выбора в формах
+    public function getActiveCategories() {
+        $query = "SELECT name, icon, description
+                 FROM " . $this->table_name . "
+                 WHERE is_active = 1
+                 ORDER BY sort_order ASC, name ASC";
+
+        try {
+            $stmt = $this->conn->query($query);
+            $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($categories)) {
+                return $categories;
+            }
+        } catch (PDOException $e) {
+            // Таблица не существует
+        }
+
+        // Если таблица пуста, берем из services
+        $query = "SELECT DISTINCT category as name,
+                        'fa-folder' as icon,
+                        '' as description
+                 FROM services
+                 WHERE category IS NOT NULL AND category != ''
+                 ORDER BY category ASC";
+
+        $stmt = $this->conn->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Получить статистику
     public function getStats() {
         $stats = [];
 
-        // Всего категорий
+        // Проверяем, есть ли записи в таблице categories
         $query = "SELECT COUNT(*) as total FROM " . $this->table_name;
         $stmt = $this->conn->query($query);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $stats['total'] = $result['total'];
+        $categoriesTableCount = $result['total'];
 
-        // Активных
-        $query = "SELECT COUNT(*) as active FROM " . $this->table_name . " WHERE is_active = 1";
-        $stmt = $this->conn->query($query);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $stats['active'] = $result['active'];
+        if ($categoriesTableCount > 0) {
+            // Берем из таблицы categories
+            $stats['total'] = $categoriesTableCount;
 
-        // Неактивных
-        $stats['inactive'] = $stats['total'] - $stats['active'];
+            $query = "SELECT COUNT(*) as active FROM " . $this->table_name . " WHERE is_active = 1";
+            $stmt = $this->conn->query($query);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stats['active'] = $result['active'];
 
-        // Всего услуг по категориям
-        $query = "SELECT COUNT(DISTINCT id) as total FROM services";
+            $stats['inactive'] = $stats['total'] - $stats['active'];
+        } else {
+            // Берем уникальные категории из services
+            $query = "SELECT COUNT(DISTINCT category) as total FROM services WHERE category IS NOT NULL AND category != ''";
+            $stmt = $this->conn->query($query);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stats['total'] = $result['total'];
+            $stats['active'] = $result['total'];
+            $stats['inactive'] = 0;
+        }
+
+        // Всего услуг
+        $query = "SELECT COUNT(DISTINCT id) as total FROM services WHERE category IS NOT NULL";
         $stmt = $this->conn->query($query);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $stats['total_services'] = $result['total'];
@@ -251,13 +349,24 @@ class Category {
     // Миграция существующих категорий из services
     public function migrateFromServices() {
         try {
-            // Получаем уникальные категории из services
-            $query = "SELECT DISTINCT category FROM services WHERE category IS NOT NULL AND category != ''";
+            // Получаем уникальные категории из services с количеством услуг
+            $query = "SELECT
+                        category,
+                        COUNT(*) as services_count,
+                        MIN(created_at) as first_created
+                     FROM services
+                     WHERE category IS NOT NULL AND category != ''
+                     GROUP BY category
+                     ORDER BY services_count DESC";
             $stmt = $this->conn->query($query);
-            $serviceCategories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $serviceCategories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $migrated = 0;
-            foreach ($serviceCategories as $categoryName) {
+            $sortOrder = 0;
+
+            foreach ($serviceCategories as $cat) {
+                $categoryName = $cat['category'];
+
                 // Проверяем, существует ли уже такая категория
                 $checkQuery = "SELECT id FROM " . $this->table_name . " WHERE name = :name";
                 $checkStmt = $this->conn->prepare($checkQuery);
@@ -268,13 +377,16 @@ class Category {
                     continue; // Категория уже существует
                 }
 
+                // Определяем иконку по названию категории
+                $icon = $this->getIconByCategory($categoryName);
+
                 // Создаем категорию
                 $data = [
                     'name' => $categoryName,
                     'slug' => $this->generateSlug($categoryName),
-                    'description' => '',
-                    'icon' => 'fa-folder',
-                    'sort_order' => 0,
+                    'description' => "Количество услуг: {$cat['services_count']}",
+                    'icon' => $icon,
+                    'sort_order' => $sortOrder++,
                     'is_active' => 1
                 ];
 
@@ -283,10 +395,35 @@ class Category {
                 }
             }
 
-            return ['success' => true, 'migrated' => $migrated];
+            return ['success' => true, 'migrated' => $migrated, 'total' => count($serviceCategories)];
         } catch (Exception $e) {
             return ['success' => false, 'error' => $e->getMessage()];
         }
+    }
+
+    // Определить иконку по названию категории
+    private function getIconByCategory($categoryName) {
+        $categoryName = mb_strtolower($categoryName);
+
+        $iconMap = [
+            'печать' => 'fa-print',
+            'дизайн' => 'fa-palette',
+            'постпечать' => 'fa-cut',
+            'широкоформат' => 'fa-image',
+            'сувенир' => 'fa-gift',
+            'брошюр' => 'fa-book',
+            'визит' => 'fa-id-card',
+            'листовк' => 'fa-file',
+            'баннер' => 'fa-flag',
+        ];
+
+        foreach ($iconMap as $keyword => $icon) {
+            if (strpos($categoryName, $keyword) !== false) {
+                return $icon;
+            }
+        }
+
+        return 'fa-folder';
     }
 }
 ?>

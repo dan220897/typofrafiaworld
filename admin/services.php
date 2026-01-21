@@ -847,14 +847,22 @@ textarea.form-control {
                 
                 <div class="form-group">
                     <label class="form-label">Категория <span class="required">*</span></label>
-                    <select class="form-control" name="category" required>
+                    <select class="form-control" name="category" id="category_select" required>
                         <option value="">Выберите категорию</option>
-                        <option value="печать">Печать</option>
-                        <option value="дизайн">Дизайн</option>
-                        <option value="постпечать">Постпечать</option>
-                        <option value="широкоформат">Широкоформат</option>
-                        <option value="сувенирка">Сувенирная продукция</option>
+                        <?php foreach ($categories as $cat): ?>
+                        <option value="<?php echo htmlspecialchars($cat['category']); ?>"
+                                data-icon="<?php echo isset($cat['icon']) ? htmlspecialchars($cat['icon']) : 'fa-folder'; ?>">
+                            <?php echo htmlspecialchars($cat['category']); ?>
+                            <?php if (isset($cat['count']) && $cat['count'] > 0): ?>
+                                (<?php echo $cat['count']; ?>)
+                            <?php endif; ?>
+                        </option>
+                        <?php endforeach; ?>
                     </select>
+                    <small style="color: #6b7280; font-size: 0.75rem;">
+                        Не нашли нужную категорию?
+                        <a href="/admin/categories.php" target="_blank" style="color: #3b82f6;">Добавить новую</a>
+                    </small>
                 </div>
                 
                 <div class="form-group">
