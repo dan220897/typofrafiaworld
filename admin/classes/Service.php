@@ -124,22 +124,26 @@ class Service {
     
     // Получить услугу по ID
     public function getServiceById($service_id) {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id";
-        
+        $query = "SELECT s.*,
+                         COALESCE(sbp.base_price, s.base_price, 0) as base_price
+                  FROM " . $this->table_name . " s
+                  LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
+                  WHERE s.id = :id";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $service_id);
         $stmt->execute();
-        
+
         $service = $stmt->fetch();
-        
+
         if ($service) {
             // Получаем параметры
             $service['parameters'] = $this->getServiceParameters($service_id);
-            
+
             // Получаем правила ценообразования
             $service['price_rules'] = $this->getServicePriceRules($service_id);
         }
-        
+
         return $service;
     }
     
