@@ -60,8 +60,11 @@ class Service {
         return $stmt->fetchAll();
     }
     public function getActiveServices() {
-    $query = "SELECT s.id, s.name, s.label, s.description, s.category, s.base_price, s.min_quantity, s.production_time_days
+    $query = "SELECT s.id, s.name, s.label, s.description, s.category,
+                     COALESCE(sbp.base_price, 0) as base_price,
+                     s.min_quantity, s.production_time_days
              FROM " . $this->table_name . " s
+             LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
              WHERE s.is_active = 1
              ORDER BY s.sort_order ASC, s.label ASC, s.name ASC";
 

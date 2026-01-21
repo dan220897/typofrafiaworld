@@ -854,18 +854,23 @@ select.form-control option:checked {
     padding: 1rem;
     border: 2px solid #e5e7eb;
     border-radius: 8px;
-    cursor: pointer;
     transition: all 0.2s;
     background: #ffffff;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    position: relative;
 }
 
 .service-card:hover {
     border-color: #3b82f6;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
     transform: translateY(-2px);
+}
+
+.service-card:hover .btn-select-this-service {
+    background: #2563eb;
+    transform: scale(1.05);
 }
 
 .service-card-header {
@@ -1310,12 +1315,11 @@ select.form-control option:checked {
                 $displayName = !empty($srv['label']) ? $srv['label'] : $srv['name'];
             ?>
             <div class="service-card"
-                 data-service-id="<?php echo $srv['id']; ?>"
+                 data-service-id="<?php echo intval($srv['id']); ?>"
                  data-service-name="<?php echo htmlspecialchars($displayName); ?>"
                  data-service-category="<?php echo htmlspecialchars($srv['category'] ?? ''); ?>"
-                 data-base-price="<?php echo $srv['base_price']; ?>"
-                 data-search="<?php echo strtolower(htmlspecialchars($displayName) . ' ' . htmlspecialchars($srv['category'] ?? '')); ?>"
-                 onclick="selectService(<?php echo $srv['id']; ?>)">
+                 data-base-price="<?php echo floatval($srv['base_price']); ?>"
+                 data-search="<?php echo strtolower(htmlspecialchars($displayName) . ' ' . htmlspecialchars($srv['category'] ?? '') . ' ' . htmlspecialchars($srv['description'] ?? '')); ?>">
                 <div class="service-card-header">
                     <h4 class="service-card-title"><?php echo htmlspecialchars($displayName); ?></h4>
                     <?php if (!empty($srv['category'])): ?>
@@ -1327,7 +1331,7 @@ select.form-control option:checked {
                 <?php endif; ?>
                 <div class="service-card-footer">
                     <span class="service-card-price">от <?php echo number_format($srv['base_price'], 0, ',', ' '); ?> ₽</span>
-                    <button type="button" class="btn-select-this-service">
+                    <button type="button" class="btn-select-this-service" onclick="selectService(<?php echo intval($srv['id']); ?>); event.stopPropagation();">
                         <i class="fas fa-check"></i> Выбрать
                     </button>
                 </div>
