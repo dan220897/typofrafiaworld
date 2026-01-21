@@ -12,10 +12,12 @@ class Service {
     // Получить список услуг
     public function getServices($filters = [], $limit = 50, $offset = 0) {
         $query = "SELECT s.*,
+                        COALESCE(sbp.base_price, s.base_price, 0) as base_price,
                         COUNT(DISTINCT sp.id) as parameters_count,
                         COUNT(DISTINCT spr.id) as rules_count,
                         (SELECT COUNT(*) FROM order_items WHERE service_id = s.id) as usage_count
                  FROM " . $this->table_name . " s
+                 LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
                  LEFT JOIN service_parameters sp ON s.id = sp.service_id AND sp.is_active = 1
                  LEFT JOIN service_price_rules spr ON s.id = spr.service_id AND spr.is_active = 1
                  WHERE 1=1";
