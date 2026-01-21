@@ -1329,7 +1329,7 @@ select.form-control option:checked {
                 $displayName = !empty($srv['label']) ? $srv['label'] : $srv['name'];
             ?>
             <div class="service-card"
-                 data-service-id="<?php echo intval($srv['id']); ?>"
+                 data-service-id="<?php echo htmlspecialchars($srv['id']); ?>"
                  data-service-name="<?php echo htmlspecialchars($displayName); ?>"
                  data-service-category="<?php echo htmlspecialchars($srv['category'] ?? ''); ?>"
                  data-base-price="<?php echo floatval($srv['base_price']); ?>"
@@ -1338,7 +1338,7 @@ select.form-control option:checked {
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                             <h4 class="service-card-title" style="margin: 0;"><?php echo htmlspecialchars($displayName); ?></h4>
-                            <span class="service-card-id">ID: <?php echo $srv['id']; ?></span>
+                            <span class="service-card-id">ID: <?php echo htmlspecialchars($srv['id']); ?></span>
                         </div>
                         <?php if (!empty($srv['name']) && strtolower($srv['name']) !== strtolower($displayName)): ?>
                         <div class="service-card-slug"><?php echo htmlspecialchars($srv['name']); ?></div>
@@ -1353,7 +1353,7 @@ select.form-control option:checked {
                 <?php endif; ?>
                 <div class="service-card-footer">
                     <span class="service-card-price">от <?php echo number_format($srv['base_price'], 0, ',', ' '); ?> ₽</span>
-                    <button type="button" class="btn-select-this-service" onclick="selectService(<?php echo intval($srv['id']); ?>); return false;">
+                    <button type="button" class="btn-select-this-service" onclick="selectService('<?php echo htmlspecialchars($srv['id']); ?>'); return false;">
                         <i class="fas fa-check"></i> Выбрать
                     </button>
                 </div>
