@@ -240,11 +240,11 @@
         // setInterval(() => {
         //     fetch('/admin/api/heartbeat.php', { method: 'POST' });
         // }, 60000); // Каждую минуту
-        
+
         // Проверка новых уведомлений
-        setInterval(() => {
-            checkNewNotifications();
-        }, 30000); // Каждые 30 секунд
+        // setInterval(() => {
+        //     checkNewNotifications();
+        // }, 30000); // Каждые 30 секунд
         
         
     </script>

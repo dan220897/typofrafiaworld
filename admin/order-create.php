@@ -1331,7 +1331,7 @@ select.form-control option:checked {
                 <?php endif; ?>
                 <div class="service-card-footer">
                     <span class="service-card-price">от <?php echo number_format($srv['base_price'], 0, ',', ' '); ?> ₽</span>
-                    <button type="button" class="btn-select-this-service" onclick="selectService(<?php echo intval($srv['id']); ?>); event.stopPropagation();">
+                    <button type="button" class="btn-select-this-service" onclick="selectService(<?php echo intval($srv['id']); ?>); return false;">
                         <i class="fas fa-check"></i> Выбрать
                     </button>
                 </div>
@@ -1659,6 +1659,7 @@ document.getElementById('serviceModalForm').addEventListener('submit', function(
 
 // Открыть модальное окно выбора услуги
 function openServiceSelector(itemIndex) {
+    console.log('Opening service selector for item index:', itemIndex);
     document.getElementById('serviceSelectorItemIndex').value = itemIndex;
     document.getElementById('serviceSelectorModal').style.display = 'block';
     document.getElementById('serviceSearchInput').value = '';
@@ -1667,6 +1668,7 @@ function openServiceSelector(itemIndex) {
 
 // Закрыть модальное окно выбора услуги
 function closeServiceSelectorModal() {
+    console.log('Closing service selector modal');
     document.getElementById('serviceSelectorModal').style.display = 'none';
 }
 
@@ -1719,7 +1721,14 @@ function filterServices() {
 // Выбрать услугу
 function selectService(serviceId) {
     const itemIndex = document.getElementById('serviceSelectorItemIndex').value;
-    console.log('Selecting service', serviceId, 'for item index', itemIndex);
+    console.log('=== Selecting service', serviceId, 'for item index', itemIndex, '===');
+
+    // Проверим все строки в таблице
+    const allRows = document.querySelectorAll('.item-row');
+    console.log('Total rows in table:', allRows.length);
+    allRows.forEach((r, idx) => {
+        console.log(`Row ${idx}: data-index="${r.dataset.index}"`);
+    });
 
     const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
     const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
@@ -1728,6 +1737,8 @@ function selectService(serviceId) {
         console.error('Row not found for index:', itemIndex);
         return;
     }
+
+    console.log('Found row:', row);
 
     if (!serviceCard) {
         console.error('Service card not found for id:', serviceId);
