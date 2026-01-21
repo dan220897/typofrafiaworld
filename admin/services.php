@@ -759,17 +759,17 @@ textarea.form-control {
                             </span>
                         </td>
                         <td class="actions-cell">
-                            <button class="btn-icon" onclick="editService(<?php echo $srv['id']; ?>)" title="Редактировать">
+                            <button class="btn-icon" onclick="editService('<?php echo htmlspecialchars($srv['id']); ?>')" title="Редактировать">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn-icon" onclick="manageParameters(<?php echo $srv['id']; ?>)" title="Параметры">
+                            <button class="btn-icon" onclick="manageParameters('<?php echo htmlspecialchars($srv['id']); ?>')" title="Параметры">
                                 <i class="fas fa-cog"></i>
                             </button>
-                            <button class="btn-icon" onclick="toggleServiceStatus(<?php echo $srv['id']; ?>, <?php echo $srv['is_active']; ?>)"
+                            <button class="btn-icon" onclick="toggleServiceStatus('<?php echo htmlspecialchars($srv['id']); ?>', <?php echo $srv['is_active']; ?>)"
                                     title="<?php echo $srv['is_active'] ? 'Деактивировать' : 'Активировать'; ?>">
                                 <i class="fas fa-<?php echo $srv['is_active'] ? 'eye-slash' : 'eye'; ?>"></i>
                             </button>
-                            <button class="btn-icon" onclick="deleteService(<?php echo $srv['id']; ?>)" title="Удалить">
+                            <button class="btn-icon" onclick="deleteService('<?php echo htmlspecialchars($srv['id']); ?>')" title="Удалить">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>

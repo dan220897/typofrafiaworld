@@ -29,16 +29,16 @@ try {
         case 'GET':
             if (isset($_GET['id'])) {
                 // Получить данные услуги
-                $service_id = intval($_GET['id']);
+                $service_id = $_GET['id']; // ID может быть строкой или числом
                 $service_data = $service->getServiceById($service_id);
-                
+
                 if (!$service_data) {
                     throw new Exception('Услуга не найдена');
                 }
-                
+
                 // Получаем статистику услуги
                 $service_data['stats'] = $service->getServiceStats($service_id);
-                
+
                 echo json_encode([
                     'success' => true,
                     'service' => $service_data
@@ -124,7 +124,7 @@ try {
                 ]);
             } else if ($action == 'copy') {
                 // Копировать услугу
-                $service_id = intval($_GET['id']);
+                $service_id = $_GET['id']; // ID может быть строкой
                 
                 $new_service_id = $service->copyService($service_id);
                 
@@ -134,7 +134,7 @@ try {
                 ]);
             } else if ($action == 'parameter') {
                 // Добавить параметр к услуге
-                $service_id = intval($_GET['id']);
+                $service_id = $_GET['id']; // ID может быть строкой
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (empty($data['parameter_type']) || empty($data['parameter_name'])) {
@@ -148,7 +148,7 @@ try {
                 echo json_encode(['success' => true]);
             } else if ($action == 'price_rule') {
                 // Добавить правило ценообразования
-                $service_id = intval($_GET['id']);
+                $service_id = $_GET['id']; // ID может быть строкой
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (empty($data['rule_type'])) {
@@ -164,8 +164,8 @@ try {
             break;
             
         case 'PUT':
-            $service_id = intval($_GET['id'] ?? 0);
-            
+            $service_id = $_GET['id'] ?? null; // ID может быть строкой
+
             if (!$service_id) {
                 throw new Exception('ID услуги не указан');
             }
@@ -239,16 +239,16 @@ try {
                 echo json_encode(['success' => true]);
             } else {
                 // Удалить услугу
-                $service_id = intval($_GET['id'] ?? 0);
-                
+                $service_id = $_GET['id'] ?? null; // ID может быть строкой
+
                 if (!$service_id) {
                     throw new Exception('ID услуги не указан');
                 }
-                
+
                 if (!$service->deleteService($service_id)) {
                     throw new Exception('Ошибка удаления услуги');
                 }
-                
+
                 echo json_encode(['success' => true]);
             }
             break;
