@@ -885,7 +885,21 @@ select.form-control option:checked {
     font-weight: 600;
     color: #1f2937;
     margin: 0;
-    flex: 1;
+}
+
+.service-card-id {
+    padding: 0.125rem 0.375rem;
+    background: #e0e7ff;
+    color: #4f46e5;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.service-card-slug {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-family: 'Courier New', monospace;
 }
 
 .service-card-category {
@@ -1319,9 +1333,17 @@ select.form-control option:checked {
                  data-service-name="<?php echo htmlspecialchars($displayName); ?>"
                  data-service-category="<?php echo htmlspecialchars($srv['category'] ?? ''); ?>"
                  data-base-price="<?php echo floatval($srv['base_price']); ?>"
-                 data-search="<?php echo strtolower(htmlspecialchars($displayName) . ' ' . htmlspecialchars($srv['category'] ?? '') . ' ' . htmlspecialchars($srv['description'] ?? '')); ?>">
+                 data-search="<?php echo strtolower(htmlspecialchars($displayName) . ' ' . htmlspecialchars($srv['category'] ?? '') . ' ' . htmlspecialchars($srv['description'] ?? '') . ' ' . $srv['id']); ?>">
                 <div class="service-card-header">
-                    <h4 class="service-card-title"><?php echo htmlspecialchars($displayName); ?></h4>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                            <h4 class="service-card-title" style="margin: 0;"><?php echo htmlspecialchars($displayName); ?></h4>
+                            <span class="service-card-id">ID: <?php echo $srv['id']; ?></span>
+                        </div>
+                        <?php if (!empty($srv['name']) && strtolower($srv['name']) !== strtolower($displayName)): ?>
+                        <div class="service-card-slug"><?php echo htmlspecialchars($srv['name']); ?></div>
+                        <?php endif; ?>
+                    </div>
                     <?php if (!empty($srv['category'])): ?>
                     <span class="service-card-category"><?php echo htmlspecialchars($srv['category']); ?></span>
                     <?php endif; ?>
@@ -1659,7 +1681,6 @@ document.getElementById('serviceModalForm').addEventListener('submit', function(
 
 // Открыть модальное окно выбора услуги
 function openServiceSelector(itemIndex) {
-    console.log('Opening service selector for item index:', itemIndex);
     document.getElementById('serviceSelectorItemIndex').value = itemIndex;
     document.getElementById('serviceSelectorModal').style.display = 'block';
     document.getElementById('serviceSearchInput').value = '';
@@ -1668,7 +1689,6 @@ function openServiceSelector(itemIndex) {
 
 // Закрыть модальное окно выбора услуги
 function closeServiceSelectorModal() {
-    console.log('Closing service selector modal');
     document.getElementById('serviceSelectorModal').style.display = 'none';
 }
 
@@ -1721,40 +1741,18 @@ function filterServices() {
 // Выбрать услугу
 function selectService(serviceId) {
     const itemIndex = document.getElementById('serviceSelectorItemIndex').value;
-    console.log('=== Selecting service', serviceId, 'for item index', itemIndex, '===');
-
-    // Проверим все строки в таблице
-    const allRows = document.querySelectorAll('.item-row');
-    console.log('Total rows in table:', allRows.length);
-    allRows.forEach((r, idx) => {
-        console.log(`Row ${idx}: data-index="${r.dataset.index}"`);
-    });
-
     const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
     const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
 
-    if (!row) {
-        console.error('Row not found for index:', itemIndex);
-        return;
-    }
-
-    console.log('Found row:', row);
-
-    if (!serviceCard) {
-        console.error('Service card not found for id:', serviceId);
-        return;
-    }
+    if (!row || !serviceCard) return;
 
     const serviceName = serviceCard.dataset.serviceName;
     const basePrice = parseFloat(serviceCard.dataset.basePrice || 0);
-
-    console.log('Service name:', serviceName, 'Base price:', basePrice);
 
     // Обновляем скрытое поле
     const serviceIdInput = row.querySelector('.service-id-input');
     if (serviceIdInput) {
         serviceIdInput.value = serviceId;
-        console.log('Updated service ID input to:', serviceId);
     }
 
     // Показываем выбранную услугу
@@ -1766,9 +1764,6 @@ function selectService(serviceId) {
         selectButton.style.display = 'none';
         selectedInfo.style.display = 'flex';
         serviceNameDisplay.textContent = serviceName;
-        console.log('Updated UI for row index:', itemIndex);
-    } else {
-        console.error('UI elements not found in row');
     }
 
     // Закрываем модальное окно
