@@ -1719,26 +1719,46 @@ function filterServices() {
 // Выбрать услугу
 function selectService(serviceId) {
     const itemIndex = document.getElementById('serviceSelectorItemIndex').value;
+    console.log('Selecting service', serviceId, 'for item index', itemIndex);
+
     const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
     const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
 
-    if (!row || !serviceCard) return;
+    if (!row) {
+        console.error('Row not found for index:', itemIndex);
+        return;
+    }
+
+    if (!serviceCard) {
+        console.error('Service card not found for id:', serviceId);
+        return;
+    }
 
     const serviceName = serviceCard.dataset.serviceName;
     const basePrice = parseFloat(serviceCard.dataset.basePrice || 0);
 
+    console.log('Service name:', serviceName, 'Base price:', basePrice);
+
     // Обновляем скрытое поле
     const serviceIdInput = row.querySelector('.service-id-input');
-    serviceIdInput.value = serviceId;
+    if (serviceIdInput) {
+        serviceIdInput.value = serviceId;
+        console.log('Updated service ID input to:', serviceId);
+    }
 
     // Показываем выбранную услугу
     const selectButton = row.querySelector('.btn-select-service');
     const selectedInfo = row.querySelector('.selected-service-info');
     const serviceNameDisplay = row.querySelector('.service-name-display');
 
-    selectButton.style.display = 'none';
-    selectedInfo.style.display = 'flex';
-    serviceNameDisplay.textContent = serviceName;
+    if (selectButton && selectedInfo && serviceNameDisplay) {
+        selectButton.style.display = 'none';
+        selectedInfo.style.display = 'flex';
+        serviceNameDisplay.textContent = serviceName;
+        console.log('Updated UI for row index:', itemIndex);
+    } else {
+        console.error('UI elements not found in row');
+    }
 
     // Закрываем модальное окно
     closeServiceSelectorModal();

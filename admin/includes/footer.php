@@ -237,9 +237,9 @@
         }
         
         // Автообновление активности
-        setInterval(() => {
-            fetch('/admin/api/heartbeat.php', { method: 'POST' });
-        }, 60000); // Каждую минуту
+        // setInterval(() => {
+        //     fetch('/admin/api/heartbeat.php', { method: 'POST' });
+        // }, 60000); // Каждую минуту
         
         // Проверка новых уведомлений
         setInterval(() => {
