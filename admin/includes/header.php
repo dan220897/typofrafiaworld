@@ -486,7 +486,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <?php endif; ?>
                     </a>
 
-                    <?php if (!isLocationAdmin()): ?>
+                    <?php if (!isLocationAdmin() && !isSuperAdmin()): ?>
                     <a href="/admin/chats.php" class="nav-link <?php echo $current_page == 'chats' ? 'active' : ''; ?>" data-tooltip="Чаты">
                         <i class="fas fa-comments"></i>
                         <span>Чаты</span>
@@ -514,14 +514,19 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 <div class="nav-section">
                     <div class="nav-section-title">Администрирование</div>
 
-                    <a href="/admin/locations.php" class="nav-link <?php echo $current_page == 'locations' ? 'active' : ''; ?>" data-tooltip="Точки">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <span>Точки</span>
+                    <a href="/admin/pickup_points.php" class="nav-link <?php echo $current_page == 'pickup_points' ? 'active' : ''; ?>" data-tooltip="Пункты самовывоза">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Пункты самовывоза</span>
                     </a>
 
-                    <a href="/admin/admins.php" class="nav-link <?php echo $current_page == 'admins' ? 'active' : ''; ?>" data-tooltip="Администраторы">
+                    <a href="/admin/locations.php" class="nav-link <?php echo $current_page == 'locations' ? 'active' : ''; ?>" data-tooltip="Администраторы точек">
+                        <i class="fas fa-building"></i>
+                        <span>Администраторы точек</span>
+                    </a>
+
+                    <a href="/admin/admins.php" class="nav-link <?php echo $current_page == 'admins' ? 'active' : ''; ?>" data-tooltip="Суперадмины">
                         <i class="fas fa-user-shield"></i>
-                        <span>Администраторы</span>
+                        <span>Суперадмины</span>
                     </a>
 
                     <a href="/admin/settings.php" class="nav-link <?php echo $current_page == 'settings' ? 'active' : ''; ?>" data-tooltip="Настройки">
