@@ -4,30 +4,9 @@
 class Service {
     private $conn;
     private $table_name = "services";
-    private $log_file = __DIR__ . '/../logs/service_debug.log';
 
     public function __construct($db) {
         $this->conn = $db;
-
-        // Создаем директорию для логов если не существует
-        $log_dir = dirname($this->log_file);
-        if (!is_dir($log_dir)) {
-            mkdir($log_dir, 0755, true);
-        }
-    }
-
-    // Метод для логирования
-    private function log($message, $data = null) {
-        $timestamp = date('Y-m-d H:i:s');
-        $log_entry = "[{$timestamp}] {$message}";
-
-        if ($data !== null) {
-            $log_entry .= "\nData: " . print_r($data, true);
-        }
-
-        $log_entry .= "\n" . str_repeat('-', 80) . "\n";
-
-        file_put_contents($this->log_file, $log_entry, FILE_APPEND);
     }
     
     // Получить список услуг
@@ -145,101 +124,27 @@ class Service {
     
     // Получить услугу по ID
     public function getServiceById($service_id) {
-        $this->log("=== getServiceById START ===", [
-            'service_id' => $service_id,
-            'service_id_type' => gettype($service_id)
-        ]);
+        $query = "SELECT s.*,
+                         COALESCE(sbp.base_price, s.base_price, 0) as base_price
+                  FROM " . $this->table_name . " s
+                  LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
+                  WHERE s.id = :id";
 
-        try {
-            // Проверяем, существует ли услуга в основной таблице
-            $check_query = "SELECT id, name FROM " . $this->table_name . " WHERE id = :id";
-            $this->log("Checking if service exists in table: " . $this->table_name, [
-                'query' => $check_query,
-                'service_id' => $service_id
-            ]);
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $service_id);
+        $stmt->execute();
 
-            $check_stmt = $this->conn->prepare($check_query);
-            $check_stmt->bindParam(":id", $service_id);
-            $check_stmt->execute();
-            $exists = $check_stmt->fetch();
+        $service = $stmt->fetch();
 
-            if (!$exists) {
-                $this->log("⚠️ Service NOT FOUND in table: " . $this->table_name, [
-                    'service_id' => $service_id
-                ]);
-                return false;
-            }
+        if ($service) {
+            // Получаем параметры
+            $service['parameters'] = $this->getServiceParameters($service_id);
 
-            $this->log("✓ Service EXISTS in table: " . $this->table_name, [
-                'service_id' => $exists['id'],
-                'service_name' => $exists['name']
-            ]);
-
-            // Основной запрос с JOIN
-            $query = "SELECT s.*,
-                             COALESCE(sbp.base_price, s.base_price, 0) as base_price
-                      FROM " . $this->table_name . " s
-                      LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
-                      WHERE s.id = :id";
-
-            $this->log("Executing main query with JOIN", [
-                'query' => $query,
-                'service_id' => $service_id
-            ]);
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":id", $service_id);
-            $stmt->execute();
-
-            $service = $stmt->fetch();
-
-            if ($service) {
-                $this->log("✓ Service data retrieved successfully", [
-                    'service_id' => $service['id'],
-                    'service_name' => $service['name'],
-                    'base_price' => $service['base_price'],
-                    'category' => $service['category'] ?? 'N/A'
-                ]);
-
-                // Получаем параметры
-                $this->log("Fetching service parameters...");
-                $service['parameters'] = $this->getServiceParameters($service_id);
-                $this->log("✓ Parameters fetched", [
-                    'count' => count($service['parameters'])
-                ]);
-
-                // Получаем правила ценообразования
-                $this->log("Fetching service price rules...");
-                $service['price_rules'] = $this->getServicePriceRules($service_id);
-                $this->log("✓ Price rules fetched", [
-                    'count' => count($service['price_rules'])
-                ]);
-
-                $this->log("=== getServiceById SUCCESS ===");
-                return $service;
-            } else {
-                $this->log("⚠️ Service data NOT retrieved after JOIN (this shouldn't happen)", [
-                    'service_id' => $service_id
-                ]);
-                return false;
-            }
-        } catch (PDOException $e) {
-            $this->log("❌ PDOException in getServiceById", [
-                'service_id' => $service_id,
-                'error_message' => $e->getMessage(),
-                'error_code' => $e->getCode(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            error_log("Error in getServiceById for service_id '$service_id': " . $e->getMessage());
-            return false;
-        } catch (Exception $e) {
-            $this->log("❌ Exception in getServiceById", [
-                'service_id' => $service_id,
-                'error_message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return false;
+            // Получаем правила ценообразования
+            $service['price_rules'] = $this->getServicePriceRules($service_id);
         }
+
+        return $service;
     }
     
     // Создать услугу
@@ -268,68 +173,33 @@ class Service {
     
     // Обновить услугу
     public function updateService($service_id, $data) {
-        $this->log("=== updateService START ===", [
-            'service_id' => $service_id,
-            'table' => $this->table_name,
-            'data_received' => $data
-        ]);
+        $allowed_fields = ['name', 'description', 'category', 'base_price',
+                          'min_quantity', 'production_time_days', 'is_active', 'sort_order'];
+        $update_fields = [];
+        $params = [':id' => $service_id];
 
-        try {
-            $allowed_fields = ['name', 'description', 'category', 'base_price',
-                              'min_quantity', 'production_time_days', 'is_active', 'sort_order'];
-            $update_fields = [];
-            $params = [':id' => $service_id];
-
-            foreach ($allowed_fields as $field) {
-                if (isset($data[$field])) {
-                    $update_fields[] = "$field = :$field";
-                    $params[":$field"] = $data[$field];
-                }
+        foreach ($allowed_fields as $field) {
+            if (isset($data[$field])) {
+                $update_fields[] = "$field = :$field";
+                $params[":$field"] = $data[$field];
             }
+        }
 
-            if (empty($update_fields)) {
-                $this->log("⚠️ No fields to update", ['service_id' => $service_id]);
-                return false;
-            }
-
-            $query = "UPDATE " . $this->table_name . "
-                     SET " . implode(', ', $update_fields) . ", updated_at = NOW()
-                     WHERE id = :id";
-
-            $this->log("Executing UPDATE query", [
-                'query' => $query,
-                'params' => $params
-            ]);
-
-            $stmt = $this->conn->prepare($query);
-
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
-            }
-
-            $result = $stmt->execute();
-
-            if ($result) {
-                $rows_affected = $stmt->rowCount();
-                $this->log("✓ UPDATE successful", [
-                    'service_id' => $service_id,
-                    'rows_affected' => $rows_affected
-                ]);
-            } else {
-                $this->log("⚠️ UPDATE returned false", [
-                    'service_id' => $service_id
-                ]);
-            }
-
-            return $result;
-        } catch (PDOException $e) {
-            $this->log("❌ Error in updateService", [
-                'service_id' => $service_id,
-                'error' => $e->getMessage(),
-                'code' => $e->getCode()
-            ]);
+        if (empty($update_fields)) {
             return false;
         }
+
+        $query = "UPDATE " . $this->table_name . "
+                 SET " . implode(', ', $update_fields) . ", updated_at = NOW()
+                 WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        return $stmt->execute();
     }
     
     // Удалить услугу (soft delete)
@@ -356,36 +226,15 @@ class Service {
     
     // Получить параметры услуги
     public function getServiceParameters($service_id) {
-        $this->log("getServiceParameters called", [
-            'service_id' => $service_id,
-            'table' => 'service_parameters'
-        ]);
+        $query = "SELECT * FROM service_parameters
+                 WHERE service_id = :service_id
+                 ORDER BY parameter_type, parameter_name";
 
-        try {
-            $query = "SELECT * FROM service_parameters
-                     WHERE service_id = :service_id
-                     ORDER BY parameter_type, parameter_name";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":service_id", $service_id);
+        $stmt->execute();
 
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":service_id", $service_id);
-            $stmt->execute();
-
-            $parameters = $stmt->fetchAll();
-
-            $this->log("✓ Parameters retrieved", [
-                'service_id' => $service_id,
-                'count' => count($parameters),
-                'parameters' => $parameters
-            ]);
-
-            return $parameters;
-        } catch (PDOException $e) {
-            $this->log("❌ Error in getServiceParameters", [
-                'service_id' => $service_id,
-                'error' => $e->getMessage()
-            ]);
-            return [];
-        }
+        return $stmt->fetchAll();
     }
     
     // Добавить параметр услуги
@@ -449,36 +298,15 @@ class Service {
     
     // Получить правила ценообразования услуги
     public function getServicePriceRules($service_id) {
-        $this->log("getServicePriceRules called", [
-            'service_id' => $service_id,
-            'table' => 'service_price_rules'
-        ]);
+        $query = "SELECT * FROM service_price_rules
+                 WHERE service_id = :service_id
+                 ORDER BY rule_type, min_quantity";
 
-        try {
-            $query = "SELECT * FROM service_price_rules
-                     WHERE service_id = :service_id
-                     ORDER BY rule_type, min_quantity";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":service_id", $service_id);
+        $stmt->execute();
 
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":service_id", $service_id);
-            $stmt->execute();
-
-            $rules = $stmt->fetchAll();
-
-            $this->log("✓ Price rules retrieved", [
-                'service_id' => $service_id,
-                'count' => count($rules),
-                'rules' => $rules
-            ]);
-
-            return $rules;
-        } catch (PDOException $e) {
-            $this->log("❌ Error in getServicePriceRules", [
-                'service_id' => $service_id,
-                'error' => $e->getMessage()
-            ]);
-            return [];
-        }
+        return $stmt->fetchAll();
     }
     
     // Добавить правило ценообразования
@@ -642,46 +470,25 @@ class Service {
     // Получить статистику услуг
     public function getServiceStats($service_id = null) {
         if ($service_id) {
-            $this->log("getServiceStats called for specific service", [
-                'service_id' => $service_id,
-                'table' => $this->table_name
-            ]);
+            // Статистика конкретной услуги
+            $query = "SELECT
+                        s.*,
+                        COUNT(DISTINCT oi.order_id) as orders_count,
+                        SUM(oi.quantity) as total_quantity,
+                        SUM(oi.total_price) as total_revenue,
+                        AVG(oi.total_price) as avg_order_value,
+                        (SELECT COUNT(*) FROM service_parameters WHERE service_id = s.id) as params_count,
+                        (SELECT COUNT(*) FROM service_price_rules WHERE service_id = s.id) as rules_count
+                     FROM " . $this->table_name . " s
+                     LEFT JOIN order_items oi ON s.id = oi.service_id
+                     WHERE s.id = :service_id
+                     GROUP BY s.id";
 
-            try {
-                // Статистика конкретной услуги
-                $query = "SELECT
-                            s.*,
-                            COUNT(DISTINCT oi.order_id) as orders_count,
-                            SUM(oi.quantity) as total_quantity,
-                            SUM(oi.total_price) as total_revenue,
-                            AVG(oi.total_price) as avg_order_value,
-                            (SELECT COUNT(*) FROM service_parameters WHERE service_id = s.id) as params_count,
-                            (SELECT COUNT(*) FROM service_price_rules WHERE service_id = s.id) as rules_count
-                         FROM " . $this->table_name . " s
-                         LEFT JOIN order_items oi ON s.id = oi.service_id
-                         WHERE s.id = :service_id
-                         GROUP BY s.id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":service_id", $service_id);
+            $stmt->execute();
 
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(":service_id", $service_id);
-                $stmt->execute();
-
-                $stats = $stmt->fetch();
-
-                $this->log("✓ Service stats retrieved", [
-                    'service_id' => $service_id,
-                    'orders_count' => $stats['orders_count'] ?? 0,
-                    'total_revenue' => $stats['total_revenue'] ?? 0
-                ]);
-
-                return $stats;
-            } catch (PDOException $e) {
-                $this->log("❌ Error in getServiceStats", [
-                    'service_id' => $service_id,
-                    'error' => $e->getMessage()
-                ]);
-                return false;
-            }
+            return $stmt->fetch();
         } else {
             // Общая статистика
             $query = "SELECT 

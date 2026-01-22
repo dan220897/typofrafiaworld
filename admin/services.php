@@ -842,7 +842,7 @@ textarea.form-control {
             <div class="modal-body">
                 <div class="form-group">
                     <label class="form-label">Название услуги <span class="required">*</span></label>
-                    <input type="text" class="form-control" name="name" required>
+                    <input type="text" class="form-control" name="name" id="service_name" required>
                 </div>
                 
                 <div class="form-group">
@@ -1076,16 +1076,16 @@ async function editService(id) {
             console.log('Service data loaded successfully:', data.service);
             const service = data.service;
             const form = document.getElementById('serviceForm');
-            
+
             form.service_id.value = service.id;
-            form.name.value = service.name;
-            form.category.value = service.category;
+            document.getElementById('service_name').value = service.name || '';
+            form.category.value = service.category || '';
             form.description.value = service.description || '';
-            form.base_price.value = service.base_price;
-            form.min_quantity.value = service.min_quantity;
+            form.base_price.value = service.base_price || 0;
+            form.min_quantity.value = service.min_quantity || 1;
             form.production_time_days.value = service.production_time_days || 1;
             form.is_active.checked = service.is_active == 1;
-            
+
             document.querySelector('#serviceModal .modal-title').textContent = 'Редактирование услуги';
             openModal('serviceModal');
         } else {
