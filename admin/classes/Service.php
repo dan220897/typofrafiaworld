@@ -124,27 +124,32 @@ class Service {
     
     // Получить услугу по ID
     public function getServiceById($service_id) {
-        $query = "SELECT s.*,
-                         COALESCE(sbp.base_price, s.base_price, 0) as base_price
-                  FROM " . $this->table_name . " s
-                  LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
-                  WHERE s.id = :id";
+        try {
+            $query = "SELECT s.*,
+                             COALESCE(sbp.base_price, s.base_price, 0) as base_price
+                      FROM " . $this->table_name . " s
+                      LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
+                      WHERE s.id = :id";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $service_id);
-        $stmt->execute();
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":id", $service_id);
+            $stmt->execute();
 
-        $service = $stmt->fetch();
+            $service = $stmt->fetch();
 
-        if ($service) {
-            // Получаем параметры
-            $service['parameters'] = $this->getServiceParameters($service_id);
+            if ($service) {
+                // Получаем параметры
+                $service['parameters'] = $this->getServiceParameters($service_id);
 
-            // Получаем правила ценообразования
-            $service['price_rules'] = $this->getServicePriceRules($service_id);
+                // Получаем правила ценообразования
+                $service['price_rules'] = $this->getServicePriceRules($service_id);
+            }
+
+            return $service;
+        } catch (PDOException $e) {
+            error_log("Error in getServiceById for service_id '$service_id': " . $e->getMessage());
+            return false;
         }
-
-        return $service;
     }
     
     // Создать услугу
