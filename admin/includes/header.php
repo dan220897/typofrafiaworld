@@ -506,6 +506,11 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <i class="fas fa-folder"></i>
                         <span>Категории</span>
                     </a>
+
+                    <a href="/admin/view_logs.php" class="nav-link <?php echo $current_page == 'view_logs' ? 'active' : ''; ?>" data-tooltip="Логи отладки">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Логи отладки</span>
+                    </a>
                     <?php endif; ?>
 
                     <a href="/admin/users.php" class="nav-link <?php echo $current_page == 'users' ? 'active' : ''; ?>" data-tooltip="Пользователи">

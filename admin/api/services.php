@@ -5,11 +5,36 @@ require_once '../config/config.php';
 require_once '../config/database.php';
 require_once '../classes/Service.php';
 
+// Функция логирования для API
+function logApiRequest($message, $data = null) {
+    $log_file = __DIR__ . '/../logs/api_debug.log';
+    $log_dir = dirname($log_file);
+
+    if (!is_dir($log_dir)) {
+        mkdir($log_dir, 0755, true);
+    }
+
+    $timestamp = date('Y-m-d H:i:s');
+    $log_entry = "[{$timestamp}] {$message}";
+
+    if ($data !== null) {
+        $log_entry .= "\nData: " . print_r($data, true);
+    }
+
+    $log_entry .= "\n" . str_repeat('-', 80) . "\n";
+
+    file_put_contents($log_file, $log_entry, FILE_APPEND);
+}
+
 // Проверка авторизации
 checkAuth();
 
 // Проверка прав доступа
 if (!in_array($_SESSION['admin_role'], ['super_admin', 'manager']) && !hasPermission($_SESSION['admin_id'], 'manage_services')) {
+    logApiRequest("⚠️ Access denied", [
+        'admin_role' => $_SESSION['admin_role'] ?? 'N/A',
+        'admin_id' => $_SESSION['admin_id'] ?? 'N/A'
+    ]);
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Недостаточно прав']);
     exit;
@@ -22,6 +47,15 @@ $service = new Service($db);
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
+logApiRequest("=== NEW API REQUEST ===", [
+    'method' => $method,
+    'action' => $action,
+    'GET' => $_GET,
+    'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? 'N/A',
+    'admin_id' => $_SESSION['admin_id'] ?? 'N/A',
+    'admin_role' => $_SESSION['admin_role'] ?? 'N/A'
+]);
+
 header('Content-Type: application/json');
 
 try {
@@ -30,14 +64,32 @@ try {
             if (isset($_GET['id'])) {
                 // Получить данные услуги
                 $service_id = $_GET['id']; // ID может быть строкой или числом
+
+                logApiRequest("GET service by ID", [
+                    'service_id' => $service_id,
+                    'service_id_type' => gettype($service_id)
+                ]);
+
                 $service_data = $service->getServiceById($service_id);
 
                 if (!$service_data) {
+                    logApiRequest("❌ Service not found", [
+                        'service_id' => $service_id
+                    ]);
                     throw new Exception('Услуга не найдена');
                 }
 
+                logApiRequest("✓ Service found, fetching stats", [
+                    'service_id' => $service_id
+                ]);
+
                 // Получаем статистику услуги
                 $service_data['stats'] = $service->getServiceStats($service_id);
+
+                logApiRequest("✓ Returning service data", [
+                    'service_id' => $service_id,
+                    'service_name' => $service_data['name'] ?? 'N/A'
+                ]);
 
                 echo json_encode([
                     'success' => true,
@@ -257,6 +309,14 @@ try {
             throw new Exception('Метод не поддерживается');
     }
 } catch (Exception $e) {
+    logApiRequest("❌ EXCEPTION caught", [
+        'error_message' => $e->getMessage(),
+        'error_code' => $e->getCode(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString()
+    ]);
+
     http_response_code(400);
     echo json_encode([
         'success' => false,
