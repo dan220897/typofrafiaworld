@@ -1076,9 +1076,16 @@ async function editService(id) {
             console.log('Service data loaded successfully:', data.service);
             const service = data.service;
             const form = document.getElementById('serviceForm');
+            const nameInput = document.getElementById('service_name');
 
-            form.service_id.value = service.id;
-            document.getElementById('service_name').value = service.name || '';
+            // Очищаем форму явно
+            form.reset();
+
+            // Заполняем данными
+            console.log('Setting service name:', service.name);
+
+            form.service_id.value = service.id || '';
+            nameInput.value = service.name || '';
             form.category.value = service.category || '';
             form.description.value = service.description || '';
             form.base_price.value = service.base_price || 0;
@@ -1086,6 +1093,9 @@ async function editService(id) {
             form.production_time_days.value = service.production_time_days || 1;
             form.is_active.checked = service.is_active == 1;
 
+            console.log('Name input value after setting:', nameInput.value);
+
+            // Открываем модальное окно
             document.querySelector('#serviceModal .modal-title').textContent = 'Редактирование услуги';
             openModal('serviceModal');
         } else {
