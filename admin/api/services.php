@@ -210,19 +210,27 @@ try {
             } else {
                 // Обновить услугу
                 $data = json_decode(file_get_contents('php://input'), true);
-                
+
                 if (!empty($data['name']) && strlen($data['name']) < 3) {
                     throw new Exception('Название услуги слишком короткое');
                 }
-                
+
                 if (isset($data['base_price']) && $data['base_price'] < 0) {
                     throw new Exception('Некорректная базовая цена');
                 }
-                
-                if (!$service->updateService($service_id, $data)) {
-                    throw new Exception('Ошибка обновления услуги');
+
+                $result = $service->updateService($service_id, $data);
+
+                if (!$result) {
+                    // Получаем информацию об ошибке из PDO
+                    $error_info = $db->errorInfo();
+                    $error_message = 'Ошибка обновления услуги';
+                    if (isset($error_info[2])) {
+                        $error_message .= ': ' . $error_info[2];
+                    }
+                    throw new Exception($error_message);
                 }
-                
+
                 echo json_encode(['success' => true]);
             }
             break;

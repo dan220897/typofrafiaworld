@@ -150,8 +150,11 @@ class Service {
     
     // Создать услугу
     public function createService($data) {
+        // Определяем правильное имя поля для названия
+        $name_field = $this->getNameFieldName();
+
         $query = "INSERT INTO " . $this->table_name . "
-                 (name, description, category, base_price, min_quantity, production_time_days, is_active, sort_order)
+                 ($name_field, description, category, base_price, min_quantity, production_time_days, is_active, sort_order)
                  VALUES (:name, :description, :category, :base_price, :min_quantity, :production_time_days, :is_active, :sort_order)";
 
         $stmt = $this->conn->prepare($query);
@@ -179,9 +182,14 @@ class Service {
         $update_fields = [];
         $params = [':id' => $service_id];
 
+        // Проверяем, какое поле для названия существует в таблице
+        $name_field = $this->getNameFieldName();
+
         foreach ($allowed_fields as $field) {
             if (isset($data[$field])) {
-                $update_fields[] = "$field = :$field";
+                // Если это поле 'name', используем правильное имя поля из таблицы
+                $db_field = ($field === 'name') ? $name_field : $field;
+                $update_fields[] = "$db_field = :$field";
                 $params[":$field"] = $data[$field];
             }
         }
@@ -200,7 +208,47 @@ class Service {
             $stmt->bindValue($key, $value);
         }
 
-        return $stmt->execute();
+        $result = $stmt->execute();
+
+        // В случае ошибки логируем информацию
+        if (!$result) {
+            $error_info = $stmt->errorInfo();
+            error_log("SQL Error in updateService: " . print_r($error_info, true));
+            error_log("Query: " . $query);
+            error_log("Params: " . print_r($params, true));
+        }
+
+        return $result;
+    }
+
+    // Определить имя поля для названия услуги (name или label)
+    private function getNameFieldName() {
+        static $name_field = null;
+
+        if ($name_field === null) {
+            // Проверяем структуру таблицы
+            $query = "SHOW COLUMNS FROM " . $this->table_name . " LIKE 'name'";
+            $stmt = $this->conn->query($query);
+            $has_name = $stmt->rowCount() > 0;
+
+            if ($has_name) {
+                $name_field = 'name';
+            } else {
+                // Если нет поля 'name', проверяем 'label'
+                $query = "SHOW COLUMNS FROM " . $this->table_name . " LIKE 'label'";
+                $stmt = $this->conn->query($query);
+                $has_label = $stmt->rowCount() > 0;
+
+                if ($has_label) {
+                    $name_field = 'label';
+                } else {
+                    // По умолчанию используем 'name' (для обратной совместимости)
+                    $name_field = 'name';
+                }
+            }
+        }
+
+        return $name_field;
     }
     
     // Удалить услугу (soft delete)
