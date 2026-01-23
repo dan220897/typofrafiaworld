@@ -125,6 +125,7 @@ class Service {
     // Получить услугу по ID
     public function getServiceById($service_id) {
         $query = "SELECT s.*,
+                         COALESCE(s.name, s.label, '') as name,
                          COALESCE(sbp.base_price, s.base_price, 0) as base_price
                   FROM " . $this->table_name . " s
                   LEFT JOIN service_base_prices sbp ON s.id = sbp.service_id
@@ -149,12 +150,12 @@ class Service {
     
     // Создать услугу
     public function createService($data) {
-        $query = "INSERT INTO " . $this->table_name . " 
-                 (name, description, category, base_price, min_quantity, production_time_days, is_active, sort_order) 
+        $query = "INSERT INTO " . $this->table_name . "
+                 (name, description, category, base_price, min_quantity, production_time_days, is_active, sort_order)
                  VALUES (:name, :description, :category, :base_price, :min_quantity, :production_time_days, :is_active, :sort_order)";
-        
+
         $stmt = $this->conn->prepare($query);
-        
+
         $stmt->bindParam(":name", $data['name']);
         $stmt->bindParam(":description", $data['description']);
         $stmt->bindParam(":category", $data['category']);
@@ -163,11 +164,11 @@ class Service {
         $stmt->bindParam(":production_time_days", $data['production_time_days']);
         $stmt->bindValue(":is_active", $data['is_active'] ?? 1);
         $stmt->bindValue(":sort_order", $data['sort_order'] ?? 0);
-        
+
         if ($stmt->execute()) {
             return $this->conn->lastInsertId();
         }
-        
+
         return false;
     }
     

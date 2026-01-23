@@ -1064,28 +1064,52 @@ function resetFilters() {
 
 // Редактирование услуги
 async function editService(id) {
-    console.log(`Editing service ID: ${id}`);
+    console.log(`=== START editService for ID: ${id} ===`);
     try {
         const url = `/admin/api/services.php?id=${id}`;
-        console.log(`Fetching service data from: ${url}`);
-        
+        console.log(`Fetching from: ${url}`);
+
         const response = await fetch(url);
         const data = await response.json();
-        
+
+        console.log('API Response:', data);
+
         if (data.success) {
-            console.log('Service data loaded successfully:', data.service);
             const service = data.service;
+            console.log('Service object received:', service);
+            console.log('Service name from API:', service.name);
+            console.log('Service label from API:', service.label);
+
             const form = document.getElementById('serviceForm');
             const nameInput = document.getElementById('service_name');
 
+            if (!form) {
+                console.error('ERROR: Form not found');
+                return;
+            }
+            if (!nameInput) {
+                console.error('ERROR: Name input not found');
+                return;
+            }
+
+            console.log('Form and nameInput elements found');
+
             // Очищаем форму явно
+            console.log('Resetting form...');
             form.reset();
+            console.log('Form reset complete');
 
             // Заполняем данными
-            console.log('Setting service name:', service.name);
-
+            console.log('Setting form values...');
             form.service_id.value = service.id || '';
-            nameInput.value = service.name || '';
+            console.log(`Set service_id to: ${form.service_id.value}`);
+
+            // Используем name или label в зависимости от того, какое поле заполнено
+            const serviceName = service.name || service.label || '';
+            nameInput.value = serviceName;
+            console.log(`Set nameInput.value to: "${nameInput.value}" (from ${service.name ? 'name' : 'label'} field)`);
+            console.log(`nameInput current value after set: "${nameInput.value}"`);
+
             form.category.value = service.category || '';
             form.description.value = service.description || '';
             form.base_price.value = service.base_price || 0;
@@ -1093,17 +1117,26 @@ async function editService(id) {
             form.production_time_days.value = service.production_time_days || 1;
             form.is_active.checked = service.is_active == 1;
 
-            console.log('Name input value after setting:', nameInput.value);
+            console.log('All form values set');
+
+            // Проверяем значение перед открытием модала
+            console.log(`Name input value BEFORE opening modal: "${nameInput.value}"`);
 
             // Открываем модальное окно
             document.querySelector('#serviceModal .modal-title').textContent = 'Редактирование услуги';
             openModal('serviceModal');
+
+            // Проверяем значение после открытия модала
+            setTimeout(() => {
+                console.log(`Name input value AFTER opening modal: "${nameInput.value}"`);
+                console.log('=== END editService ===');
+            }, 100);
         } else {
-            console.error('Error loading service:', data.error);
+            console.error('API Error:', data.error);
             showNotification('error', data.error || 'Ошибка загрузки услуги');
         }
     } catch (error) {
-        console.error('Error in editService:', error);
+        console.error('Exception in editService:', error);
         showNotification('error', 'Ошибка: ' + error.message);
     }
 }
@@ -1179,9 +1212,10 @@ async function manageParameters(serviceId) {
         if (data.success) {
             console.log('Parameters loaded successfully:', data.service.parameters);
             const service = data.service;
-            document.querySelector('#parametersModal .modal-title').textContent = 
-                `Параметры услуги: ${service.name}`;
-            
+            const serviceName = service.name || service.label || '';
+            document.querySelector('#parametersModal .modal-title').textContent =
+                `Параметры услуги: ${serviceName}`;
+
             displayParameters(service.parameters || []);
             openModal('parametersModal');
         }
