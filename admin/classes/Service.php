@@ -153,6 +153,7 @@ class Service {
         // Определяем правильное имя поля для названия
         $name_field = $this->getNameFieldName();
 
+        // Создаем услугу в основной таблице
         $query = "INSERT INTO " . $this->table_name . "
                  ($name_field, description, category, base_price, min_quantity, production_time_days, is_active, sort_order)
                  VALUES (:name, :description, :category, :base_price, :min_quantity, :production_time_days, :is_active, :sort_order)";
@@ -169,7 +170,22 @@ class Service {
         $stmt->bindValue(":sort_order", $data['sort_order'] ?? 0);
 
         if ($stmt->execute()) {
-            return $this->conn->lastInsertId();
+            $service_id = $this->conn->lastInsertId();
+
+            // Если ID числовой, сохраняем цену в service_base_prices
+            if ($service_id) {
+                // Также создаем запись в service_base_prices для приоритетной цены
+                $price_query = "INSERT INTO service_base_prices (service_id, base_price)
+                               VALUES (:service_id, :base_price)
+                               ON DUPLICATE KEY UPDATE base_price = :base_price";
+
+                $price_stmt = $this->conn->prepare($price_query);
+                $price_stmt->bindParam(":service_id", $service_id);
+                $price_stmt->bindParam(":base_price", $data['base_price']);
+                $price_stmt->execute();
+            }
+
+            return $service_id;
         }
 
         return false;
@@ -185,6 +201,13 @@ class Service {
         // Проверяем, какое поле для названия существует в таблице
         $name_field = $this->getNameFieldName();
 
+        // Отдельно обрабатываем base_price
+        $base_price = null;
+        if (isset($data['base_price'])) {
+            $base_price = $data['base_price'];
+            unset($data['base_price']); // Убираем из основных данных
+        }
+
         foreach ($allowed_fields as $field) {
             if (isset($data[$field])) {
                 // Если это поле 'name', используем правильное имя поля из таблицы
@@ -194,31 +217,52 @@ class Service {
             }
         }
 
-        if (empty($update_fields)) {
-            return false;
+        // Обновляем основную таблицу services (без base_price)
+        if (!empty($update_fields)) {
+            $query = "UPDATE " . $this->table_name . "
+                     SET " . implode(', ', $update_fields) . ", updated_at = NOW()
+                     WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+
+            $result = $stmt->execute();
+
+            // В случае ошибки логируем информацию
+            if (!$result) {
+                $error_info = $stmt->errorInfo();
+                error_log("SQL Error in updateService: " . print_r($error_info, true));
+                error_log("Query: " . $query);
+                error_log("Params: " . print_r($params, true));
+                return false;
+            }
         }
 
-        $query = "UPDATE " . $this->table_name . "
-                 SET " . implode(', ', $update_fields) . ", updated_at = NOW()
-                 WHERE id = :id";
+        // Обновляем или вставляем base_price в service_base_prices
+        if ($base_price !== null) {
+            $query = "INSERT INTO service_base_prices (service_id, base_price)
+                     VALUES (:service_id, :base_price)
+                     ON DUPLICATE KEY UPDATE base_price = :base_price";
 
-        $stmt = $this->conn->prepare($query);
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":service_id", $service_id);
+            $stmt->bindParam(":base_price", $base_price);
 
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+            $result = $stmt->execute();
+
+            // В случае ошибки логируем информацию
+            if (!$result) {
+                $error_info = $stmt->errorInfo();
+                error_log("SQL Error in updateService (base_price): " . print_r($error_info, true));
+                error_log("Query: " . $query);
+                return false;
+            }
         }
 
-        $result = $stmt->execute();
-
-        // В случае ошибки логируем информацию
-        if (!$result) {
-            $error_info = $stmt->errorInfo();
-            error_log("SQL Error in updateService: " . print_r($error_info, true));
-            error_log("Query: " . $query);
-            error_log("Params: " . print_r($params, true));
-        }
-
-        return $result;
+        return true;
     }
 
     // Определить имя поля для названия услуги (name или label)
