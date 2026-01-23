@@ -109,12 +109,21 @@ class Admin {
     }
     
     public function getAll() {
-        $query = "SELECT id, username, full_name, email, role, is_active, last_login_at 
-                 FROM " . $this->table_name . " 
+        $query = "SELECT id, username, full_name, email, role, is_active, last_login_at
+                 FROM " . $this->table_name . "
                  ORDER BY id DESC";
-        
-        $stmt = $this->conn->query($query);
-        return $stmt->fetchAll();
+
+        try {
+            $stmt = $this->conn->query($query);
+            if ($stmt === false) {
+                error_log("Admin::getAll() query failed");
+                return [];
+            }
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Admin::getAll() error: " . $e->getMessage());
+            return [];
+        }
     }
     
     public function getById($id) {

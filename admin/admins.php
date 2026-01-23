@@ -16,6 +16,12 @@ if (!isSuperAdmin()) {
 // Подключаемся к БД
 $database = new Database();
 $db = $database->getConnection();
+
+// Проверяем подключение
+if (!$db) {
+    die('Ошибка подключения к базе данных. Проверьте настройки подключения.');
+}
+
 $admin = new Admin($db);
 $adminLog = new AdminLog($db);
 
@@ -176,7 +182,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isAjaxRequest()) {
 }
 
 // Получаем список администраторов
-$admins = $admin->getAll();
+try {
+    $admins = $admin->getAll();
+    if ($admins === false || $admins === null) {
+        $admins = [];
+        error_log('Admin::getAll() returned false or null');
+    }
+} catch (Exception $e) {
+    error_log('Error in getAll(): ' . $e->getMessage());
+    $admins = [];
+}
 
 // Получаем доступные роли и права
 $roles = Admin::getRoles();
@@ -1173,7 +1188,8 @@ textarea.form-control {
 
 <script>
 // Данные администраторов для редактирования
-const adminsData = <?php echo json_encode($admins); ?>;
+const adminsData = <?php echo json_encode($admins ?? []); ?>;
+console.log('Loaded adminsData:', adminsData);
 
 // Показать модальное окно создания
 function showCreateModal() {
@@ -1191,21 +1207,52 @@ function closeModal() {
 
 // Редактировать администратора
 function editAdmin(id) {
+    console.log('editAdmin called with id:', id);
+    console.log('adminsData:', adminsData);
+
+    if (!adminsData || adminsData.length === 0) {
+        alert('Ошибка: Данные администраторов не загружены');
+        console.error('adminsData is empty or undefined');
+        return;
+    }
+
     const admin = adminsData.find(a => a.id == id);
-    if (!admin) return;
-    
-    document.getElementById('modalTitle').textContent = 'Редактировать администратора';
-    document.getElementById('adminId').value = id;
-    document.getElementById('passwordGroup').style.display = 'block';
-    
-    // Заполняем форму
-    document.querySelector('input[name="username"]').value = admin.username;
-    document.querySelector('input[name="full_name"]').value = admin.full_name;
-    document.querySelector('input[name="email"]').value = admin.email;
-    document.querySelector('select[name="role"]').value = admin.role;
-    document.querySelector('input[name="is_active"]').checked = admin.is_active == 1;
-    
-    document.getElementById('adminModal').style.display = 'flex';
+    console.log('Found admin:', admin);
+
+    if (!admin) {
+        alert('Ошибка: Администратор не найден');
+        console.error('Admin not found for id:', id);
+        return;
+    }
+
+    try {
+        document.getElementById('modalTitle').textContent = 'Редактировать администратора';
+        document.getElementById('adminId').value = id;
+        document.getElementById('passwordGroup').style.display = 'block';
+
+        // Заполняем форму
+        const usernameInput = document.querySelector('input[name="username"]');
+        const fullNameInput = document.querySelector('input[name="full_name"]');
+        const emailInput = document.querySelector('input[name="email"]');
+        const roleSelect = document.querySelector('select[name="role"]');
+        const isActiveInput = document.querySelector('input[name="is_active"]');
+
+        if (!usernameInput || !fullNameInput || !emailInput || !roleSelect || !isActiveInput) {
+            throw new Error('Не удалось найти элементы формы');
+        }
+
+        usernameInput.value = admin.username || '';
+        fullNameInput.value = admin.full_name || '';
+        emailInput.value = admin.email || '';
+        roleSelect.value = admin.role || 'operator';
+        isActiveInput.checked = admin.is_active == 1;
+
+        document.getElementById('adminModal').style.display = 'flex';
+        console.log('Modal opened successfully');
+    } catch (error) {
+        console.error('Error in editAdmin:', error);
+        alert('Ошибка соединения: ' + error.message);
+    }
 }
 
 // Сохранить администратора
