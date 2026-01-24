@@ -546,20 +546,34 @@ function handleCreateOrder($userService, $chatService, $telegramNotifier) {
         
         // Рассчитываем стоимость
         $pricing = calculateOrderPricing($input['items']);
-        
+
+        // Получаем pickup_point_id если указан
+        $pickupPointId = isset($input['pickup_point_id']) ? (int)$input['pickup_point_id'] : null;
+        $locationId = null;
+
+        // Если указана точка самовывоза, получаем её location_id
+        if ($pickupPointId) {
+            $stmt = $db->prepare("SELECT location_id FROM pickup_points WHERE id = ?");
+            $stmt->execute([$pickupPointId]);
+            $pickupPoint = $stmt->fetch();
+            if ($pickupPoint && isset($pickupPoint['location_id'])) {
+                $locationId = $pickupPoint['location_id'];
+            }
+        }
+
         // Создаем заказ
         $stmt = $db->prepare("
-            INSERT INTO orders 
-            (order_number, user_id, status, total_amount, final_amount, delivery_method, 
-             delivery_address, notes, deadline_at, created_at, updated_at, source)
-            VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, NOW(), NOW(), 'website')
+            INSERT INTO orders
+            (order_number, user_id, status, total_amount, final_amount, delivery_method,
+             delivery_address, pickup_point_id, location_id, notes, deadline_at, created_at, updated_at, source)
+            VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 'website')
         ");
         
         $deliveryMethod = isset($input['delivery_method']) ? $input['delivery_method'] : null;
         $deliveryAddress = isset($input['delivery_address']) ? $input['delivery_address'] : null;
         $notes = isset($input['notes']) ? $input['notes'] : null;
         $deadline = isset($input['deadline']) ? $input['deadline'] : null;
-        
+
         $result = $stmt->execute([
             $orderNumber,
             $userId,
@@ -567,6 +581,8 @@ function handleCreateOrder($userService, $chatService, $telegramNotifier) {
             $pricing['final'],
             $deliveryMethod,
             $deliveryAddress,
+            $pickupPointId,
+            $locationId,
             $notes,
             $deadline
         ]);
