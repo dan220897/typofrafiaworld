@@ -557,11 +557,13 @@ class EmailService {
 
                 } catch (Exception $e) {
                     $errorMsg = $e->getMessage();
-                    logMessage("Ошибка отправки через SMTP: {$errorMsg}", 'ERROR');
+                    if (function_exists('logMessage')) {
+                        logMessage("Ошибка отправки через SMTP: {$errorMsg}", 'ERROR');
+                    }
 
                     return [
                         'success' => false,
-                        'error' => 'Ошибка отправки письма через SMTP'
+                        'error' => 'Ошибка SMTP: ' . $errorMsg // Временно показываем детали для отладки
                     ];
                 }
             } else {
