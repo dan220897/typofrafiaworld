@@ -516,7 +516,11 @@ class EmailService {
      */
     public function sendEmail($to, $subject, $body, $altBody = '') {
         try {
-            logMessage("Попытка отправки email на {$to} с темой '{$subject}'", 'INFO');
+            if (function_exists('logMessage')) {
+                logMessage("Попытка отправки email на {$to} с темой '{$subject}'", 'INFO');
+                logMessage("FROM: {$this->fromEmail}, TO: {$to}", 'INFO');
+                logMessage("USE_SMTP: " . (defined('USE_SMTP') && USE_SMTP ? 'true' : 'false') . ", mailer: " . ($this->mailer ? 'initialized' : 'null'), 'INFO');
+            }
 
             if (defined('USE_SMTP') && USE_SMTP && $this->mailer) {
                 // Отправка через PHPMailer (SMTP)
@@ -541,15 +545,21 @@ class EmailService {
                     // Текстовая версия (для клиентов без HTML)
                     $this->mailer->AltBody = $altBody ?: strip_tags($body);
 
+                    if (function_exists('logMessage')) {
+                        logMessage("Вызов SMTP send() для {$to}", 'INFO');
+                    }
+
                     // Отправляем
                     $sent = $this->mailer->send();
 
                     if ($sent) {
-                        logMessage("Email успешно отправлен на {$to} через SMTP", 'INFO');
+                        if (function_exists('logMessage')) {
+                            logMessage("Email успешно отправлен на {$to} через SMTP", 'INFO');
+                        }
 
                         return [
                             'success' => true,
-                            'message' => 'Email успешно отправлен'
+                            'message' => "Email отправлен на {$to}. Проверьте папку \"Спам\""
                         ];
                     } else {
                         throw new Exception('PHPMailer вернул false');
