@@ -2125,8 +2125,10 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     // Проверка товаров
     let hasValidItems = false;
     document.querySelectorAll('.item-row').forEach(row => {
-        const serviceId = row.querySelector('.service-select').value;
+        const serviceIdInput = row.querySelector('.service-id-input');
         const quantity = row.querySelector('.quantity-input').value;
+        const serviceId = serviceIdInput ? serviceIdInput.value : '';
+
         if (serviceId && quantity > 0) {
             hasValidItems = true;
         }

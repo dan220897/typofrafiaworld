@@ -594,9 +594,12 @@ class Order {
     public function addOrderItem($order_id, $item_data) {
         // Получаем информацию об услуге
         $service = $this->getServiceById($item_data['service_id']);
-        
+
         if (!$service) {
-            throw new Exception("Услуга не найдена");
+            $service_id_debug = isset($item_data['service_id']) ? $item_data['service_id'] : 'NULL';
+            error_log("Service not found. Requested service_id: " . $service_id_debug);
+            error_log("Item data: " . json_encode($item_data));
+            throw new Exception("Услуга не найдена (ID: " . $service_id_debug . ")");
         }
         
         // Проверяем, была ли передана кастомная цена
@@ -1093,7 +1096,15 @@ private function addToHistory($order_id, $action, $admin_id, $description) {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":service_id", $service_id);
         $stmt->execute();
-        return $stmt->fetch();
+        $result = $stmt->fetch();
+
+        // Логирование для отладки
+        if (!$result) {
+            error_log("Service not found for ID: " . $service_id . " (type: " . gettype($service_id) . ")");
+            error_log("SQL Query: " . $query);
+        }
+
+        return $result;
     }
     
     private function getUserById($user_id) {
