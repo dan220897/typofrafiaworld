@@ -90,48 +90,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
         // Валидация пользователя
         $selectedUserId = intval($_POST['user_id'] ?? 0);
         $isNewUser = false;
-        
+        $isAnonymous = isset($_POST['is_anonymous']) && $_POST['is_anonymous'] == '1';
+
         if (!$selectedUserId) {
-            // Создаем нового пользователя
-            $newUserEmail = trim($_POST['new_user_email'] ?? '');
-            $newUserPhone = trim($_POST['new_user_phone'] ?? '');
+            if ($isAnonymous) {
+                // Создаем анонимного виртуального пользователя
+                // Генерируем уникальный номер для анонимного клиента
+                $query = "SELECT COUNT(*) as count FROM users WHERE name LIKE 'Клиент %'";
+                $stmt = $db->prepare($query);
+                $stmt->execute();
+                $result = $stmt->fetch();
+                $anonymousNumber = ($result['count'] ?? 0) + 1;
 
-            // Валидация email (обязательно)
-            if (empty($newUserEmail) || !filter_var($newUserEmail, FILTER_VALIDATE_EMAIL)) {
-                throw new Exception('Введите корректный email адрес');
-            }
-
-            // Обработка телефона (необязательно)
-            if (!empty($newUserPhone)) {
-                // Очищаем номер от форматирования, оставляем только цифры
-                $newUserPhone = preg_replace('/\D/', '', $newUserPhone);
-
-                // Проверяем формат если телефон указан
-                if (strlen($newUserPhone) !== 11 || $newUserPhone[0] !== '7') {
-                    throw new Exception('Некорректный номер телефона. Введите номер в формате +7 (XXX) XXX-XX-XX');
-                }
-
-                // Форматируем для сохранения в БД
-                $newUserPhone = '+' . $newUserPhone;
-            } else {
-                $newUserPhone = null;
-            }
-
-            // Проверяем, может пользователь уже существует по email
-            $existingUser = $user->getUserByEmail($newUserEmail);
-            if ($existingUser) {
-                $selectedUserId = $existingUser['id'];
-            } else {
-                // Создаем нового пользователя
-                $newUserData = [
-                    'phone' => $newUserPhone,
-                    'name' => trim($_POST['new_user_name'] ?? ''),
-                    'email' => $newUserEmail,
-                    'company_name' => trim($_POST['new_user_company'] ?? '')
+                $anonymousUserData = [
+                    'phone' => null,
+                    'name' => "Клиент {$anonymousNumber}",
+                    'email' => "anonymous{$anonymousNumber}@typografia.local",
+                    'company_name' => ''
                 ];
 
-                $selectedUserId = $user->createUser($newUserData);
+                $selectedUserId = $user->createUser($anonymousUserData);
                 $isNewUser = true;
+            } else {
+                // Создаем нового пользователя с реальными данными
+                $newUserEmail = trim($_POST['new_user_email'] ?? '');
+                $newUserPhone = trim($_POST['new_user_phone'] ?? '');
+
+                // Валидация email (обязательно)
+                if (empty($newUserEmail) || !filter_var($newUserEmail, FILTER_VALIDATE_EMAIL)) {
+                    throw new Exception('Введите корректный email адрес');
+                }
+
+                // Обработка телефона (необязательно)
+                if (!empty($newUserPhone)) {
+                    // Очищаем номер от форматирования, оставляем только цифры
+                    $newUserPhone = preg_replace('/\D/', '', $newUserPhone);
+
+                    // Проверяем формат если телефон указан
+                    if (strlen($newUserPhone) !== 11 || $newUserPhone[0] !== '7') {
+                        throw new Exception('Некорректный номер телефона. Введите номер в формате +7 (XXX) XXX-XX-XX');
+                    }
+
+                    // Форматируем для сохранения в БД
+                    $newUserPhone = '+' . $newUserPhone;
+                } else {
+                    $newUserPhone = null;
+                }
+
+                // Проверяем, может пользователь уже существует по email
+                $existingUser = $user->getUserByEmail($newUserEmail);
+                if ($existingUser) {
+                    $selectedUserId = $existingUser['id'];
+                } else {
+                    // Создаем нового пользователя
+                    $newUserData = [
+                        'phone' => $newUserPhone,
+                        'name' => trim($_POST['new_user_name'] ?? ''),
+                        'email' => $newUserEmail,
+                        'company_name' => trim($_POST['new_user_company'] ?? '')
+                    ];
+
+                    $selectedUserId = $user->createUser($newUserData);
+                    $isNewUser = true;
+                }
             }
         }
         
@@ -994,6 +1015,23 @@ select.form-control option:checked {
     color: #ffffff !important;
 }
 
+/* Информационный блок для анонимного клиента */
+.alert {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.alert-info {
+    background-color: #e0f2fe;
+    border: 1px solid #0ea5e9;
+    color: #075985;
+}
+
+.alert-info i {
+    margin-right: 0.5rem;
+}
+
 /* Адаптив */
 @media (max-width: 768px) {
     .form-row {
@@ -1039,16 +1077,21 @@ select.form-control option:checked {
             <div class="client-selector">
                 <div class="radio-group">
                     <label class="radio-label">
-                        <input type="radio" name="client_type" value="existing" 
-                               <?php echo $user_id ? 'checked' : ''; ?> 
+                        <input type="radio" name="client_type" value="existing"
+                               <?php echo $user_id ? 'checked' : ''; ?>
                                onchange="toggleClientForm('existing')">
                         Существующий клиент
                     </label>
                     <label class="radio-label">
-                        <input type="radio" name="client_type" value="new" 
-                               <?php echo !$user_id ? 'checked' : ''; ?> 
+                        <input type="radio" name="client_type" value="new"
+                               <?php echo !$user_id ? 'checked' : ''; ?>
                                onchange="toggleClientForm('new')">
                         Новый клиент
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="client_type" value="anonymous"
+                               onchange="toggleClientForm('anonymous')">
+                        Отказался оставлять контактные данные
                     </label>
                 </div>
             </div>
@@ -1120,6 +1163,15 @@ select.form-control option:checked {
                                    placeholder="ООО Рога и копыта">
                         </div>
                     </div>
+                </div>
+
+                <!-- Форма анонимного клиента -->
+                <div class="client-form-section" id="anonymousClientForm">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Будет создан виртуальный клиент с автоматически сгенерированными данными.
+                    </div>
+                    <input type="hidden" name="is_anonymous" id="isAnonymous" value="0">
                 </div>
             </div>
         </div>
@@ -1522,28 +1574,44 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Переключение между формами клиента
-// Переключение между формами клиента
 function toggleClientForm(type) {
     const emailInput = document.getElementById('newUserEmail');
+    const isAnonymousInput = document.getElementById('isAnonymous');
+    const existingClientForm = document.getElementById('existingClientForm');
+    const newClientForm = document.getElementById('newClientForm');
+    const anonymousClientForm = document.getElementById('anonymousClientForm');
+
+    // Скрываем все формы
+    existingClientForm.classList.remove('active');
+    newClientForm.classList.remove('active');
+    anonymousClientForm.classList.remove('active');
 
     if (type === 'existing') {
-        document.getElementById('existingClientForm').classList.add('active');
-        document.getElementById('newClientForm').classList.remove('active');
+        existingClientForm.classList.add('active');
 
         // Убираем required с полей нового клиента
         if (emailInput) {
             emailInput.removeAttribute('required');
         }
 
+        // Сбрасываем флаг анонимности
+        if (isAnonymousInput) {
+            isAnonymousInput.value = '0';
+        }
+
         // Очищаем поля нового клиента
         document.querySelectorAll('#newClientForm input').forEach(input => input.value = '');
-    } else {
-        document.getElementById('newClientForm').classList.add('active');
-        document.getElementById('existingClientForm').classList.remove('active');
+    } else if (type === 'new') {
+        newClientForm.classList.add('active');
 
         // Добавляем required к email
         if (emailInput) {
             emailInput.setAttribute('required', 'required');
+        }
+
+        // Сбрасываем флаг анонимности
+        if (isAnonymousInput) {
+            isAnonymousInput.value = '0';
         }
 
         // Сбрасываем выбор существующего клиента
@@ -1555,6 +1623,26 @@ function toggleClientForm(type) {
         setTimeout(() => {
             initPhoneMask();
         }, 100);
+    } else if (type === 'anonymous') {
+        anonymousClientForm.classList.add('active');
+
+        // Убираем required с полей нового клиента
+        if (emailInput) {
+            emailInput.removeAttribute('required');
+        }
+
+        // Устанавливаем флаг анонимности
+        if (isAnonymousInput) {
+            isAnonymousInput.value = '1';
+        }
+
+        // Очищаем поля нового клиента
+        document.querySelectorAll('#newClientForm input').forEach(input => input.value = '');
+
+        // Сбрасываем выбор существующего клиента
+        document.querySelectorAll('.client-card').forEach(card => card.classList.remove('selected'));
+        document.getElementById('selectedUserId').value = '';
+        selectedClientId = null;
     }
 }
 
