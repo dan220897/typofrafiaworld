@@ -295,24 +295,25 @@ class Order {
     }
     
     // Создать новый заказ
-    public function createOrder($user_id, $items = [], $notes = null, $generate_payment = true) {
+    public function createOrder($user_id, $items = [], $notes = null, $generate_payment = true, $location_id = null) {
         $this->conn->beginTransaction();
-        
+
         try {
             // Генерируем номер заказа
             $order_number = $this->generateOrderNumber();
-            
+
             // Создаем заказ
-            $query = "INSERT INTO " . $this->table_name . " 
-                     (order_number, user_id, status, notes, created_at, updated_at) 
-                     VALUES (:order_number, :user_id, :status, :notes, NOW(), NOW())";
-            
+            $query = "INSERT INTO " . $this->table_name . "
+                     (order_number, user_id, status, notes, location_id, created_at, updated_at)
+                     VALUES (:order_number, :user_id, :status, :notes, :location_id, NOW(), NOW())";
+
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":order_number", $order_number);
             $stmt->bindParam(":user_id", $user_id);
             $stmt->bindValue(":status", self::STATUS_DRAFT);
             $stmt->bindParam(":notes", $notes);
-            
+            $stmt->bindParam(":location_id", $location_id);
+
             if (!$stmt->execute()) {
                 throw new Exception("Ошибка при создании заказа");
             }

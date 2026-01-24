@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
         }
         
         // Создаем заказ БЕЗ генерации платежной ссылки
-        $order_id = $order->createOrder($selectedUserId, $orderItems, $comment, false);
+        $order_id = $order->createOrder($selectedUserId, $orderItems, $comment, false, getCurrentLocationId());
         
         if (!$order_id) {
             throw new Exception('Ошибка создания заказа');

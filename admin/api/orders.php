@@ -78,7 +78,9 @@ try {
                 $order_id = $order->createOrder(
                     $data['user_id'],
                     $data['items'] ?? [],
-                    $data['notes'] ?? null
+                    $data['notes'] ?? null,
+                    true,
+                    getCurrentLocationId()
                 );
                 
                 echo json_encode([
