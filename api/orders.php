@@ -551,15 +551,37 @@ function handleCreateOrder($userService, $chatService, $telegramNotifier) {
         $pickupPointId = isset($input['pickup_point_id']) ? (int)$input['pickup_point_id'] : null;
         $locationId = null;
 
+        // ЛОГИРОВАНИЕ: Проверяем входные данные
+        logMessage("Создание заказа - входные данные: pickup_point_id=" . ($pickupPointId ?? 'NULL') . ", delivery_method=" . ($input['delivery_method'] ?? 'NULL'), 'INFO');
+
         // Если указана точка самовывоза, получаем её location_id
         if ($pickupPointId) {
-            $stmt = $db->prepare("SELECT location_id FROM pickup_points WHERE id = ?");
+            logMessage("Ищем location_id для pickup_point_id={$pickupPointId}", 'INFO');
+
+            $stmt = $db->prepare("SELECT id, name, location_id FROM pickup_points WHERE id = ?");
             $stmt->execute([$pickupPointId]);
             $pickupPoint = $stmt->fetch();
+
+            logMessage("Результат запроса pickup_points: " . json_encode($pickupPoint), 'INFO');
+
             if ($pickupPoint && isset($pickupPoint['location_id'])) {
                 $locationId = $pickupPoint['location_id'];
+                logMessage("Найден location_id={$locationId} для точки '{$pickupPoint['name']}'", 'INFO');
+            } else {
+                logMessage("WARNING: pickup_point найдена, но location_id=" . ($pickupPoint['location_id'] ?? 'NULL'), 'WARNING');
             }
+        } else {
+            logMessage("pickup_point_id не указан в запросе", 'INFO');
         }
+
+        logMessage("Создание заказа с параметрами: pickup_point_id={$pickupPointId}, location_id={$locationId}", 'INFO');
+
+        // Проверяем наличие столбцов в таблице orders
+        $checkStmt = $db->prepare("SHOW COLUMNS FROM orders WHERE Field IN ('pickup_point_id', 'location_id')");
+        $checkStmt->execute();
+        $columns = $checkStmt->fetchAll();
+        $columnNames = array_column($columns, 'Field');
+        logMessage("Столбцы в orders: " . implode(', ', $columnNames) . " (pickup_point_id: " . (in_array('pickup_point_id', $columnNames) ? 'ДА' : 'НЕТ') . ", location_id: " . (in_array('location_id', $columnNames) ? 'ДА' : 'НЕТ') . ")", 'INFO');
 
         // Создаем заказ
         $stmt = $db->prepare("
@@ -574,7 +596,7 @@ function handleCreateOrder($userService, $chatService, $telegramNotifier) {
         $notes = isset($input['notes']) ? $input['notes'] : null;
         $deadline = isset($input['deadline']) ? $input['deadline'] : null;
 
-        $result = $stmt->execute([
+        $params = [
             $orderNumber,
             $userId,
             $pricing['total'],
@@ -585,13 +607,29 @@ function handleCreateOrder($userService, $chatService, $telegramNotifier) {
             $locationId,
             $notes,
             $deadline
-        ]);
-        
+        ];
+
+        logMessage("Параметры INSERT в orders: " . json_encode($params, JSON_UNESCAPED_UNICODE), 'INFO');
+
+        try {
+            $result = $stmt->execute($params);
+        } catch (PDOException $e) {
+            logMessage("ОШИБКА SQL при создании заказа: " . $e->getMessage(), 'ERROR');
+            throw new Exception('Ошибка создания заказа: ' . $e->getMessage());
+        }
+
         if (!$result) {
+            logMessage("Execute вернул false при создании заказа", 'ERROR');
             throw new Exception('Ошибка создания заказа');
         }
-        
+
         $orderId = $db->lastInsertId();
+
+        // ЛОГИРОВАНИЕ: Проверяем что сохранилось в orders
+        $stmt = $db->prepare("SELECT id, order_number, pickup_point_id, location_id, delivery_method FROM orders WHERE id = ?");
+        $stmt->execute([$orderId]);
+        $savedOrder = $stmt->fetch();
+        logMessage("Заказ создан в БД: " . json_encode($savedOrder), 'INFO');
         
         // Добавляем позиции заказа
         foreach ($input['items'] as $item) {
