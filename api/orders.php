@@ -15,6 +15,8 @@ require_once dirname(__DIR__) . '/classes/UserService.php';
 require_once dirname(__DIR__) . '/classes/SMSService.php';
 require_once dirname(__DIR__) . '/classes/ChatService.php';
 require_once dirname(__DIR__) . '/classes/TelegramNotifier.php';
+require_once dirname(__DIR__) . '/classes/EmailService.php';
+require_once dirname(__DIR__) . '/admin/classes/TinkoffPayment.php';
 
 // Определяем действие из URL параметров или пути
 $action = '';
@@ -606,7 +608,59 @@ function handleCreateOrder($userService, $chatService, $telegramNotifier) {
         $stmt->execute([$orderId, $userId]);
         
         $db->commit();
-        
+
+        // Получаем данные пользователя
+        $user = $userService->getCurrentUser();
+
+        // Создаем платеж через Tinkoff
+        $tinkoffPayment = new TinkoffPayment();
+        $paymentResult = $tinkoffPayment->createPayment(
+            $orderId,
+            $pricing['final'],
+            "Оплата заказа №{$orderNumber}",
+            [
+                'email' => $user['email'] ?? null,
+                'phone' => $user['phone'] ?? null
+            ]
+        );
+
+        // Сохраняем ссылку на оплату в заказ
+        if ($paymentResult['success']) {
+            $stmt = $db->prepare("
+                UPDATE orders
+                SET tinkoff_payment_id = ?, tinkoff_payment_url = ?
+                WHERE id = ?
+            ");
+            $stmt->execute([
+                $paymentResult['paymentId'],
+                $paymentResult['paymentUrl'],
+                $orderId
+            ]);
+
+            // Отправляем email клиенту с ссылкой на оплату
+            if (!empty($user['email'])) {
+                $emailService = new EmailService();
+                $subject = "Заказ №{$orderNumber} - Ссылка на оплату";
+
+                $body = getOrderEmailTemplate(
+                    $orderNumber,
+                    $pricing['final'],
+                    $paymentResult['paymentUrl'],
+                    getServicesNames($input['items'])
+                );
+
+                $altBody = "Здравствуйте!\n\n";
+                $altBody .= "Ваш заказ №{$orderNumber} успешно создан.\n";
+                $altBody .= "Сумма к оплате: {$pricing['final']} ₽\n\n";
+                $altBody .= "Оплатите заказ по ссылке:\n{$paymentResult['paymentUrl']}\n\n";
+                $altBody .= "С уважением,\nТипография";
+
+                $emailService->sendEmail($user['email'], $subject, $body, $altBody);
+            }
+        } else {
+            logMessage("Ошибка создания платежа для заказа {$orderId}: " . ($paymentResult['error'] ?? 'Unknown error'), 'ERROR');
+        }
+
         // Отправляем уведомление в чат
         $chatResult = $chatService->getOrCreateUserChat($userId);
         if ($chatResult['success']) {
@@ -617,9 +671,8 @@ function handleCreateOrder($userService, $chatService, $telegramNotifier) {
                 ['order_id' => $orderId, 'order_number' => $orderNumber]
             );
         }
-        
+
         // Уведомление в Telegram
-        $user = $userService->getCurrentUser();
         $orderData = [
             'id' => $orderId,
             'client_name' => $user['name'] ?: $user['phone'],
@@ -999,5 +1052,75 @@ function checkRateLimit($action, $limit = 10, $window = 3600) {
     }
     
     return true;
+}
+
+/**
+ * HTML шаблон письма с ссылкой на оплату
+ */
+function getOrderEmailTemplate($orderNumber, $finalAmount, $paymentUrl, $servicesText) {
+    $formattedAmount = number_format($finalAmount, 0, '', ' ');
+    return '
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказ ' . htmlspecialchars($orderNumber) . '</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Типография</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="color: #333333; margin-top: 0; font-size: 24px;">Заказ №' . htmlspecialchars($orderNumber) . ' успешно создан!</h2>
+                            <p style="color: #666666; font-size: 16px; line-height: 1.6;">
+                                Здравствуйте! Ваш заказ успешно оформлен. Для начала работы необходимо оплатить заказ.
+                            </p>
+                            <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">Номер заказа:</p>
+                                <p style="margin: 0 0 20px 0; color: #333333; font-size: 18px; font-weight: bold;">№' . htmlspecialchars($orderNumber) . '</p>
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">Услуги:</p>
+                                <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px;">' . htmlspecialchars($servicesText) . '</p>
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">Сумма к оплате:</p>
+                                <p style="margin: 0; color: #667eea; font-size: 24px; font-weight: bold;">' . htmlspecialchars($formattedAmount) . ' ₽</p>
+                            </div>
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="' . htmlspecialchars($paymentUrl) . '" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+                                    Оплатить заказ
+                                </a>
+                            </div>
+                            <p style="color: #666666; font-size: 14px; line-height: 1.6;">
+                                После успешной оплаты мы приступим к выполнению вашего заказа. Вы получите уведомление на этот email.
+                            </p>
+                            <p style="color: #999999; font-size: 13px; line-height: 1.6; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eeeeee;">
+                                Если кнопка не работает, скопируйте и вставьте эту ссылку в браузер:<br>
+                                <a href="' . htmlspecialchars($paymentUrl) . '" style="color: #667eea; word-break: break-all;">' . htmlspecialchars($paymentUrl) . '</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 20px 30px; text-align: center; border-top: 1px solid #eeeeee;">
+                            <p style="color: #999999; font-size: 12px; margin: 0;">
+                                © ' . date('Y') . ' Типография. Все права защищены.
+                            </p>
+                            <p style="color: #999999; font-size: 12px; margin: 10px 0 0 0;">
+                                <a href="https://typo-grafia.ru" style="color: #667eea; text-decoration: none;">https://typo-grafia.ru</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    ';
 }
 ?>
