@@ -337,10 +337,11 @@ function checkout($db, $sessionId, $userId) {
         sendError('Invalid phone number format', 400);
     }
 
-    // Проверяем точку самовывоза
-    $stmt = $db->prepare("SELECT id, name, address FROM pickup_points WHERE id = ? AND is_active = 1");
+    // Проверяем точку самовывоза и получаем location_id
+    $stmt = $db->prepare("SELECT id, name, address, location_id FROM pickup_points WHERE id = ? AND is_active = 1");
     $stmt->execute([$pickupPointId]);
     $pickupPoint = $stmt->fetch();
+    $locationId = $pickupPoint ? ($pickupPoint['location_id'] ?? null) : null;
 
     if (!$pickupPoint) {
         sendError('Invalid pickup point', 404);
@@ -447,14 +448,14 @@ function checkout($db, $sessionId, $userId) {
         $stmt = $db->prepare("
             INSERT INTO orders (
                 order_number, user_id, total_amount, final_amount,
-                delivery_method, delivery_address, payment_status,
-                created_at
-            ) VALUES (?, ?, ?, ?, 'pickup', ?, 'pending', NOW())
+                delivery_method, delivery_address, pickup_point_id, location_id,
+                payment_status, created_at
+            ) VALUES (?, ?, ?, ?, 'pickup', ?, ?, ?, 'pending', NOW())
         ");
-        $stmt->execute([$orderNumber, $userId, $totalAmount, $totalAmount, $deliveryAddress]);
+        $stmt->execute([$orderNumber, $userId, $totalAmount, $totalAmount, $deliveryAddress, $pickupPointId, $locationId]);
         $orderId = $db->lastInsertId();
 
-        logMessage("Создан заказ ID: {$orderId}, order_number: {$orderNumber}, user_id: {$userId}, total: {$totalAmount}", 'INFO');
+        logMessage("Создан заказ ID: {$orderId}, order_number: {$orderNumber}, user_id: {$userId}, total: {$totalAmount}, pickup_point_id: {$pickupPointId}, location_id: " . ($locationId ?? 'NULL'), 'INFO');
 
         // Добавляем товары в заказ
         logMessage("Добавляем товары в заказ ID: {$orderId}, количество товаров: " . count($cartItems), 'INFO');
