@@ -110,12 +110,22 @@ define('PAYMENT_STATUSES', [
 ]);
 
 // Email настройки
+define('USE_SMTP', true); // Использовать SMTP для отправки email
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);
+define('SMTP_ENCRYPTION', 'tls'); // tls или ssl
 define('SMTP_USERNAME', 'your-email@gmail.com');
 define('SMTP_PASSWORD', 'your-password');
 define('SMTP_FROM_EMAIL', 'noreply@typo-grafia.ru');
 define('SMTP_FROM_NAME', 'Типография');
+
+// Aliases для совместимости с EmailService
+if (!defined('EMAIL_FROM_ADDRESS')) {
+    define('EMAIL_FROM_ADDRESS', SMTP_FROM_EMAIL);
+}
+if (!defined('EMAIL_FROM_NAME')) {
+    define('EMAIL_FROM_NAME', SMTP_FROM_NAME);
+}
 
 // Часовой пояс
 date_default_timezone_set('Europe/Moscow');

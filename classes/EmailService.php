@@ -1,5 +1,8 @@
 <?php
-require_once dirname(__DIR__) . '/config/config.php';
+// Подключаем config только если Database еще не определен
+if (!class_exists('Database')) {
+    require_once dirname(__DIR__) . '/config/config.php';
+}
 
 // Проверяем наличие autoload.php перед подключением
 $autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
