@@ -311,11 +311,13 @@ async function sendPaymentEmail() {
         if (data.success) {
             showNotification('Email успешно отправлен', 'success');
         } else {
-            showNotification(data.message || 'Ошибка отправки email', 'error');
+            // Показываем конкретную ошибку из ответа сервера
+            console.error('Ошибка сервера:', data);
+            showNotification(data.message || data.error || 'Ошибка отправки email', 'error');
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        showNotification('Ошибка соединения', 'error');
+        showNotification('Ошибка соединения: ' + error.message, 'error');
     } finally {
         button.disabled = false;
         button.innerHTML = originalHTML;
