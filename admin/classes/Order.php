@@ -462,11 +462,142 @@ class Order {
         return ['success' => false, 'error' => 'Ошибка отправки SMS'];
     }
     
+    // Отправка Email с ссылкой на оплату
+    public function sendPaymentLinkEmail($order_id) {
+        require_once dirname(__DIR__, 2) . '/classes/EmailService.php';
+
+        $order = $this->getOrderById($order_id);
+
+        if (!$order || !$order['tinkoff_payment_url']) {
+            return ['success' => false, 'error' => 'Заказ или ссылка на оплату не найдены'];
+        }
+
+        // Получаем email клиента
+        $userEmail = $order['user_email'] ?? null;
+        if (!$userEmail) {
+            return ['success' => false, 'error' => 'Email клиента не указан'];
+        }
+
+        // Подготовка данных для письма
+        $orderNumber = $order['order_number'];
+        $finalAmount = number_format($order['final_amount'], 0, '', ' ');
+        $paymentUrl = $order['tinkoff_payment_url'];
+
+        // Тема письма
+        $subject = "Ссылка на оплату заказа №{$orderNumber} - " . SITE_NAME;
+
+        // HTML содержимое письма
+        $body = $this->getPaymentEmailTemplate($orderNumber, $finalAmount, $paymentUrl);
+
+        // Текстовая версия
+        $altBody = "Здравствуйте!\n\n";
+        $altBody .= "Ваш заказ №{$orderNumber}\n";
+        $altBody .= "Сумма к оплате: {$finalAmount} ₽\n\n";
+        $altBody .= "Оплатите заказ по ссылке:\n{$paymentUrl}\n\n";
+        $altBody .= "С уважением,\n" . SITE_NAME;
+
+        // Отправляем email
+        $emailService = new EmailService();
+        $result = $emailService->sendEmail($userEmail, $subject, $body, $altBody);
+
+        // Логируем отправку
+        if ($result['success']) {
+            $this->logEmailSent($order_id, $userEmail, 'payment_link', 'sent');
+        } else {
+            $this->logEmailSent($order_id, $userEmail, 'payment_link', 'failed', $result['error'] ?? 'Unknown error');
+        }
+
+        return $result;
+    }
+
+    // HTML шаблон письма с ссылкой на оплату
+    private function getPaymentEmailTemplate($orderNumber, $finalAmount, $paymentUrl) {
+        return '
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ссылка на оплату</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">' . SITE_NAME . '</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="color: #333333; margin-top: 0; font-size: 24px;">Оплата заказа №' . htmlspecialchars($orderNumber) . '</h2>
+                            <p style="color: #666666; font-size: 16px; line-height: 1.6;">
+                                Здравствуйте! Для оплаты вашего заказа перейдите по ссылке ниже:
+                            </p>
+                            <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">Номер заказа:</p>
+                                <p style="margin: 0 0 20px 0; color: #333333; font-size: 18px; font-weight: bold;">№' . htmlspecialchars($orderNumber) . '</p>
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">Сумма к оплате:</p>
+                                <p style="margin: 0; color: #667eea; font-size: 24px; font-weight: bold;">' . htmlspecialchars($finalAmount) . ' ₽</p>
+                            </div>
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="' . htmlspecialchars($paymentUrl) . '" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+                                    Оплатить заказ
+                                </a>
+                            </div>
+                            <p style="color: #666666; font-size: 14px; line-height: 1.6;">
+                                После успешной оплаты вы получите уведомление на этот email.
+                            </p>
+                            <p style="color: #999999; font-size: 13px; line-height: 1.6; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eeeeee;">
+                                Если кнопка не работает, скопируйте и вставьте эту ссылку в браузер:<br>
+                                <a href="' . htmlspecialchars($paymentUrl) . '" style="color: #667eea; word-break: break-all;">' . htmlspecialchars($paymentUrl) . '</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 20px 30px; text-align: center; border-top: 1px solid #eeeeee;">
+                            <p style="color: #999999; font-size: 12px; margin: 0;">
+                                © ' . date('Y') . ' ' . SITE_NAME . '. Все права защищены.
+                            </p>
+                            <p style="color: #999999; font-size: 12px; margin: 10px 0 0 0;">
+                                <a href="' . SITE_URL . '" style="color: #667eea; text-decoration: none;">' . SITE_URL . '</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+        ';
+    }
+
+    // Логирование отправки Email
+    private function logEmailSent($order_id, $email, $type, $status, $error = null) {
+        $query = "INSERT INTO email_log (order_id, email, type, status, error_message, created_at)
+                 VALUES (:order_id, :email, :type, :status, :error, NOW())";
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':order_id', $order_id);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':type', $type);
+            $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':error', $error);
+            $stmt->execute();
+        } catch (Exception $e) {
+            error_log("Ошибка логирования отправки email: " . $e->getMessage());
+        }
+    }
+
     // Логирование SMS
     private function logSMS($order_id, $phone, $message, $status, $error = null) {
-        $query = "INSERT INTO sms_log (order_id, phone, message, status, error_message, created_at) 
+        $query = "INSERT INTO sms_log (order_id, phone, message, status, error_message, created_at)
                  VALUES (:order_id, :phone, :message, :status, :error, NOW())";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':order_id', $order_id);
         $stmt->bindParam(':phone', $phone);

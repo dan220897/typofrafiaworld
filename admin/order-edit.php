@@ -620,11 +620,31 @@ body {
                         <option value="courier" <?php echo $orderData['delivery_type'] === 'courier' ? 'selected' : ''; ?>>Курьер</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Срок выполнения</label>
-                    <input type="date" name="deadline_at" class="form-control" 
+                    <input type="date" name="deadline_at" class="form-control"
                            value="<?php echo $orderData['deadline_at'] ? date('Y-m-d', strtotime($orderData['deadline_at'])) : ''; ?>">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Статус оплаты</label>
+                    <select id="paymentStatusSelect" class="form-control" onchange="updatePaymentStatus()">
+                        <option value="pending" <?php echo $orderData['payment_status'] === 'pending' ? 'selected' : ''; ?>>Ожидает оплаты</option>
+                        <option value="paid" <?php echo $orderData['payment_status'] === 'paid' ? 'selected' : ''; ?>>Оплачен</option>
+                        <option value="partially_paid" <?php echo $orderData['payment_status'] === 'partially_paid' ? 'selected' : ''; ?>>Частично оплачен</option>
+                        <option value="refunded" <?php echo $orderData['payment_status'] === 'refunded' ? 'selected' : ''; ?>>Возврат</option>
+                        <option value="failed" <?php echo $orderData['payment_status'] === 'failed' ? 'selected' : ''; ?>>Ошибка оплаты</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Отправка ссылки на оплату</label>
+                    <button type="button" class="btn btn-info" onclick="sendPaymentEmail()" style="width: 100%;">
+                        <i class="fas fa-envelope"></i> Отправить email с ссылкой на оплату
+                    </button>
                 </div>
             </div>
             
@@ -774,6 +794,139 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
         return false;
     }
 });
+
+// Обновление статуса оплаты
+async function updatePaymentStatus() {
+    const newStatus = document.getElementById('paymentStatusSelect').value;
+    const orderId = <?php echo $order_id; ?>;
+
+    if (!confirm('Изменить статус оплаты заказа?')) {
+        // Если отменили, возвращаем предыдущее значение
+        location.reload();
+        return;
+    }
+
+    try {
+        const response = await fetch(`api/orders.php?id=${orderId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'update_payment',
+                payment_status: newStatus
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Статус оплаты обновлен', 'success');
+        } else {
+            showNotification(data.message || 'Ошибка обновления статуса', 'error');
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('Ошибка соединения', 'error');
+        location.reload();
+    }
+}
+
+// Отправка email с ссылкой на оплату
+async function sendPaymentEmail() {
+    const orderId = <?php echo $order_id; ?>;
+
+    if (!confirm('Отправить email с ссылкой на оплату клиенту?')) {
+        return;
+    }
+
+    // Показываем индикатор загрузки
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+    try {
+        const response = await fetch(`api/orders.php?id=${orderId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'send_payment_email'
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Email успешно отправлен', 'success');
+        } else {
+            showNotification(data.message || 'Ошибка отправки email', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('Ошибка соединения', 'error');
+    } finally {
+        button.disabled = false;
+        button.innerHTML = originalHTML;
+    }
+}
+
+// Уведомления
+function showNotification(message, type = 'info') {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    // Удаляем через 3 секунды
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Добавляем стили анимации
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 
 <?php

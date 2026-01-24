@@ -453,21 +453,121 @@ class EmailService {
     public function cleanupOldCodes() {
         try {
             $stmt = $this->db->prepare("
-                DELETE FROM email_codes 
+                DELETE FROM email_codes
                 WHERE expires_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
             ");
             $result = $stmt->execute();
-            
+
             $deletedCount = $stmt->rowCount();
             if ($deletedCount > 0) {
                 logMessage("Удалено {$deletedCount} старых Email кодов", 'INFO');
             }
-            
+
             return $deletedCount;
-            
+
         } catch (Exception $e) {
             logMessage("Ошибка очистки старых Email кодов: " . $e->getMessage(), 'ERROR');
             return 0;
+        }
+    }
+
+    /**
+     * Отправка произвольного Email
+     *
+     * @param string $to Email получателя
+     * @param string $subject Тема письма
+     * @param string $body HTML содержимое письма
+     * @param string $altBody Текстовая версия (опционально)
+     * @return array ['success' => bool, 'message'/'error' => string]
+     */
+    public function sendEmail($to, $subject, $body, $altBody = '') {
+        try {
+            logMessage("Попытка отправки email на {$to} с темой '{$subject}'", 'INFO');
+
+            if (defined('USE_SMTP') && USE_SMTP && $this->mailer) {
+                // Отправка через PHPMailer (SMTP)
+                try {
+                    // Очищаем предыдущие настройки
+                    $this->mailer->clearAddresses();
+                    $this->mailer->clearAttachments();
+
+                    // Отправитель
+                    $this->mailer->setFrom($this->fromEmail, $this->fromName);
+
+                    // Получатель
+                    $this->mailer->addAddress($to);
+
+                    // Тема письма
+                    $this->mailer->Subject = $subject;
+
+                    // HTML содержимое
+                    $this->mailer->isHTML(true);
+                    $this->mailer->Body = $body;
+
+                    // Текстовая версия (для клиентов без HTML)
+                    $this->mailer->AltBody = $altBody ?: strip_tags($body);
+
+                    // Отправляем
+                    $sent = $this->mailer->send();
+
+                    if ($sent) {
+                        logMessage("Email успешно отправлен на {$to} через SMTP", 'INFO');
+
+                        return [
+                            'success' => true,
+                            'message' => 'Email успешно отправлен'
+                        ];
+                    } else {
+                        throw new Exception('PHPMailer вернул false');
+                    }
+
+                } catch (Exception $e) {
+                    $errorMsg = $e->getMessage();
+                    logMessage("Ошибка отправки через SMTP: {$errorMsg}", 'ERROR');
+
+                    return [
+                        'success' => false,
+                        'error' => 'Ошибка отправки письма через SMTP'
+                    ];
+                }
+            } else {
+                // Отправка через стандартную функцию mail()
+                try {
+                    $headers = "MIME-Version: 1.0\r\n";
+                    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+                    $headers .= "From: {$this->fromName} <{$this->fromEmail}>\r\n";
+                    $headers .= "Reply-To: {$this->fromEmail}\r\n";
+
+                    $sent = @mail($to, $subject, $body, $headers);
+
+                    if (!$sent) {
+                        throw new Exception('mail() функция не работает');
+                    }
+
+                    logMessage("Email отправлен через mail() на {$to}", 'INFO');
+
+                    return [
+                        'success' => true,
+                        'message' => 'Email успешно отправлен'
+                    ];
+
+                } catch (Exception $e) {
+                    logMessage("Ошибка mail(): " . $e->getMessage(), 'ERROR');
+
+                    return [
+                        'success' => false,
+                        'error' => 'Ошибка отправки письма'
+                    ];
+                }
+            }
+
+        } catch (Exception $e) {
+            logMessage("Ошибка отправки Email на {$to}: " . $e->getMessage(), 'ERROR');
+
+            return [
+                'success' => false,
+                'error' => 'Не удалось отправить письмо. Попробуйте позже.'
+            ];
         }
     }
 }

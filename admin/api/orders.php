@@ -129,16 +129,42 @@ try {
                         break;
                         
                     case 'update_payment':
-                        // Изменить статус оплаты
+                        // Изменить статус оплаты (доступно и для location admins)
                         if (!isset($data['payment_status'])) {
                             throw new Exception('Не указан статус оплаты');
                         }
-                        
+
                         $order->updatePaymentStatus($order_id, $data['payment_status']);
-                        
+
+                        // Логируем действие
+                        $orderData = $order->getOrderById($order_id);
+                        $adminLog->log($_SESSION['admin_id'], 'update_payment_status',
+                            "Изменен статус оплаты заказа #{$orderData['order_number']} на {$data['payment_status']}",
+                            'order', $order_id);
+
                         echo json_encode(['success' => true]);
                         break;
-                        
+
+                    case 'send_payment_email':
+                        // Отправить email с ссылкой на оплату (доступно и для location admins)
+                        $result = $order->sendPaymentLinkEmail($order_id);
+
+                        if ($result['success']) {
+                            // Логируем действие
+                            $orderData = $order->getOrderById($order_id);
+                            $adminLog->log($_SESSION['admin_id'], 'send_payment_email',
+                                "Отправлен email с ссылкой на оплату для заказа #{$orderData['order_number']}",
+                                'order', $order_id);
+
+                            echo json_encode([
+                                'success' => true,
+                                'message' => 'Email с ссылкой на оплату отправлен'
+                            ]);
+                        } else {
+                            throw new Exception($result['error'] ?? 'Ошибка отправки email');
+                        }
+                        break;
+
                     default:
                         throw new Exception('Неизвестное действие');
                 }
