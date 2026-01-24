@@ -11,77 +11,149 @@ if (!defined('SYSTEM_INIT')) {
 }
 
 // Настройки базы данных
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'anikannx_printtg');
-define('DB_USERNAME', 'anikannx_printtg');
-define('DB_PASSWORD', 'Mur645519!');
-define('DB_CHARSET', 'utf8mb4');
+if (!defined('DB_HOST')) {
+    define('DB_HOST', 'localhost');
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', 'anikannx_printtg');
+}
+if (!defined('DB_USERNAME')) {
+    define('DB_USERNAME', 'anikannx_printtg');
+}
+if (!defined('DB_PASSWORD')) {
+    define('DB_PASSWORD', 'Mur645519!');
+}
+if (!defined('DB_CHARSET')) {
+    define('DB_CHARSET', 'utf8mb4');
+}
 
 // API ключи
-define('SMS_RU_API_KEY', '658A225F-F674-C908-78C2-BBE9E3A5F69D');
+if (!defined('SMS_RU_API_KEY')) {
+    define('SMS_RU_API_KEY', '658A225F-F674-C908-78C2-BBE9E3A5F69D');
+}
 
 // Основные настройки системы
-define('SITE_NAME', 'Типо-графия');
-define('SITE_URL', 'https://typo-grafia.ru');
-define('ADMIN_EMAIL', 'info@typo-grafia.ru');
+if (!defined('SITE_NAME')) {
+    define('SITE_NAME', 'Типо-графия');
+}
+if (!defined('SITE_URL')) {
+    define('SITE_URL', 'https://typo-grafia.ru');
+}
+if (!defined('ADMIN_EMAIL')) {
+    define('ADMIN_EMAIL', 'info@typo-grafia.ru');
+}
 
-define('BOT_TOKEN', '8265444504:AAE2pfiHbPQPqy6RM8bueO831cPFtz3sWqg');
-define('TELEGRAM_API_URL', 'https://api.telegram.org/bot' . BOT_TOKEN . '/');
-define('MANAGER_CHAT_ID', '-1003168549220');
-define('TELEGRAM_NOTIFICATIONS_ENABLED', true);
-define('MANAGER_TELEGRAM_LINK', 'https://t.me/typografia_manager'); // Ссылка на менеджера
+if (!defined('BOT_TOKEN')) {
+    define('BOT_TOKEN', '8265444504:AAE2pfiHbPQPqy6RM8bueO831cPFtz3sWqg');
+}
+if (!defined('TELEGRAM_API_URL')) {
+    define('TELEGRAM_API_URL', 'https://api.telegram.org/bot' . BOT_TOKEN . '/');
+}
+if (!defined('MANAGER_CHAT_ID')) {
+    define('MANAGER_CHAT_ID', '-1003168549220');
+}
+if (!defined('TELEGRAM_NOTIFICATIONS_ENABLED')) {
+    define('TELEGRAM_NOTIFICATIONS_ENABLED', true);
+}
+if (!defined('MANAGER_TELEGRAM_LINK')) {
+    define('MANAGER_TELEGRAM_LINK', 'https://t.me/typografia_manager'); // Ссылка на менеджера
+}
 
 // Настройки Email и SMTP
-define('USE_SMTP', true); // Использовать SMTP вместо mail()
-define('SMTP_HOST', 'smtp.beget.ru');
-define('SMTP_PORT', 465);
-define('SMTP_USERNAME', 'info@etat.agency');
-define('SMTP_PASSWORD', 'Mur220897!');
-define('SMTP_ENCRYPTION', 'ssl'); // 'ssl' или 'tls'
-define('EMAIL_FROM_NAME', 'PHOTO.ETAT');
-define('EMAIL_FROM_ADDRESS', 'info@etat.agency');
-define('LOG_EMAILS', true); // Логировать отправку писем
-define('ADMIN_URL', SITE_URL . '/admin');
-define('UPLOADS_DIR', __DIR__ . '/../uploads/');
-define('UPLOADS_URL', SITE_URL . '/uploads/');
+if (!defined('USE_SMTP')) {
+    define('USE_SMTP', true); // Использовать SMTP вместо mail()
+}
+if (!defined('SMTP_HOST')) {
+    define('SMTP_HOST', 'smtp.beget.ru');
+}
+if (!defined('SMTP_PORT')) {
+    define('SMTP_PORT', 465);
+}
+if (!defined('SMTP_USERNAME')) {
+    define('SMTP_USERNAME', 'info@etat.agency');
+}
+if (!defined('SMTP_PASSWORD')) {
+    define('SMTP_PASSWORD', 'Mur220897!');
+}
+if (!defined('SMTP_ENCRYPTION')) {
+    define('SMTP_ENCRYPTION', 'ssl'); // 'ssl' или 'tls'
+}
+if (!defined('EMAIL_FROM_NAME')) {
+    define('EMAIL_FROM_NAME', 'PHOTO.ETAT');
+}
+if (!defined('EMAIL_FROM_ADDRESS')) {
+    define('EMAIL_FROM_ADDRESS', 'info@etat.agency');
+}
+if (!defined('LOG_EMAILS')) {
+    define('LOG_EMAILS', true); // Логировать отправку писем
+}
+if (!defined('ADMIN_URL')) {
+    define('ADMIN_URL', SITE_URL . '/admin');
+}
+if (!defined('UPLOADS_DIR')) {
+    define('UPLOADS_DIR', __DIR__ . '/../uploads/');
+}
+if (!defined('UPLOADS_URL')) {
+    define('UPLOADS_URL', SITE_URL . '/uploads/');
+}
 
 // Настройки безопасности
-define('SESSION_LIFETIME', 3600 * 24 * 7); // 7 дней
-define('SMS_CODE_LIFETIME', 300); // 5 минут
-define('MAX_LOGIN_ATTEMPTS', 5);
-define('LOGIN_BLOCK_TIME', 900); // 15 минут
+if (!defined('SESSION_LIFETIME')) {
+    define('SESSION_LIFETIME', 3600 * 24 * 7); // 7 дней
+}
+if (!defined('SMS_CODE_LIFETIME')) {
+    define('SMS_CODE_LIFETIME', 300); // 5 минут
+}
+if (!defined('MAX_LOGIN_ATTEMPTS')) {
+    define('MAX_LOGIN_ATTEMPTS', 5);
+}
+if (!defined('LOGIN_BLOCK_TIME')) {
+    define('LOGIN_BLOCK_TIME', 900); // 15 минут
+}
 
 // Настройки файлов
-define('MAX_FILE_SIZE', 10 * 1024 * 1024); // 10 MB
-define('ALLOWED_FILE_TYPES', [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-    'application/pdf', 'application/msword', 
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-]);
+if (!defined('MAX_FILE_SIZE')) {
+    define('MAX_FILE_SIZE', 10 * 1024 * 1024); // 10 MB
+}
+if (!defined('ALLOWED_FILE_TYPES')) {
+    define('ALLOWED_FILE_TYPES', [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf', 'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ]);
+}
 
 // Статусы заказов
-define('ORDER_STATUSES', [
-    'draft' => 'Черновик',
-    'pending' => 'Ожидает подтверждения',
-    'confirmed' => 'Подтвержден',
-    'in_production' => 'В производстве',
-    'ready' => 'Готов к выдаче',
-    'delivered' => 'Доставлен',
-    'cancelled' => 'Отменен'
-]);
+if (!defined('ORDER_STATUSES')) {
+    define('ORDER_STATUSES', [
+        'draft' => 'Черновик',
+        'pending' => 'Ожидает подтверждения',
+        'confirmed' => 'Подтвержден',
+        'in_production' => 'В производстве',
+        'ready' => 'Готов к выдаче',
+        'delivered' => 'Доставлен',
+        'cancelled' => 'Отменен'
+    ]);
+}
 
 // Настройки логирования
-define('LOG_ERRORS', true);
-define('LOG_FILE', __DIR__ . '/../logs/system.log');
+if (!defined('LOG_ERRORS')) {
+    define('LOG_ERRORS', true);
+}
+if (!defined('LOG_FILE')) {
+    define('LOG_FILE', __DIR__ . '/../logs/system.log');
+}
 
 // Настройки временной зоны
 date_default_timezone_set('Europe/Moscow');
 
 // Настройки сессии
-ini_set('session.cookie_lifetime', SESSION_LIFETIME);
-ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_lifetime', SESSION_LIFETIME);
+    ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+}
 
 // Класс для работы с базой данных
 if (!class_exists('Database')) {
