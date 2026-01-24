@@ -144,126 +144,154 @@ if (!function_exists('logMessage')) {
 }
 
 // Функция для безопасного получения данных из массива
-function getArrayValue($array, $key, $default = null) {
-    return isset($array[$key]) ? $array[$key] : $default;
+if (!function_exists('getArrayValue')) {
+    function getArrayValue($array, $key, $default = null) {
+        return isset($array[$key]) ? $array[$key] : $default;
+    }
 }
 
 // Функция для санитизации данных
-function sanitizeInput($data) {
-    if (is_array($data)) {
-        return array_map('sanitizeInput', $data);
+if (!function_exists('sanitizeInput')) {
+    function sanitizeInput($data) {
+        if (is_array($data)) {
+            return array_map('sanitizeInput', $data);
+        }
+        return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
     }
-    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
 }
 
 // Функция для валидации номера телефона
-function validatePhone($phone) {
-    $phone = preg_replace('/[^0-9]/', '', $phone);
-    if (strlen($phone) === 11 && substr($phone, 0, 1) === '7') {
-        return '+' . $phone;
-    } elseif (strlen($phone) === 10) {
-        return '+7' . $phone;
+if (!function_exists('validatePhone')) {
+    function validatePhone($phone) {
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        if (strlen($phone) === 11 && substr($phone, 0, 1) === '7') {
+            return '+' . $phone;
+        } elseif (strlen($phone) === 10) {
+            return '+7' . $phone;
+        }
+        return false;
     }
-    return false;
 }
 
 // Функция для генерации случайного кода
-function generateCode($length = 6) {
-    return str_pad(random_int(0, pow(10, $length) - 1), $length, '0', STR_PAD_LEFT);
+if (!function_exists('generateCode')) {
+    function generateCode($length = 6) {
+        return str_pad(random_int(0, pow(10, $length) - 1), $length, '0', STR_PAD_LEFT);
+    }
 }
 
 // Функция для создания безопасного имени файла
-function sanitizeFilename($filename) {
-    $filename = basename($filename);
-    $filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $filename);
-    return $filename;
+if (!function_exists('sanitizeFilename')) {
+    function sanitizeFilename($filename) {
+        $filename = basename($filename);
+        $filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $filename);
+        return $filename;
+    }
 }
 
 // Функция для получения MIME типа файла
-function getMimeType($filePath) {
-    if (function_exists('finfo_file')) {
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        return finfo_file($finfo, $filePath);
-    } elseif (function_exists('mime_content_type')) {
-        return mime_content_type($filePath);
+if (!function_exists('getMimeType')) {
+    function getMimeType($filePath) {
+        if (function_exists('finfo_file')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            return finfo_file($finfo, $filePath);
+        } elseif (function_exists('mime_content_type')) {
+            return mime_content_type($filePath);
+        }
+        return false;
     }
-    return false;
 }
 
 // Функция для проверки разрешенного типа файла
-function isAllowedFileType($mimeType) {
-    return in_array($mimeType, ALLOWED_FILE_TYPES);
+if (!function_exists('isAllowedFileType')) {
+    function isAllowedFileType($mimeType) {
+        return in_array($mimeType, ALLOWED_FILE_TYPES);
+    }
 }
 
 // Функция для форматирования размера файла
-function formatFileSize($bytes) {
-    $units = ['B', 'KB', 'MB', 'GB'];
-    $bytes = max($bytes, 0);
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-    $pow = min($pow, count($units) - 1);
-    
-    $bytes /= pow(1024, $pow);
-    
-    return round($bytes, 2) . ' ' . $units[$pow];
+if (!function_exists('formatFileSize')) {
+    function formatFileSize($bytes) {
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, 2) . ' ' . $units[$pow];
+    }
 }
 
 // Функция для отправки JSON ответа
-function sendJsonResponse($data, $statusCode = 200) {
-    http_response_code($statusCode);
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
-    exit;
+if (!function_exists('sendJsonResponse')) {
+    function sendJsonResponse($data, $statusCode = 200) {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 }
 
 // Функция для получения IP адреса пользователя
-function getUserIP() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        return $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-    } elseif (!empty($_SERVER['HTTP_X_REAL_IP'])) {
-        return $_SERVER['HTTP_X_REAL_IP'];
-    } else {
-        return $_SERVER['REMOTE_ADDR'];
+if (!function_exists('getUserIP')) {
+    function getUserIP() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            return $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+        } elseif (!empty($_SERVER['HTTP_X_REAL_IP'])) {
+            return $_SERVER['HTTP_X_REAL_IP'];
+        } else {
+            return $_SERVER['REMOTE_ADDR'];
+        }
     }
 }
 
 // Функция для получения User Agent
-function getUserAgent() {
-    return getArrayValue($_SERVER, 'HTTP_USER_AGENT', 'Unknown');
+if (!function_exists('getUserAgent')) {
+    function getUserAgent() {
+        return getArrayValue($_SERVER, 'HTTP_USER_AGENT', 'Unknown');
+    }
 }
 
 // Создание необходимых директорий
-function createRequiredDirectories() {
-    $dirs = [
-        dirname(LOG_FILE),
-        UPLOADS_DIR,
-        UPLOADS_DIR . 'messages',
-        UPLOADS_DIR . 'orders',
-        UPLOADS_DIR . 'temp'
-    ];
-    
-    foreach ($dirs as $dir) {
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+if (!function_exists('createRequiredDirectories')) {
+    function createRequiredDirectories() {
+        $dirs = [
+            dirname(LOG_FILE),
+            UPLOADS_DIR,
+            UPLOADS_DIR . 'messages',
+            UPLOADS_DIR . 'orders',
+            UPLOADS_DIR . 'temp'
+        ];
+
+        foreach ($dirs as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
         }
     }
 }
 
 // Инициализация системы
-function initSystem() {
-    // Запускаем сессию
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+if (!function_exists('initSystem')) {
+    function initSystem() {
+        // Запускаем сессию
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Создаем необходимые директории
+        createRequiredDirectories();
+
+        // Логируем запуск системы
+        logMessage("Система инициализирована", 'INFO');
     }
-    
-    // Создаем необходимые директории
-    createRequiredDirectories();
-    
-    // Логируем запуск системы
-    logMessage("Система инициализирована", 'INFO');
 }
 
 // Автоматическая инициализация при подключении файла
-initSystem();
+if (function_exists('initSystem')) {
+    initSystem();
+}
 ?>
