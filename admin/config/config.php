@@ -117,11 +117,11 @@ define('PAYMENT_STATUSES', [
 
 // Email настройки
 define('USE_SMTP', true); // Использовать SMTP для отправки email
-define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_PORT', 587);
-define('SMTP_ENCRYPTION', 'tls'); // tls или ssl
-define('SMTP_USERNAME', 'your-email@gmail.com');
-define('SMTP_PASSWORD', 'your-password');
+define('SMTP_HOST', 'smtp.beget.ru');
+define('SMTP_PORT', 465);
+define('SMTP_ENCRYPTION', 'ssl'); // tls или ssl
+define('SMTP_USERNAME', 'info@etat.agency');
+define('SMTP_PASSWORD', 'Mur220897!');
 define('SMTP_FROM_EMAIL', 'noreply@typo-grafia.ru');
 define('SMTP_FROM_NAME', 'Типография');
 
