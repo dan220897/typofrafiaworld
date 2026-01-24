@@ -20,15 +20,12 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 
 class EmailService {
-    private $db;
+    private $db = null;
     private $fromEmail;
     private $fromName;
     private $mailer;
 
     public function __construct() {
-        // Инициализация подключения к базе данных
-        $this->db = Database::getInstance()->getConnection();
-
         $this->fromEmail = EMAIL_FROM_ADDRESS;
         $this->fromName = EMAIL_FROM_NAME;
 
@@ -41,6 +38,23 @@ class EmailService {
                 logMessage("SMTP включен, но PHPMailer не установлен. Используется mail()", 'WARNING');
             }
         }
+    }
+
+    /**
+     * Получение подключения к БД (ленивая инициализация)
+     */
+    private function getDb() {
+        if ($this->db === null) {
+            // Проверяем, есть ли метод getInstance (для фронтенда)
+            if (method_exists('Database', 'getInstance')) {
+                $this->db = Database::getInstance()->getConnection();
+            } else {
+                // Для админки создаём новый экземпляр
+                $database = new Database();
+                $this->db = $database->getConnection();
+            }
+        }
+        return $this->db;
     }
 
     /**
@@ -214,7 +228,7 @@ class EmailService {
             $code = generateCode(6);
             
             // Сохраняем в базу
-            $stmt = $this->db->prepare("
+            $stmt = $this->getDb()->prepare("
                 INSERT INTO email_codes (email, code, expires_at, ip_address, user_agent) 
                 VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND), ?, ?)
             ");
@@ -236,7 +250,7 @@ class EmailService {
             
             if (!$emailResult['success']) {
                 // Если отправка не удалась, удаляем код из БД
-                $this->db->prepare("DELETE FROM email_codes WHERE email = ? AND code = ?")
+                $this->getDb()->prepare("DELETE FROM email_codes WHERE email = ? AND code = ?")
                          ->execute([$email, $code]);
                 
                 return $emailResult;
@@ -263,7 +277,7 @@ class EmailService {
     public function verifyCode($email, $code) {
         try {
             // Получаем код из БД
-            $stmt = $this->db->prepare("
+            $stmt = $this->getDb()->prepare("
                 SELECT id, attempts, expires_at, is_used 
                 FROM email_codes 
                 WHERE email = ? AND code = ? 
@@ -305,7 +319,7 @@ class EmailService {
             }
             
             // Отмечаем код как использованный
-            $stmt = $this->db->prepare("
+            $stmt = $this->getDb()->prepare("
                 UPDATE email_codes 
                 SET is_used = 1, attempts = attempts + 1 
                 WHERE id = ?
@@ -334,7 +348,7 @@ class EmailService {
      */
     public function incrementAttempts($email, $code) {
         try {
-            $stmt = $this->db->prepare("
+            $stmt = $this->getDb()->prepare("
                 UPDATE email_codes 
                 SET attempts = attempts + 1 
                 WHERE email = ? AND code = ? AND is_used = 0
@@ -351,7 +365,7 @@ class EmailService {
      */
     private function checkSendLimit($email) {
         try {
-            $stmt = $this->db->prepare("
+            $stmt = $this->getDb()->prepare("
                 SELECT COUNT(*) as count 
                 FROM email_codes 
                 WHERE email = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
@@ -457,7 +471,7 @@ class EmailService {
      */
     public function cleanupOldCodes() {
         try {
-            $stmt = $this->db->prepare("
+            $stmt = $this->getDb()->prepare("
                 DELETE FROM email_codes
                 WHERE expires_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
             ");
