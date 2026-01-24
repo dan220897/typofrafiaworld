@@ -11,12 +11,30 @@ class AdminLog {
     
     // Записать действие в лог
     public function log($admin_id, $action, $details = null, $entity_type = null, $entity_id = null) {
-        $query = "INSERT INTO " . $this->table_name . " 
-                 (admin_id, action, entity_type, entity_id, details, ip_address, user_agent) 
+        // Проверяем, что admin_id существует в таблице admins
+        if ($admin_id) {
+            $check_query = "SELECT id FROM admins WHERE id = :admin_id LIMIT 1";
+            $check_stmt = $this->conn->prepare($check_query);
+            $check_stmt->bindParam(":admin_id", $admin_id);
+            $check_stmt->execute();
+
+            // Если админ не найден, логируем ошибку и не пытаемся записать лог
+            if ($check_stmt->rowCount() === 0) {
+                error_log("AdminLog::log() - Admin ID {$admin_id} not found in admins table. Skipping log entry.");
+                return false;
+            }
+        } else {
+            // Если admin_id не передан, логируем и пропускаем
+            error_log("AdminLog::log() - No admin_id provided. Skipping log entry.");
+            return false;
+        }
+
+        $query = "INSERT INTO " . $this->table_name . "
+                 (admin_id, action, entity_type, entity_id, details, ip_address, user_agent)
                  VALUES (:admin_id, :action, :entity_type, :entity_id, :details, :ip, :user_agent)";
-        
+
         $stmt = $this->conn->prepare($query);
-        
+
         $stmt->bindParam(":admin_id", $admin_id);
         $stmt->bindParam(":action", $action);
         $stmt->bindParam(":entity_type", $entity_type);
@@ -24,8 +42,13 @@ class AdminLog {
         $stmt->bindParam(":details", $details);
         $stmt->bindValue(":ip", $this->getClientIP());
         $stmt->bindValue(":user_agent", $_SERVER['HTTP_USER_AGENT'] ?? null);
-        
-        return $stmt->execute();
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("AdminLog::log() error: " . $e->getMessage());
+            return false;
+        }
     }
     
     // Получить логи с фильтрацией

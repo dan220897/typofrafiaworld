@@ -61,11 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action']) && $_P
         if (!$service_id) {
             throw new Exception('Ошибка создания услуги');
         }
-        
-        // Логируем действие
-        $adminLog->log($_SESSION['admin_id'], 'create_service', 
-            "Создана новая услуга: {$serviceData['name']}", 
-            'service', $service_id);
+
+        // Логируем действие (только если admin_id установлен)
+        if (isset($_SESSION['admin_id']) && $_SESSION['admin_id']) {
+            $adminLog->log($_SESSION['admin_id'], 'create_service',
+                "Создана новая услуга: {$serviceData['name']}",
+                'service', $service_id);
+        }
         
         echo json_encode([
             'success' => true,
@@ -282,14 +284,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
         
         // Получаем информацию о созданном заказе для логирования
         $orderInfo = $order->getOrderById($order_id);
-        
-        // Логируем действие
-        $logMessage = "Создан заказ #{$orderInfo['order_number']}";
-        if ($isNewUser) {
-            $logMessage .= ' и новый пользователь';
+
+        // Логируем действие (только если admin_id установлен)
+        if (isset($_SESSION['admin_id']) && $_SESSION['admin_id']) {
+            $logMessage = "Создан заказ #{$orderInfo['order_number']}";
+            if ($isNewUser) {
+                $logMessage .= ' и новый пользователь';
+            }
+
+            $adminLog->log($_SESSION['admin_id'], 'create_order', $logMessage, 'order', $order_id);
+        } else {
+            error_log("Order created but admin_id not set in session. Order ID: {$order_id}");
         }
-        
-        $adminLog->log($_SESSION['admin_id'], 'create_order', $logMessage, 'order', $order_id);
         
         // Отправляем уведомление в Telegram если включено
         if (defined('TELEGRAM_NOTIFICATIONS_ENABLED') && TELEGRAM_NOTIFICATIONS_ENABLED) {
