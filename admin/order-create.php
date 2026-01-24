@@ -2097,7 +2097,8 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
             alert('Выберите клиента из списка');
             return false;
         }
-    } else {
+    } else if (clientType === 'new') {
+        // Валидация только для нового клиента с реальными данными
         const email = document.querySelector('input[name="new_user_email"]').value.trim();
 
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -2119,7 +2120,8 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
             }
         }
     }
-    
+    // Для anonymous не проверяем ничего, виртуальный клиент создастся автоматически
+
     // Проверка товаров
     let hasValidItems = false;
     document.querySelectorAll('.item-row').forEach(row => {
@@ -2129,7 +2131,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
             hasValidItems = true;
         }
     });
-    
+
     if (!hasValidItems) {
         e.preventDefault();
         alert('Добавьте хотя бы одну услугу в заказ');
