@@ -20,13 +20,11 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 
 class EmailService {
-    private $db;
     private $fromEmail;
     private $fromName;
     private $mailer;
 
     public function __construct() {
-        $this->db = Database::getInstance()->getConnection();
         $this->fromEmail = EMAIL_FROM_ADDRESS;
         $this->fromName = EMAIL_FROM_NAME;
 
