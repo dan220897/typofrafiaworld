@@ -122,7 +122,7 @@ define('SMTP_PORT', 465);
 define('SMTP_ENCRYPTION', 'ssl'); // tls или ssl
 define('SMTP_USERNAME', 'info@etat.agency');
 define('SMTP_PASSWORD', 'Mur220897!');
-define('SMTP_FROM_EMAIL', 'noreply@typo-grafia.ru');
+define('SMTP_FROM_EMAIL', 'info@etat.agency'); // Используем тот же адрес, что и для авторизации
 define('SMTP_FROM_NAME', 'Типография');
 
 // Aliases для совместимости с EmailService
