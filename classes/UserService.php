@@ -1,5 +1,8 @@
 <?php
-require_once dirname(__DIR__) . '/config/config.php';
+// Подключаем config только если он еще не загружен
+if (!defined('CONFIG_LOADED')) {
+    require_once dirname(__DIR__) . '/config/config.php';
+}
 require_once dirname(__DIR__) . '/classes/EmailService.php';
 
 class UserService {

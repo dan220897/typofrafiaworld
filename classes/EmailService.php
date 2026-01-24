@@ -1,6 +1,6 @@
 <?php
-// Подключаем config только если Database еще не определен
-if (!class_exists('Database')) {
+// Подключаем config только если он еще не загружен
+if (!defined('CONFIG_LOADED')) {
     require_once dirname(__DIR__) . '/config/config.php';
 }
 

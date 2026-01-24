@@ -1,6 +1,12 @@
 <?php
 // admin/config/config.php - Основные настройки системы
 
+// Предотвращение повторной загрузки конфигурации
+if (defined('CONFIG_LOADED')) {
+    return;
+}
+define('CONFIG_LOADED', true);
+
 // Запуск сессии
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -129,6 +135,11 @@ if (!defined('EMAIL_FROM_NAME')) {
 
 // Часовой пояс
 date_default_timezone_set('Europe/Moscow');
+
+// Подключаем класс Database
+if (!class_exists('Database')) {
+    require_once __DIR__ . '/database.php';
+}
 
 // Автозагрузка классов
 spl_autoload_register(function ($class) {

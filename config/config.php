@@ -1,4 +1,10 @@
 <?php
+// Предотвращение повторной загрузки конфигурации
+if (defined('CONFIG_LOADED')) {
+    return;
+}
+define('CONFIG_LOADED', true);
+
 // Предотвращение прямого доступа
 if (!defined('SYSTEM_INIT')) {
     define('SYSTEM_INIT', true);
@@ -78,41 +84,45 @@ ini_set('session.cookie_lifetime', SESSION_LIFETIME);
 ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
 
 // Класс для работы с базой данных
-class Database {
-    private static $instance = null;
-    private $pdo;
-    
-    private function __construct() {
-        try {
-            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET
-            ];
-            
-            $this->pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-        } catch (PDOException $e) {
-            logMessage("Ошибка подключения к БД: " . $e->getMessage(), 'ERROR');
-            throw new Exception("Ошибка подключения к базе данных");
+if (!class_exists('Database')) {
+    class Database {
+        private static $instance = null;
+        private $pdo;
+
+        private function __construct() {
+            try {
+                $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+                $options = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET
+                ];
+
+                $this->pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+            } catch (PDOException $e) {
+                if (function_exists('logMessage')) {
+                    logMessage("Ошибка подключения к БД: " . $e->getMessage(), 'ERROR');
+                }
+                throw new Exception("Ошибка подключения к базе данных");
+            }
         }
-    }
-    
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new self();
+
+        public static function getInstance() {
+            if (self::$instance === null) {
+                self::$instance = new self();
+            }
+            return self::$instance;
         }
-        return self::$instance;
+
+        public function getConnection() {
+            return $this->pdo;
+        }
+
+        // Запрет клонирования и десериализации
+        private function __clone() {}
+        public function __wakeup() {}
     }
-    
-    public function getConnection() {
-        return $this->pdo;
-    }
-    
-    // Запрет клонирования и десериализации
-    private function __clone() {}
-    public function __wakeup() {}
 }
 
 // Функция логирования
