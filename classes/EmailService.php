@@ -11,7 +11,9 @@ if (file_exists($autoloadPath)) {
     define('PHPMAILER_AVAILABLE', true);
 } else {
     define('PHPMAILER_AVAILABLE', false);
-    logMessage("PHPMailer не установлен. Используется fallback на mail()", 'WARNING');
+    if (function_exists('logMessage')) {
+        logMessage("PHPMailer не установлен. Используется fallback на mail()", 'WARNING');
+    }
 }
 
 // Импорт классов PHPMailer (безопасно даже если не установлен, пока не используется)
@@ -35,7 +37,9 @@ class EmailService {
             $this->configureSMTP();
         } else {
             if (defined('USE_SMTP') && USE_SMTP && !PHPMAILER_AVAILABLE) {
-                logMessage("SMTP включен, но PHPMailer не установлен. Используется mail()", 'WARNING');
+                if (function_exists('logMessage')) {
+                    logMessage("SMTP включен, но PHPMailer не установлен. Используется mail()", 'WARNING');
+                }
             }
         }
     }
@@ -45,13 +49,22 @@ class EmailService {
      */
     private function getDb() {
         if ($this->db === null) {
-            // Проверяем, есть ли метод getInstance (для фронтенда)
-            if (method_exists('Database', 'getInstance')) {
-                $this->db = Database::getInstance()->getConnection();
-            } else {
-                // Для админки создаём новый экземпляр
-                $database = new Database();
-                $this->db = $database->getConnection();
+            try {
+                // Проверяем, есть ли метод getInstance (для фронтенда)
+                if (class_exists('Database') && method_exists('Database', 'getInstance')) {
+                    $this->db = Database::getInstance()->getConnection();
+                } elseif (class_exists('Database')) {
+                    // Для админки создаём новый экземпляр
+                    $database = new Database();
+                    $this->db = $database->getConnection();
+                } else {
+                    throw new Exception('Database class not found');
+                }
+            } catch (Exception $e) {
+                if (function_exists('logMessage')) {
+                    logMessage("EmailService: Ошибка инициализации БД: " . $e->getMessage(), 'ERROR');
+                }
+                throw $e;
             }
         }
         return $this->db;
@@ -94,7 +107,9 @@ class EmailService {
             }
 
         } catch (Exception $e) {
-            logMessage("Ошибка настройки SMTP: " . $e->getMessage(), 'ERROR');
+            if (function_exists('logMessage')) {
+                logMessage("Ошибка настройки SMTP: " . $e->getMessage(), 'ERROR');
+            }
         }
     }
     
