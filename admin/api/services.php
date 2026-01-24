@@ -53,15 +53,15 @@ try {
                 ]);
             } else if ($action == 'calculate') {
                 // Расчет цены
-                $service_id = intval($_GET['service_id']);
+                $service_id = $_GET['service_id']; // Keep as string for varchar IDs
                 $quantity = intval($_GET['quantity'] ?? 1);
                 $parameters = $_GET['parameters'] ?? [];
                 $options = [
                     'urgent' => $_GET['urgent'] ?? false
                 ];
-                
+
                 $price_data = $service->calculatePrice($service_id, $quantity, $parameters, $options);
-                
+
                 echo json_encode([
                     'success' => true,
                     'price' => $price_data

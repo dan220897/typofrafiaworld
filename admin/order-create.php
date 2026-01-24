@@ -168,20 +168,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
                 if (empty($item['service_id']) || empty($item['quantity'])) {
                     continue;
                 }
-                
+
                 $unitPrice = floatval($item['unit_price']);
                 $quantity = intval($item['quantity']);
                 $itemTotal = $unitPrice * $quantity;
-                
+
                 $orderItems[] = [
-                    'service_id' => intval($item['service_id']),
+                    'service_id' => $item['service_id'], // Keep as string for varchar IDs
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'total_price' => $itemTotal,
                     'parameters' => !empty($item['parameters']) ? $item['parameters'] : [],
                     'notes' => $item['notes'] ?? ''
                 ];
-                
+
                 $totalAmount += $itemTotal;
             }
         }

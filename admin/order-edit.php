@@ -69,17 +69,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (empty($item['service_id']) || empty($item['quantity'])) {
                     continue;
                 }
-                
+
                 $itemData = [
                     'order_id' => $order_id,
-                    'service_id' => intval($item['service_id']),
+                    'service_id' => $item['service_id'], // Keep as string for varchar IDs
                     'quantity' => intval($item['quantity']),
                     'unit_price' => floatval($item['unit_price']),
                     'total_price' => floatval($item['unit_price']) * intval($item['quantity']),
                     'parameters' => !empty($item['parameters']) ? json_encode($item['parameters']) : null,
                     'notes' => $item['notes'] ?? ''
                 ];
-                
+
                 $order->addOrderItem($itemData);
                 $totalAmount += $itemData['total_price'];
             }
