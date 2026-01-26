@@ -955,5 +955,7 @@ ease;
             });
         });
     </script>
+
+    <?php include 'components/auth-modal.php'; ?>
 </body>
 </html>

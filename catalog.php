@@ -760,5 +760,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
             });
         });
     </script>
+
+    <?php include 'components/auth-modal.php'; ?>
 </body>
 </html>
