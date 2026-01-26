@@ -14,23 +14,27 @@ define('DB_CHARSET', 'utf8mb4');
 // API ключи
 define('SMS_RU_API_KEY', '658A225F-F674-C908-78C2-BBE9E3A5F69D');
 
-define('BOT_TOKEN', '8265444504:AAE2pfiHbPQPqy6RM8bueO831cPFtz3sWqg');
-define('TELEGRAM_API_URL', 'https://api.telegram.org/bot' . BOT_TOKEN . '/');
-define('MANAGER_CHAT_ID', '-1003168549220');
-define('TELEGRAM_NOTIFICATIONS_ENABLED', true);
-
-// Настройки Email
-define('SMTP_HOST', 'smtp.your-domain.com'); // если используете SMTP
-define('SMTP_PORT', 587);
-define('SMTP_USERNAME', 'noreply@your-domain.com');
-define('SMTP_PASSWORD', 'your-password');
-define('EMAIL_FROM_NAME', SITE_NAME);
-define('EMAIL_FROM_ADDRESS', ADMIN_EMAIL);
-
 // Основные настройки системы
 define('SITE_NAME', 'Типо-графия');
 define('SITE_URL', 'https://typo-grafia.ru');
 define('ADMIN_EMAIL', 'info@typo-grafia.ru');
+
+define('BOT_TOKEN', '8265444504:AAE2pfiHbPQPqy6RM8bueO831cPFtz3sWqg');
+define('TELEGRAM_API_URL', 'https://api.telegram.org/bot' . BOT_TOKEN . '/');
+define('MANAGER_CHAT_ID', '-1003168549220');
+define('TELEGRAM_NOTIFICATIONS_ENABLED', true);
+define('MANAGER_TELEGRAM_LINK', 'https://t.me/typografia_manager'); // Ссылка на менеджера
+
+// Настройки Email и SMTP
+define('USE_SMTP', true); // Использовать SMTP вместо mail()
+define('SMTP_HOST', 'smtp.beget.ru');
+define('SMTP_PORT', 465);
+define('SMTP_USERNAME', 'info@etat.agency');
+define('SMTP_PASSWORD', 'Mur220897!');
+define('SMTP_ENCRYPTION', 'ssl'); // 'ssl' или 'tls'
+define('EMAIL_FROM_NAME', 'PHOTO.ETAT');
+define('EMAIL_FROM_ADDRESS', 'info@etat.agency');
+define('LOG_EMAILS', true); // Логировать отправку писем
 define('ADMIN_URL', SITE_URL . '/admin');
 define('UPLOADS_DIR', __DIR__ . '/../uploads/');
 define('UPLOADS_URL', SITE_URL . '/uploads/');

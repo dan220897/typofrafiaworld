@@ -1,15 +1,82 @@
 <?php
 require_once dirname(__DIR__) . '/config/config.php';
 
+// Проверяем наличие autoload.php перед подключением
+$autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
+    define('PHPMAILER_AVAILABLE', true);
+} else {
+    define('PHPMAILER_AVAILABLE', false);
+    logMessage("PHPMailer не установлен. Используется fallback на mail()", 'WARNING');
+}
+
+// Импорт классов PHPMailer (безопасно даже если не установлен, пока не используется)
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
 class EmailService {
     private $db;
     private $fromEmail;
     private $fromName;
-    
+    private $mailer;
+
     public function __construct() {
         $this->db = Database::getInstance()->getConnection();
-        $this->fromEmail = ADMIN_EMAIL;
-        $this->fromName = SITE_NAME;
+        $this->fromEmail = EMAIL_FROM_ADDRESS;
+        $this->fromName = EMAIL_FROM_NAME;
+
+        // Инициализация PHPMailer только если он доступен
+        if (defined('USE_SMTP') && USE_SMTP && PHPMAILER_AVAILABLE) {
+            $this->mailer = new PHPMailer(true);
+            $this->configureSMTP();
+        } else {
+            if (defined('USE_SMTP') && USE_SMTP && !PHPMAILER_AVAILABLE) {
+                logMessage("SMTP включен, но PHPMailer не установлен. Используется mail()", 'WARNING');
+            }
+        }
+    }
+
+    /**
+     * Настройка SMTP
+     */
+    private function configureSMTP() {
+        if (!PHPMAILER_AVAILABLE) {
+            return;
+        }
+
+        try {
+            // Настройки сервера
+            $this->mailer->isSMTP();
+            $this->mailer->Host       = SMTP_HOST;
+            $this->mailer->SMTPAuth   = true;
+            $this->mailer->Username   = SMTP_USERNAME;
+            $this->mailer->Password   = SMTP_PASSWORD;
+            $this->mailer->SMTPSecure = SMTP_ENCRYPTION;
+            $this->mailer->Port       = SMTP_PORT;
+
+            // Настройки кодировки
+            $this->mailer->CharSet    = 'UTF-8';
+            $this->mailer->Encoding   = 'base64';
+
+            // Отключаем проверку SSL сертификата (если есть проблемы)
+            $this->mailer->SMTPOptions = array(
+                'ssl' => array(
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                )
+            );
+
+            // Логирование SMTP (для отладки)
+            if (defined('LOG_EMAILS') && LOG_EMAILS) {
+                $this->mailer->SMTPDebug = SMTP::DEBUG_OFF; // Можно включить DEBUG_SERVER для отладки
+            }
+
+        } catch (Exception $e) {
+            logMessage("Ошибка настройки SMTP: " . $e->getMessage(), 'ERROR');
+        }
     }
     
     /**
@@ -17,39 +84,110 @@ class EmailService {
      */
     public function sendCode($email, $code) {
         try {
-            // Код в начале темы письма
+            // Логируем попытку отправки
+            logMessage("Попытка отправки email на {$email} с кодом {$code} через SMTP", 'INFO');
+
+            if (defined('USE_SMTP') && USE_SMTP && $this->mailer) {
+                // Отправка через PHPMailer (SMTP)
+                return $this->sendViaSMTP($email, $code);
+            } else {
+                // Отправка через стандартную функцию mail()
+                return $this->sendViaMail($email, $code);
+            }
+
+        } catch (Exception $e) {
+            logMessage("Ошибка отправки Email на {$email}: " . $e->getMessage(), 'ERROR');
+
+            return [
+                'success' => false,
+                'error' => 'Не удалось отправить письмо. Попробуйте позже.'
+            ];
+        }
+    }
+
+    /**
+     * Отправка через SMTP (PHPMailer)
+     */
+    private function sendViaSMTP($email, $code) {
+        try {
+            // Очищаем предыдущие настройки
+            $this->mailer->clearAddresses();
+            $this->mailer->clearAttachments();
+
+            // Отправитель
+            $this->mailer->setFrom($this->fromEmail, $this->fromName);
+
+            // Получатель
+            $this->mailer->addAddress($email);
+
+            // Тема письма
             $subject = "{$code} - Код подтверждения для " . SITE_NAME;
-            
-            // HTML шаблон письма
+            $this->mailer->Subject = $subject;
+
+            // HTML содержимое
+            $this->mailer->isHTML(true);
+            $this->mailer->Body = $this->getEmailTemplate($code);
+
+            // Текстовая версия (для клиентов без HTML)
+            $this->mailer->AltBody = "Ваш код подтверждения: {$code}\n\nКод действителен в течение 5 минут.";
+
+            // Отправляем
+            $sent = $this->mailer->send();
+
+            if ($sent) {
+                logMessage("Email успешно отправлен на {$email} через SMTP", 'INFO');
+
+                return [
+                    'success' => true,
+                    'message' => 'Код отправлен на email'
+                ];
+            } else {
+                throw new Exception('PHPMailer вернул false');
+            }
+
+        } catch (Exception $e) {
+            $errorMsg = $e->getMessage();
+            logMessage("Ошибка отправки через SMTP: {$errorMsg}", 'ERROR');
+
+            return [
+                'success' => false,
+                'error' => 'Ошибка отправки письма через SMTP'
+            ];
+        }
+    }
+
+    /**
+     * Отправка через стандартную функцию mail() (резервный вариант)
+     */
+    private function sendViaMail($email, $code) {
+        try {
+            $subject = "{$code} - Код подтверждения для " . SITE_NAME;
             $message = $this->getEmailTemplate($code);
-            
-            // Заголовки для HTML письма
+
             $headers = "MIME-Version: 1.0\r\n";
             $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
             $headers .= "From: {$this->fromName} <{$this->fromEmail}>\r\n";
             $headers .= "Reply-To: {$this->fromEmail}\r\n";
-            $headers .= "X-Mailer: PHP/" . phpversion();
-            
-            // Отправляем письмо
-            $sent = mail($email, $subject, $message, $headers);
-            
+
+            $sent = @mail($email, $subject, $message, $headers);
+
             if (!$sent) {
-                throw new Exception('Ошибка отправки письма');
+                throw new Exception('mail() функция не работает');
             }
-            
-            logMessage("Email код отправлен на адрес {$email}", 'INFO');
-            
+
+            logMessage("Email отправлен через mail() на {$email}", 'INFO');
+
             return [
                 'success' => true,
                 'message' => 'Код отправлен на email'
             ];
-            
+
         } catch (Exception $e) {
-            logMessage("Ошибка отправки Email на {$email}: " . $e->getMessage(), 'ERROR');
-            
+            logMessage("Ошибка mail(): " . $e->getMessage(), 'ERROR');
+
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => 'Ошибка отправки письма'
             ];
         }
     }

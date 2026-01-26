@@ -152,23 +152,59 @@ function handlePutRequest($action, $userService, $chatService) {
  */
 function handleGetOrders($userService) {
     $userId = $_SESSION['user_id'];
+
+    // Отладочная информация
+    logMessage("Запрос списка заказов - User ID: {$userId}, Session: " . json_encode([
+        'user_id' => $_SESSION['user_id'] ?? 'not set',
+        'user_email' => $_SESSION['user_email'] ?? 'not set',
+        'user_phone' => $_SESSION['user_phone'] ?? 'not set'
+    ]), 'DEBUG');
+
     $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? min(50, max(1, (int)$_GET['limit'])) : 20;
     $status = isset($_GET['status']) ? $_GET['status'] : null;
     $offset = ($page - 1) * $limit;
-    
+
     try {
         $db = Database::getInstance()->getConnection();
-        
-        // Строим WHERE условие
-        $whereConditions = ['o.user_id = ?'];
-        $params = [$userId];
-        
+
+        // Получаем информацию о текущем пользователе
+        $currentUser = $userService->getCurrentUser();
+        $userEmail = $currentUser['email'] ?? null;
+        $userPhone = $currentUser['phone'] ?? null;
+
+        // Находим все связанные user_id (по email или phone)
+        $relatedUserIds = [$userId];
+
+        if ($userEmail) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $stmt->execute([$userEmail, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        if ($userPhone) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE phone = ? AND id != ?");
+            $stmt->execute([$userPhone, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        $relatedUserIds = array_unique($relatedUserIds);
+        logMessage("Поиск заказов для связанных user_id: " . implode(', ', $relatedUserIds), 'DEBUG');
+
+        // Строим WHERE условие с учетом всех связанных user_id
+        $placeholders = implode(',', array_fill(0, count($relatedUserIds), '?'));
+        $whereConditions = ["o.user_id IN ({$placeholders})"];
+        $params = $relatedUserIds;
+
         if ($status && array_key_exists($status, ORDER_STATUSES)) {
             $whereConditions[] = 'o.status = ?';
             $params[] = $status;
         }
-        
+
         $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
         
         // Получаем общее количество заказов
@@ -182,7 +218,7 @@ function handleGetOrders($userService) {
         
         // Получаем заказы с дополнительной информацией
         $stmt = $db->prepare("
-            SELECT 
+            SELECT
                 o.id,
                 o.order_number,
                 o.status,
@@ -203,12 +239,17 @@ function handleGetOrders($userService) {
             ORDER BY o.created_at DESC
             LIMIT ? OFFSET ?
         ");
-        
-        $params[] = $limit;
-        $params[] = $offset;
-        $stmt->execute($params);
+
+        // Создаем копию params для добавления limit и offset
+        $queryParams = $params;
+        $queryParams[] = $limit;
+        $queryParams[] = $offset;
+        $stmt->execute($queryParams);
         $orders = $stmt->fetchAll();
-        
+
+        // Отладка: выводим количество найденных заказов
+        logMessage("Найдено заказов для user_id {$userId}: " . count($orders) . " из {$totalCount} всего", 'DEBUG');
+
         // Форматируем заказы
         $formattedOrders = [];
         foreach ($orders as $order) {
@@ -253,18 +294,46 @@ function handleGetOrders($userService) {
  */
 function handleGetOrderById($orderId, $userService) {
     $userId = $_SESSION['user_id'];
-    
+
     try {
         $db = Database::getInstance()->getConnection();
-        
-        // Получаем заказ с проверкой владельца
+
+        // Получаем информацию о текущем пользователе
+        $currentUser = $userService->getCurrentUser();
+        $userEmail = $currentUser['email'] ?? null;
+        $userPhone = $currentUser['phone'] ?? null;
+
+        // Находим все связанные user_id (по email или phone)
+        $relatedUserIds = [$userId];
+
+        if ($userEmail) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $stmt->execute([$userEmail, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        if ($userPhone) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE phone = ? AND id != ?");
+            $stmt->execute([$userPhone, $userId]);
+            while ($row = $stmt->fetch()) {
+                $relatedUserIds[] = $row['id'];
+            }
+        }
+
+        $relatedUserIds = array_unique($relatedUserIds);
+        $placeholders = implode(',', array_fill(0, count($relatedUserIds), '?'));
+
+        // Получаем заказ с проверкой владельца (по всем связанным user_id)
         $stmt = $db->prepare("
             SELECT o.*, u.phone, u.name as user_name, u.email
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
-            WHERE o.id = ? AND o.user_id = ?
+            WHERE o.id = ? AND o.user_id IN ({$placeholders})
         ");
-        $stmt->execute([$orderId, $userId]);
+        $params = array_merge([$orderId], $relatedUserIds);
+        $stmt->execute($params);
         $order = $stmt->fetch();
         
         if (!$order) {
@@ -273,7 +342,9 @@ function handleGetOrderById($orderId, $userService) {
         
         // Получаем позиции заказа
         $stmt = $db->prepare("
-            SELECT oi.*, s.name as service_name, s.description as service_description
+            SELECT oi.*,
+                   COALESCE(s.label, s.name) as service_name,
+                   s.description as service_description
             FROM order_items oi
             LEFT JOIN services s ON oi.service_id = s.id
             WHERE oi.order_id = ?
@@ -312,6 +383,8 @@ function handleGetOrderById($orderId, $userService) {
             'discount_amount' => (float)$order['discount_amount'],
             'final_amount' => (float)$order['final_amount'],
             'payment_status' => $order['payment_status'],
+            'tinkoff_payment_id' => $order['tinkoff_payment_id'],
+            'tinkoff_payment_url' => $order['tinkoff_payment_url'],
             'delivery_method' => $order['delivery_method'],
             'delivery_address' => $order['delivery_address'],
             'notes' => $order['notes'],
@@ -336,6 +409,7 @@ function handleGetOrderById($orderId, $userService) {
                 'quantity' => (int)$item['quantity'],
                 'parameters' => $item['parameters'] ? json_decode($item['parameters'], true) : null,
                 'unit_price' => (float)$item['unit_price'],
+                'price' => (float)$item['total_price'], // Для совместимости с order-details.php
                 'total_price' => (float)$item['total_price'],
                 'design_status' => $item['design_status'],
                 'notes' => $item['notes']
@@ -370,10 +444,15 @@ function handleGetOrderById($orderId, $userService) {
         }
         
         logMessage("Получена детальная информация о заказе ID: {$orderId} для пользователя ID: {$userId}", 'INFO');
-        
+
+        // Извлекаем items из orderData для совместимости с order-details.php
+        $items = $orderData['items'];
+        unset($orderData['items']);
+
         sendJsonResponse([
             'success' => true,
-            'order' => $orderData
+            'order' => $orderData,
+            'items' => $items
         ]);
         
     } catch (Exception $e) {

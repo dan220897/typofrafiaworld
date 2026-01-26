@@ -15,23 +15,34 @@ require_once dirname(__DIR__) . '/classes/UserService.php';
 require_once dirname(__DIR__) . '/classes/EmailService.php';
 require_once dirname(__DIR__) . '/classes/ChatService.php';
 
-// Определяем действие из URL параметров или пути
+// Определяем действие из URL параметров, JSON body или пути
 $action = '';
 
 // Сначала проверяем URL параметр action
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
 } else {
-    // Если нет параметра, пытаемся извлечь из пути
-    $requestUri = $_SERVER['REQUEST_URI'];
-    $scriptName = $_SERVER['SCRIPT_NAME'];
-    $requestPath = str_replace(dirname($scriptName), '', $requestUri);
-    $requestPath = trim($requestPath, '/');
-    $requestPath = explode('?', $requestPath)[0];
-    
-    $pathParts = explode('/', $requestPath);
-    $action = end($pathParts);
-    $action = str_replace('.php', '', $action);
+    // Проверяем JSON body для POST запросов
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $rawInput = file_get_contents('php://input');
+        $jsonInput = json_decode($rawInput, true);
+        if ($jsonInput && isset($jsonInput['action'])) {
+            $action = $jsonInput['action'];
+        }
+    }
+
+    // Если action все еще пустой, пытаемся извлечь из пути
+    if (empty($action)) {
+        $requestUri = $_SERVER['REQUEST_URI'];
+        $scriptName = $_SERVER['SCRIPT_NAME'];
+        $requestPath = str_replace(dirname($scriptName), '', $requestUri);
+        $requestPath = trim($requestPath, '/');
+        $requestPath = explode('?', $requestPath)[0];
+
+        $pathParts = explode('/', $requestPath);
+        $action = end($pathParts);
+        $action = str_replace('.php', '', $action);
+    }
 }
 
 // Если action пустой или равен 'auth', то это проверка авторизации для GET
@@ -77,14 +88,17 @@ function handlePostRequest($action, $userService, $chatService) {
     }
     
     switch ($action) {
+        case 'send_code':
         case 'send-code':
             handleSendCode($input, $userService);
             break;
-            
+
+        case 'verify_code':
         case 'verify-code':
             handleVerifyCode($input, $userService, $chatService);
             break;
-            
+
+        case 'update_profile':
         case 'update-profile':
             handleUpdateProfile($input, $userService);
             break;
