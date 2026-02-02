@@ -37,44 +37,28 @@ $stmt = $db->prepare($query);
 $stmt->execute();
 $pickupPoints = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Обработка AJAX запроса для создания новой услуги
+// Обработка AJAX запроса для добавления кастомной услуги (только в заказ, не в БД)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'create_service') {
     header('Content-Type: application/json');
-    
+
     try {
-        $serviceData = [
-            'name' => trim($_POST['service_name'] ?? ''),
-            'base_price' => floatval($_POST['service_price'] ?? 0),
-            'category' => trim($_POST['service_category'] ?? 'другое'),
-            'description' => trim($_POST['service_description'] ?? ''),
-            'min_quantity' => 1,
-            'production_time_days' => 1,
-            'is_active' => 1
-        ];
-        
-        if (empty($serviceData['name'])) {
+        $serviceName = trim($_POST['service_name'] ?? '');
+        $servicePrice = floatval($_POST['service_price'] ?? 0);
+
+        if (empty($serviceName)) {
             throw new Exception('Название услуги обязательно');
         }
-        
-        $service_id = $service->createService($serviceData);
-        
-        if (!$service_id) {
-            throw new Exception('Ошибка создания услуги');
-        }
 
-        // Логируем действие (только если admin_id установлен)
-        if (isset($_SESSION['admin_id']) && $_SESSION['admin_id']) {
-            $adminLog->log($_SESSION['admin_id'], 'create_service',
-                "Создана новая услуга: {$serviceData['name']}",
-                'service', $service_id);
-        }
-        
+        // Генерируем временный ID для кастомной услуги (не сохраняем в БД)
+        $tempId = 'custom_' . time() . '_' . mt_rand(1000, 9999);
+
         echo json_encode([
             'success' => true,
             'service' => [
-                'id' => $service_id,
-                'name' => $serviceData['name'],
-                'base_price' => $serviceData['base_price']
+                'id' => $tempId,
+                'name' => $serviceName,
+                'base_price' => $servicePrice,
+                'is_custom' => true
             ]
         ]);
     } catch (Exception $e) {
@@ -175,15 +159,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
                 $quantity = intval($item['quantity']);
                 $itemTotal = $unitPrice * $quantity;
 
-                $orderItems[] = [
-                    'service_id' => $item['service_id'], // Keep as string for varchar IDs
+                $isCustomService = strpos($item['service_id'], 'custom_') === 0;
+
+                $orderItem = [
+                    'service_id' => $item['service_id'],
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'total_price' => $itemTotal,
                     'parameters' => !empty($item['parameters']) ? $item['parameters'] : [],
-                    'notes' => $item['notes'] ?? ''
+                    'notes' => $item['notes'] ?? '',
+                    'is_custom' => $isCustomService,
+                    'custom_service_name' => $isCustomService ? ($item['custom_service_name'] ?? 'Услуга') : ''
                 ];
 
+                $orderItems[] = $orderItem;
                 $totalAmount += $itemTotal;
             }
         }
@@ -300,13 +289,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_action'])) {
         // Отправляем уведомление в Telegram если включено
         if (defined('TELEGRAM_NOTIFICATIONS_ENABLED') && TELEGRAM_NOTIFICATIONS_ENABLED) {
             try {
-                $tgMessage = "🆕 Новый заказ #{$orderInfo['order_number']}\n";
-                $tgMessage .= "💰 Сумма: " . number_format($orderInfo['final_amount'], 0, '', ' ') . " руб.\n";
-                $tgMessage .= "👤 Клиент: " . ($orderInfo['user_name'] ?: 'Без имени') . "\n";
-                $tgMessage .= "📱 Телефон: " . $orderInfo['user_phone'];
-                
-                // Здесь можно добавить отправку уведомления в Telegram
-                // $telegram->sendMessage($tgMessage);
+                require_once __DIR__ . '/classes/TelegramNotifier.php';
+                $telegramNotifier = new TelegramNotifier();
+
+                // Собираем названия услуг для уведомления
+                $serviceNames = [];
+                if (!empty($orderInfo['items'])) {
+                    foreach ($orderInfo['items'] as $item) {
+                        $serviceNames[] = $item['service_name'] ?? 'Услуга';
+                    }
+                }
+
+                $orderData = [
+                    'id' => $order_id,
+                    'client_name' => $orderInfo['user_name'] ?: 'Без имени',
+                    'client_phone' => $orderInfo['user_phone'] ?? '',
+                    'service_name' => !empty($serviceNames) ? implode(', ', $serviceNames) : 'Не указано',
+                    'description' => $comment ?? '',
+                    'price' => number_format($orderInfo['final_amount'], 0, '', ' ')
+                ];
+
+                $telegramNotifier->notifyNewOrder($orderData);
             } catch (Exception $e) {
                 error_log('Ошибка отправки уведомления в Telegram: ' . $e->getMessage());
             }
@@ -1423,6 +1426,12 @@ select.form-control option:checked {
             <i class="fas fa-search"></i>
             <p>Услуги не найдены</p>
         </div>
+
+        <div style="text-align: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+            <button type="button" class="btn btn-secondary" onclick="closeServiceSelectorModal(); openServiceModal(document.getElementById('serviceSelectorItemIndex').value);">
+                <i class="fas fa-plus"></i> Добавить свою услугу
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1724,53 +1733,57 @@ function closeServiceModal() {
     document.getElementById('serviceModalForm').reset();
 }
 
-// Обработка формы добавления услуги
+// Обработка формы добавления кастомной услуги (не сохраняется в БД)
 document.getElementById('serviceModalForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     const itemIndex = document.getElementById('serviceModalItemIndex').value;
-    const formData = new FormData();
-    formData.append('ajax_action', 'create_service');
-    formData.append('service_name', document.getElementById('serviceModalName').value);
-    formData.append('service_category', document.getElementById('serviceModalCategory').value);
-    formData.append('service_price', document.getElementById('serviceModalPrice').value);
-    formData.append('service_description', document.getElementById('serviceModalDescription').value);
-    
-    // Отправляем AJAX запрос
-    fetch('order-create.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Добавляем новую услугу в массив
-            const newService = data.service;
-            services.push(newService);
-            
-            // Добавляем опцию во все селекты
-            const option = `<option value="${newService.id}" data-price="${newService.base_price}">${escapeHtml(newService.name)}</option>`;
-            document.querySelectorAll('.service-select').forEach(select => {
-                select.insertAdjacentHTML('beforeend', option);
-            });
-            
-            // Выбираем новую услугу в текущем селекте
-            const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
-            if (row) {
-                const select = row.querySelector('.service-select');
-                select.value = newService.id;
-                updateServicePrice(select);
-            }
-            
-            closeServiceModal();
-        } else {
-            alert('Ошибка создания услуги: ' + data.error);
+    const serviceName = document.getElementById('serviceModalName').value;
+    const servicePrice = parseFloat(document.getElementById('serviceModalPrice').value) || 0;
+
+    if (!serviceName.trim()) {
+        alert('Введите название услуги');
+        return;
+    }
+
+    // Генерируем временный ID (кастомная услуга не сохраняется в БД)
+    const tempId = 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
+
+    // Обновляем строку заказа
+    const row = document.querySelector(`.item-row[data-index="${itemIndex}"]`);
+    if (row) {
+        const serviceIdInput = row.querySelector('.service-id-input');
+        serviceIdInput.value = tempId;
+
+        // Добавляем скрытое поле с названием кастомной услуги
+        let customNameInput = row.querySelector('.custom-service-name-input');
+        if (!customNameInput) {
+            customNameInput = document.createElement('input');
+            customNameInput.type = 'hidden';
+            customNameInput.className = 'custom-service-name-input';
+            customNameInput.name = `items[${itemIndex}][custom_service_name]`;
+            serviceIdInput.parentNode.appendChild(customNameInput);
         }
-    })
-    .catch(error => {
-        alert('Ошибка сети');
-        console.error(error);
-    });
+        customNameInput.value = serviceName;
+
+        // Показываем выбранную услугу
+        const selectButton = row.querySelector('.btn-select-service');
+        const selectedInfo = row.querySelector('.selected-service-info');
+        const serviceNameDisplay = row.querySelector('.service-name-display');
+
+        if (selectButton && selectedInfo && serviceNameDisplay) {
+            selectButton.style.display = 'none';
+            selectedInfo.style.display = 'flex';
+            serviceNameDisplay.textContent = serviceName + ' (своя)';
+        }
+
+        // Устанавливаем цену
+        const priceInput = row.querySelector('.price-input');
+        priceInput.value = servicePrice;
+        updateItemTotal(priceInput);
+    }
+
+    closeServiceModal();
 });
 
 // Открыть модальное окно выбора услуги

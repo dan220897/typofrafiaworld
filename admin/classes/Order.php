@@ -41,9 +41,9 @@ class Order {
                         u.name as user_name, u.phone as user_phone, u.company_name,
                         l.name as location_name,
                         COUNT(DISTINCT oi.id) as items_count,
-                        (SELECT GROUP_CONCAT(s.name SEPARATOR ', ')
+                        (SELECT GROUP_CONCAT(COALESCE(s.name, oi2.notes) SEPARATOR ', ')
                          FROM order_items oi2
-                         JOIN services s ON oi2.service_id = s.id
+                         LEFT JOIN services s ON oi2.service_id = s.id
                          WHERE oi2.order_id = o.id
                          LIMIT 3) as services_list
                  FROM " . $this->table_name . " o
@@ -272,9 +272,9 @@ class Order {
     
     // Получить позиции заказа
     public function getOrderItems($order_id) {
-        $query = "SELECT oi.*, s.name as service_name, s.category as service_category
+        $query = "SELECT oi.*, COALESCE(s.name, 'Своя услуга') as service_name, s.category as service_category
                  FROM order_items oi
-                 JOIN services s ON oi.service_id = s.id
+                 LEFT JOIN services s ON oi.service_id = s.id
                  WHERE oi.order_id = :order_id
                  ORDER BY oi.id";
         
@@ -724,50 +724,66 @@ class Order {
     }
     
     public function addOrderItem($order_id, $item_data) {
-        // Получаем информацию об услуге
-        $service = $this->getServiceById($item_data['service_id']);
+        $isCustom = !empty($item_data['is_custom']);
+        $service_id = $item_data['service_id'];
 
-        if (!$service) {
-            $service_id_debug = isset($item_data['service_id']) ? $item_data['service_id'] : 'NULL';
-            error_log("Service not found. Requested service_id: " . $service_id_debug);
-            error_log("Item data: " . json_encode($item_data));
-            throw new Exception("Услуга не найдена (ID: " . $service_id_debug . ")");
-        }
-        
-        // Проверяем, была ли передана кастомная цена
-        if (isset($item_data['unit_price']) && $item_data['unit_price'] > 0) {
-            // Используем переданную цену
-            $unit_price = floatval($item_data['unit_price']);
+        if ($isCustom) {
+            // Кастомная услуга — не ищем в БД, используем переданные данные
+            $unit_price = floatval($item_data['unit_price'] ?? 0);
             $total_price = $unit_price * intval($item_data['quantity']);
+            $customName = $item_data['custom_service_name'] ?? 'Услуга';
+            // Сохраняем название кастомной услуги в notes
+            $notes = '[Своя услуга: ' . $customName . ']';
+            if (!empty($item_data['notes'])) {
+                $notes .= ' ' . $item_data['notes'];
+            }
+            // Для кастомных услуг service_id = NULL в БД
+            $service_id = null;
         } else {
-            // Если цена не передана, рассчитываем стандартную
-            $price_data = $this->calculateItemPrice(
-                $item_data['service_id'],
-                $item_data['quantity'],
-                $item_data['parameters'] ?? []
-            );
-            $unit_price = $price_data['unit_price'];
-            $total_price = $price_data['total_price'];
+            // Получаем информацию об услуге
+            $service = $this->getServiceById($service_id);
+
+            if (!$service) {
+                $service_id_debug = isset($item_data['service_id']) ? $item_data['service_id'] : 'NULL';
+                error_log("Service not found. Requested service_id: " . $service_id_debug);
+                error_log("Item data: " . json_encode($item_data));
+                throw new Exception("Услуга не найдена (ID: " . $service_id_debug . ")");
+            }
+
+            $notes = $item_data['notes'] ?? '';
+
+            // Проверяем, была ли передана кастомная цена
+            if (isset($item_data['unit_price']) && $item_data['unit_price'] > 0) {
+                $unit_price = floatval($item_data['unit_price']);
+                $total_price = $unit_price * intval($item_data['quantity']);
+            } else {
+                $price_data = $this->calculateItemPrice(
+                    $item_data['service_id'],
+                    $item_data['quantity'],
+                    $item_data['parameters'] ?? []
+                );
+                $unit_price = $price_data['unit_price'];
+                $total_price = $price_data['total_price'];
+            }
         }
-        
+
         // Подготавливаем JSON для параметров
         $parameters_json = json_encode($item_data['parameters'] ?? []);
-        
-        $query = "INSERT INTO order_items 
-                 (order_id, service_id, quantity, parameters, unit_price, total_price, notes) 
+
+        $query = "INSERT INTO order_items
+                 (order_id, service_id, quantity, parameters, unit_price, total_price, notes)
                  VALUES (:order_id, :service_id, :quantity, :parameters, :unit_price, :total_price, :notes)";
-        
+
         $stmt = $this->conn->prepare($query);
-        
-        // Используем bindValue вместо bindParam для значений
+
         $stmt->bindValue(":order_id", $order_id);
-        $stmt->bindValue(":service_id", $item_data['service_id']);
+        $stmt->bindValue(":service_id", $service_id);
         $stmt->bindValue(":quantity", $item_data['quantity']);
         $stmt->bindValue(":parameters", $parameters_json);
         $stmt->bindValue(":unit_price", $unit_price);
         $stmt->bindValue(":total_price", $total_price);
-        $stmt->bindValue(":notes", $item_data['notes'] ?? '');
-        
+        $stmt->bindValue(":notes", $notes);
+
         return $stmt->execute();
     }
     

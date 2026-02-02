@@ -207,10 +207,28 @@ require_once 'includes/header.php';
                         <?php endif; ?>
                     </td>
                     <td>
-                        <select class="status-select" onchange="updateOrderStatus(<?php echo $orderItem['id']; ?>, this.value)">
-                            <?php foreach (ORDER_STATUSES as $key => $label): ?>
-                            <option value="<?php echo $key; ?>" <?php echo $orderItem['status'] === $key ? 'selected' : ''; ?>>
-                                <?php echo $label; ?>
+                        <?php
+                        // Допустимые переходы статусов
+                        $allowedTransitions = [
+                            'draft' => ['pending', 'confirmed', 'cancelled'],
+                            'pending' => ['confirmed', 'cancelled'],
+                            'confirmed' => ['in_production', 'cancelled'],
+                            'in_production' => ['ready', 'cancelled'],
+                            'ready' => ['delivered'],
+                            'delivered' => [],
+                            'cancelled' => []
+                        ];
+                        $currentStatus = $orderItem['status'];
+                        $validNextStatuses = $allowedTransitions[$currentStatus] ?? [];
+                        ?>
+                        <select class="status-select" onchange="updateOrderStatus(<?php echo $orderItem['id']; ?>, this.value, '<?php echo $currentStatus; ?>')"
+                                <?php echo empty($validNextStatuses) ? 'disabled' : ''; ?>>
+                            <option value="<?php echo $currentStatus; ?>" selected>
+                                <?php echo ORDER_STATUSES[$currentStatus] ?? $currentStatus; ?>
+                            </option>
+                            <?php foreach ($validNextStatuses as $nextStatus): ?>
+                            <option value="<?php echo $nextStatus; ?>">
+                                <?php echo ORDER_STATUSES[$nextStatus] ?? $nextStatus; ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
@@ -552,8 +570,21 @@ require_once 'includes/header.php';
 </style>
 
 <script>
+// Допустимые переходы статусов (для обновления dropdown после смены)
+const allowedTransitions = {
+    'draft': ['pending', 'confirmed', 'cancelled'],
+    'pending': ['confirmed', 'cancelled'],
+    'confirmed': ['in_production', 'cancelled'],
+    'in_production': ['ready', 'cancelled'],
+    'ready': ['delivered'],
+    'delivered': [],
+    'cancelled': []
+};
+
+const statusLabels = <?php echo json_encode(ORDER_STATUSES, JSON_UNESCAPED_UNICODE); ?>;
+
 // Обновление статуса заказа
-async function updateOrderStatus(orderId, newStatus) {
+async function updateOrderStatus(orderId, newStatus, oldStatus) {
     try {
         const response = await fetch(`api/orders.php?id=${orderId}`, {
             method: 'PUT',
@@ -565,16 +596,41 @@ async function updateOrderStatus(orderId, newStatus) {
                 status: newStatus
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showNotification('Статус заказа обновлен', 'success');
+            // Обновляем dropdown, чтобы показать новые допустимые переходы
+            const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+            if (row) {
+                const select = row.querySelector('.status-select');
+                const nextStatuses = allowedTransitions[newStatus] || [];
+                let html = `<option value="${newStatus}" selected>${statusLabels[newStatus] || newStatus}</option>`;
+                nextStatuses.forEach(s => {
+                    html += `<option value="${s}">${statusLabels[s] || s}</option>`;
+                });
+                select.innerHTML = html;
+                select.disabled = nextStatuses.length === 0;
+                select.setAttribute('onchange', `updateOrderStatus(${orderId}, this.value, '${newStatus}')`);
+            }
         } else {
             showNotification(data.message || 'Ошибка обновления статуса', 'error');
+            // Возвращаем старый статус в dropdown
+            const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+            if (row) {
+                const select = row.querySelector('.status-select');
+                select.value = oldStatus;
+            }
         }
     } catch (error) {
         showNotification('Ошибка соединения', 'error');
+        // Возвращаем старый статус
+        const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+        if (row) {
+            const select = row.querySelector('.status-select');
+            select.value = oldStatus;
+        }
     }
 }
 
