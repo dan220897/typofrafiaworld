@@ -486,87 +486,6 @@ try {
             line-height: 1.6;
         }
 
-        /* Telegram Widget */
-        .telegram-widget {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 99;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            animation: fadeIn 1s ease-out;
-        }
-
-        .telegram-info {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            padding: 1rem 1.5rem;
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-            opacity: 0;
-            transform: translateX(20px);
-            transition: all 0.3s ease;
-            pointer-events: none;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .telegram-widget:hover .telegram-info {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: all;
-        }
-
-        .telegram-info-title {
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 0.25rem;
-            font-size: 0.95rem;
-        }
-
-        .telegram-info-status {
-            font-size: 0.85rem;
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .telegram-info-status::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .telegram-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #0088cc;
-            color: var(--white);
-            border: none;
-            font-size: 1.75rem;
-            cursor: pointer;
-            box-shadow: var(--shadow-xl);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .telegram-btn:hover {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 15px 30px rgba(0, 136, 204, 0.4);
-        }
-
-        .telegram-btn:active {
-            transform: scale(0.95);
-        }
-
         @media (max-width: 968px) {
             .container {
                 grid-template-columns: 1fr;
@@ -586,21 +505,6 @@ try {
 
             .features-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .telegram-widget {
-                bottom: 1.5rem;
-                right: 1.5rem;
-            }
-
-            .telegram-info {
-                display: none;
-            }
-
-            .telegram-btn {
-                width: 56px;
-                height: 56px;
-                font-size: 1.5rem;
             }
 
             .header-nav {
@@ -848,16 +752,6 @@ try {
                 font-size: 0.9rem;
             }
 
-            .telegram-widget {
-                bottom: 0.875rem;
-                right: 0.875rem;
-            }
-
-            .telegram-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.15rem;
-            }
         }
 
         @media (max-width: 360px) {
@@ -907,9 +801,6 @@ try {
                 gap: 1.5rem;
             }
             .service-card { padding: 2rem 1.5rem; }
-            .telegram-widget { bottom: 1.5rem; right: 1.5rem; }
-            .telegram-btn { width: 56px; height: 56px; font-size: 1.5rem; }
-            .telegram-widget:hover .telegram-info { display: none; }
         }
 
         @media (max-width: 480px) {
@@ -1191,15 +1082,7 @@ try {
         </div>
     </div>
 
-    <div class="telegram-widget">
-        <div class="telegram-info">
-            <div class="telegram-info-title">Свяжитесь с нами в Telegram</div>
-            <div class="telegram-info-status">Мы онлайн сейчас</div>
-        </div>
-        <button class="telegram-btn" onclick="window.open('https://t.me/yourusername', '_blank')">
-            <i class="fab fa-telegram-plane"></i>
-        </button>
-    </div>
+    <?php include __DIR__ . '/components/telegram-widget.php'; ?>
 
     <script>
         // Intersection Observer для анимации карточек преимуществ
@@ -1599,12 +1482,6 @@ try {
                     card.style.display = 'none';
                 }
             });
-        }
-
-        // Открыть Telegram
-        function openTelegram() {
-            // TODO: Заменить на реальную ссылку на Telegram бота или группу
-            window.open('https://t.me/your_bot', '_blank');
         }
 
         // Показать модальное окно авторизации
