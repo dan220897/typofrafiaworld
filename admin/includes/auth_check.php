@@ -83,7 +83,8 @@ function hasLocationAdminPermission($permission) {
         'view_orders',
         'edit_orders',
         'view_users',
-        'view_reports'
+        'view_reports',
+        'view_tasks'
     ];
 
     return in_array($permission, $allowedPermissions);

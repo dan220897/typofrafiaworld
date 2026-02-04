@@ -512,6 +512,11 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <i class="fas fa-users"></i>
                         <span>Пользователи</span>
                     </a>
+
+                    <a href="/admin/tasks.php" class="nav-link <?php echo $current_page == 'tasks' ? 'active' : ''; ?>" data-tooltip="Задачи">
+                        <i class="fas fa-tasks"></i>
+                        <span>Задачи</span>
+                    </a>
                 </div>
 
                 <?php if (isSuperAdmin()): ?>
