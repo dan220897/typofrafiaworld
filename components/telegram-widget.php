@@ -70,14 +70,10 @@ try {
 }
 
 .tg-point-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
     opacity: 0;
     transform: translateY(20px) scale(0.8);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     pointer-events: none;
-    flex-direction: row-reverse;
 }
 
 .tg-points-list.open {
@@ -96,47 +92,42 @@ try {
 .tg-point-item:nth-child(4) { transition-delay: 0.2s; }
 .tg-point-item:nth-child(5) { transition-delay: 0.25s; }
 
-.tg-point-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: #0088cc;
-    color: #fff;
+.tg-point-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    cursor: pointer;
+    gap: 0.6rem;
+    background: #0088cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 28px;
+    padding: 0.5rem 1rem 0.5rem 0.6rem;
     box-shadow: 0 4px 12px rgba(0, 136, 204, 0.35);
     transition: all 0.2s ease;
-    text-decoration: none;
-    flex-shrink: 0;
+    white-space: nowrap;
 }
 
-.tg-point-circle:hover {
-    transform: scale(1.15);
+.tg-point-link:hover {
+    transform: scale(1.05);
     box-shadow: 0 6px 18px rgba(0, 136, 204, 0.5);
     background: #006fa8;
 }
 
-.tg-point-label {
-    background: #fff;
-    color: #1f2937;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-    white-space: nowrap;
-    opacity: 0;
-    transform: translateX(10px);
-    transition: all 0.2s ease;
-    pointer-events: none;
+.tg-point-link .tg-point-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
-.tg-point-item:hover .tg-point-label {
-    opacity: 1;
-    transform: translateX(0);
+.tg-point-link .tg-point-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding-right: 0.25rem;
 }
 
 /* Overlay для закрытия при клике снаружи */
@@ -167,17 +158,18 @@ try {
         font-size: 1.5rem;
     }
 
-    .tg-point-circle {
-        width: 46px;
-        height: 46px;
-        font-size: 1.1rem;
+    .tg-point-link {
+        padding: 0.4rem 0.85rem 0.4rem 0.5rem;
     }
 
-    .tg-point-label {
-        opacity: 1;
-        transform: translateX(0);
+    .tg-point-link .tg-point-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .tg-point-link .tg-point-name {
         font-size: 0.8rem;
-        padding: 0.4rem 0.75rem;
     }
 }
 </style>
@@ -189,10 +181,10 @@ try {
         <?php foreach ($tgPoints as $point): ?>
         <div class="tg-point-item">
             <a href="<?php echo htmlspecialchars($point['telegram_link']); ?>" target="_blank" rel="noopener noreferrer"
-               class="tg-point-circle" title="<?php echo htmlspecialchars($point['name']); ?>">
-                <i class="fab fa-telegram-plane"></i>
+               class="tg-point-link">
+                <span class="tg-point-icon"><i class="fab fa-telegram-plane"></i></span>
+                <span class="tg-point-name"><?php echo htmlspecialchars($point['name']); ?></span>
             </a>
-            <span class="tg-point-label"><?php echo htmlspecialchars($point['name']); ?></span>
         </div>
         <?php endforeach; ?>
     </div>

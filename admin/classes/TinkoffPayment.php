@@ -1,8 +1,8 @@
 <?php
 
 class TinkoffPayment {
-    private $terminalKey = '1744391857550';
-    private $password = '1l2M#Rh4MklXdppe';
+    private $terminalKey = '1770104625890DEMO';
+    private $password = 'J9xE&J^gKwh&EjLw';
     private $apiUrl = 'https://securepay.tinkoff.ru/v2/';
     
     /**

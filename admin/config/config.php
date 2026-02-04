@@ -77,8 +77,8 @@ define('MANAGER_CHAT_ID', '7497468073');
 define('TELEGRAM_NOTIFICATIONS_ENABLED', true);
 
 // Данные Тинькофф
-define('TINKOFF_TERMINAL_KEY', '1744391857550');
-define('TINKOFF_PASSWORD', '1l2M#Rh4MklXdppe');
+define('TINKOFF_TERMINAL_KEY', '1770104625890DEMO');
+define('TINKOFF_PASSWORD', 'J9xE&J^gKwh&EjLw');
 define('TINKOFF_API_URL', 'https://securepay.tinkoff.ru/v2/');
 
 // Настройки загрузки файлов
