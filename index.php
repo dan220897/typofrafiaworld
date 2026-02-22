@@ -97,14 +97,186 @@ $categoryColors = [
 ];
 ?>
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= SITE_NAME ?> - Профессиональная типография онлайн</title>
-    <meta name="description" content="Качественная полиграфия с доставкой. Визитки, баннеры, флаеры, дизайн. Быстрое изготовление, низкие цены.">
+
+    <!-- Primary Meta Tags -->
+    <title>Типография в Москве — печать визиток, баннеров, листовок | <?= SITE_NAME ?></title>
+    <meta name="title" content="Типография в Москве — печать визиток, баннеров, листовок | <?= SITE_NAME ?>">
+    <meta name="description" content="Типография <?= SITE_NAME ?> в Москве ✓ Печать визиток от 500₽ ✓ Баннеры и флаеры ✓ Буклеты и листовки ✓ Срочная печать за 1 день ✓ 3 точки в Москве. Звоните: +7 (985) 315-20-05">
+    <meta name="keywords" content="типография москва, печать визиток, печать баннеров, печать листовок, печать флаеров, буклеты печать, полиграфия москва, срочная печать, широкоформатная печать, наклейки на заказ, календари печать, дизайн полиграфии">
+    <meta name="author" content="<?= SITE_NAME ?>">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="yandex" content="index, follow">
+    <link rel="canonical" href="<?= SITE_URL ?>/">
+
+    <!-- Geo Tags -->
+    <meta name="geo.region" content="RU-MOW">
+    <meta name="geo.placename" content="Москва">
+    <meta name="geo.position" content="55.7558;37.6173">
+    <meta name="ICBM" content="55.7558, 37.6173">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= SITE_URL ?>/">
+    <meta property="og:title" content="Типография в Москве — печать визиток, баннеров, листовок | <?= SITE_NAME ?>">
+    <meta property="og:description" content="Профессиональная типография в Москве. Печать визиток, баннеров, флаеров, буклетов. Срочное изготовление за 1 день. 3 точки в Москве.">
+    <meta property="og:image" content="<?= SITE_URL ?>/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="<?= SITE_NAME ?>">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?= SITE_URL ?>/">
+    <meta name="twitter:title" content="Типография в Москве — печать визиток, баннеров, листовок">
+    <meta name="twitter:description" content="Профессиональная типография в Москве. Печать визиток, баннеров, флаеров. Срочное изготовление за 1 день.">
+    <meta name="twitter:image" content="<?= SITE_URL ?>/og-image.jpg">
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <!-- Stylesheets -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "@id": "<?= SITE_URL ?>/#organization",
+        "name": "<?= SITE_NAME ?>",
+        "alternateName": "Типография Типо-графия",
+        "description": "Профессиональная типография в Москве. Печать визиток, баннеров, флаеров, буклетов, листовок. Широкоформатная печать, дизайн полиграфии.",
+        "url": "<?= SITE_URL ?>",
+        "telephone": "+7-985-315-20-05",
+        "email": "<?= ADMIN_EMAIL ?>",
+        "image": "<?= SITE_URL ?>/og-image.jpg",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "<?= SITE_URL ?>/favicon.svg"
+        },
+        "priceRange": "₽₽",
+        "currenciesAccepted": "RUB",
+        "paymentAccepted": "Cash, Credit Card, Bank Transfer",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Москва",
+            "addressRegion": "Москва",
+            "addressCountry": "RU"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 55.7558,
+            "longitude": 37.6173
+        },
+        "areaServed": {
+            "@type": "City",
+            "name": "Москва"
+        },
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "09:00",
+                "closes": "20:00"
+            },
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Saturday", "Sunday"],
+                "opens": "10:00",
+                "closes": "18:00"
+            }
+        ],
+        "sameAs": [
+            "https://t.me/Typografia_ru"
+        ],
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Услуги типографии",
+            "itemListElement": [
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Печать визиток",
+                        "description": "Печать визиток на плотной бумаге различных форматов"
+                    }
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Печать баннеров",
+                        "description": "Широкоформатная печать баннеров любых размеров"
+                    }
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Печать листовок и флаеров",
+                        "description": "Печать рекламных листовок и флаеров"
+                    }
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Печать буклетов",
+                        "description": "Печать буклетов различных форматов со сгибом"
+                    }
+                }
+            ]
+        }
+    }
+    </script>
+
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Главная",
+                "item": "<?= SITE_URL ?>/"
+            }
+        ]
+    }
+    </script>
+
+    <!-- WebSite Schema for Sitelinks Search Box -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "<?= SITE_URL ?>/",
+        "name": "<?= SITE_NAME ?>",
+        "description": "Типография в Москве — печать визиток, баннеров, листовок",
+        "publisher": {
+            "@type": "Organization",
+            "name": "<?= SITE_NAME ?>"
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "<?= SITE_URL ?>/catalog.php?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
     <style>
         * {
             margin: 0;
@@ -808,15 +980,15 @@ ease;
     </header>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero" aria-label="Главный баннер">
         <div class="hero-content">
-            <h1>Современная типография нового формата</h1>
-            <p>Более 5-и точек по всей Москве</p>
+            <h1>Типография в Москве — печать визиток, баннеров, листовок</h1>
+            <p>Срочная печать за 1 день • 3 точки в Москве • Доставка по всей России</p>
         </div>
     </section>
 
     <!-- Categories -->
-    <main class="container">
+    <main class="container" role="main" aria-label="Каталог услуг типографии">
         <div class="services-header">
             <h2 class="section-title">Наши услуги</h2>
             <div class="services-search-wrapper">
