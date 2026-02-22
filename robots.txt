@@ -1,0 +1,43 @@
+# Robots.txt for typo-grafia.ru
+User-agent: *
+Allow: /
+
+# Disallow admin and API
+Disallow: /admin/
+Disallow: /api/
+Disallow: /config/
+Disallow: /classes/
+Disallow: /components/
+Disallow: /migrations/
+
+# Disallow duplicate content
+Disallow: /*?*
+Allow: /catalog.php?category=
+
+# Crawl-delay for politeness
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://typo-grafia.ru/sitemap.xml
+
+# Yandex specific
+User-agent: Yandex
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /config/
+Disallow: /classes/
+Disallow: /components/
+Disallow: /migrations/
+Crawl-delay: 0.5
+Host: typo-grafia.ru
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /config/
+Disallow: /classes/
+Disallow: /components/
+Disallow: /migrations/
