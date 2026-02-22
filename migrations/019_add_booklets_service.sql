@@ -23,8 +23,9 @@ INSERT INTO `service_sizes` (`id`, `service_id`, `label`, `price`, `is_active`) 
 ON DUPLICATE KEY UPDATE label = VALUES(label), price = VALUES(price);
 
 INSERT INTO `service_quantities` (`id`, `service_id`, `label`, `quantity`, `multiplier`, `price`) VALUES
-('booklet_50', 'booklets', '50 шт', 50, 1.00, 0),
-('booklet_100', 'booklets', '100 шт', 100, 0.90, 0),
+('booklet_1', 'booklets', '1 шт', 1, 1.00, 0),
+('booklet_50', 'booklets', '50 шт', 50, 0.90, 0),
+('booklet_100', 'booklets', '100 шт', 100, 0.85, 0),
 ('booklet_250', 'booklets', '250 шт', 250, 0.80, 0),
 ('booklet_500', 'booklets', '500 шт', 500, 0.70, 0),
 ('booklet_1000', 'booklets', '1000 шт', 1000, 0.60, 0)
