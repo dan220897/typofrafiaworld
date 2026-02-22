@@ -522,14 +522,6 @@ try {
                             </div>
 
                             <div class="location-detail">
-                                <i class="fas fa-phone"></i>
-                                <div class="location-detail-text">
-                                    <strong>Телефон</strong>
-                                    <a href="tel:<?= htmlspecialchars($point['phone']) ?>"><?= htmlspecialchars($point['phone']) ?></a>
-                                </div>
-                            </div>
-
-                            <div class="location-detail">
                                 <i class="fas fa-clock"></i>
                                 <div class="location-detail-text">
                                     <strong>Часы работы</strong>
@@ -538,7 +530,7 @@ try {
                             </div>
 
                             <div class="location-actions">
-                                <a href="tel:<?= htmlspecialchars($point['phone']) ?>" class="location-btn btn-call">
+                                <a href="tel:+79853152005" class="location-btn btn-call">
                                     <i class="fas fa-phone"></i>
                                     Позвонить
                                 </a>
@@ -629,5 +621,6 @@ try {
     </footer>
 
     <?php include 'components/auth-modal.php'; ?>
+    <?php include __DIR__ . '/components/telegram-widget.php'; ?>
 </body>
 </html>

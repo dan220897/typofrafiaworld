@@ -56,7 +56,7 @@ if (!defined('TELEGRAM_NOTIFICATIONS_ENABLED')) {
     define('TELEGRAM_NOTIFICATIONS_ENABLED', true);
 }
 if (!defined('MANAGER_TELEGRAM_LINK')) {
-    define('MANAGER_TELEGRAM_LINK', 'https://t.me/typografia_manager'); // Ссылка на менеджера
+    define('MANAGER_TELEGRAM_LINK', 'https://t.me/Typografia_ru'); // Ссылка на менеджера
 }
 
 // Настройки Email и SMTP
