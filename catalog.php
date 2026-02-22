@@ -75,6 +75,7 @@ $currentColor = $categoryColors[$category] ?? '#6366f1';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($category) ?> - <?= SITE_NAME ?></title>
     <meta name="description" content="<?= htmlspecialchars($category) ?> - качественная печать с доставкой">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }

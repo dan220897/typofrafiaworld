@@ -15,7 +15,8 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title ?? 'Админ-панель'; ?> - <?php echo SITE_NAME; ?></title>
-    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/admin/assets/css/admin.css">

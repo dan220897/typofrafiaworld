@@ -31,6 +31,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Контакты - <?= SITE_NAME ?></title>
     <meta name="description" content="Свяжитесь с нами. Адреса офисов, телефоны, email, форма обратной связи.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }

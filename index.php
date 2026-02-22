@@ -103,6 +103,7 @@ $categoryColors = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= SITE_NAME ?> - Профессиональная типография онлайн</title>
     <meta name="description" content="Качественная полиграфия с доставкой. Визитки, баннеры, флаеры, дизайн. Быстрое изготовление, низкие цены.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
