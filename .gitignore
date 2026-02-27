@@ -1,0 +1,39 @@
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# PHP
+vendor/
+composer.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.backup
+*.bak
+
+# Database dumps (except initial schema)
+*.sql.gz
+backup_*.sql
+dump_*.sql
+
+# Environment
+.env
+.env.local
